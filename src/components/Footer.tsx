@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ShieldCheck, Heart, ArrowUpRight, MessageCircle } from 'lucide-react';
+import { CrackedCoconutPiece } from './CrackedCoconutPiece';
 import { useStore } from '../context/StoreContext';
 
 export const Footer: React.FC = () => {
@@ -17,11 +18,11 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Col 1: Brand & Heritage */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-emerald-800 text-amber-300 flex items-center justify-center font-serif text-lg font-bold">
-                🥥
+            <div className="flex items-center gap-2.5">
+              <div className="flex items-center justify-center shrink-0">
+                <CrackedCoconutPiece className="w-7 h-7" />
               </div>
-              <span className="font-serif text-2xl font-bold text-white tracking-tight">
+              <span className="font-brand text-2xl sm:text-3xl font-bold text-white tracking-wider">
                 {settings.brandName}
               </span>
             </div>
@@ -44,7 +45,7 @@ export const Footer: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-full text-xs font-semibold transition-colors shadow-sm"
               >
                 <MessageCircle className="w-4 h-4 text-white" />
-                Chat on WhatsApp (+91 98765 43210)
+                Chat on WhatsApp (+91 95625 13642)
               </button>
             </div>
           </div>
@@ -129,11 +130,18 @@ export const Footer: React.FC = () => {
                   {settings.address.line1}, {settings.address.city}, {settings.address.state} — {settings.address.pincode}
                 </span>
               </li>
-              <li className="flex items-center gap-3 text-stone-400">
-                <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
-                <a href={`tel:${settings.supportPhone}`} className="hover:text-white">
-                  {settings.supportPhone}
-                </a>
+              <li className="flex items-start gap-3 text-stone-400">
+                <Phone className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <div className="space-y-0.5">
+                  <a href={`tel:${settings.supportPhone}`} className="hover:text-white block">
+                    {settings.supportPhone} <span className="text-[10px] text-emerald-400 font-normal">(Primary)</span>
+                  </a>
+                  {settings.secondaryPhone && (
+                    <a href={`tel:${settings.secondaryPhone}`} className="hover:text-white block text-xs text-stone-400">
+                      {settings.secondaryPhone} <span className="text-[10px] text-stone-500 font-normal">(WhatsApp / Support)</span>
+                    </a>
+                  )}
+                </div>
               </li>
               <li className="flex items-center gap-3 text-stone-400">
                 <Mail className="w-4 h-4 text-emerald-400 shrink-0" />

@@ -900,14 +900,25 @@ export const AdminDashboard: React.FC = () => {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">Support Phone</label>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">Primary Phone</label>
                 <input
                   type="text"
                   value={storeSettings.supportPhone}
                   onChange={e => setStoreSettings({ ...storeSettings, supportPhone: e.target.value })}
                   className="w-full text-xs p-3 rounded-xl border border-stone-300"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">Secondary / WhatsApp Phone</label>
+                <input
+                  type="text"
+                  value={storeSettings.whatsappNumber}
+                  onChange={e => setStoreSettings({ ...storeSettings, whatsappNumber: e.target.value, secondaryPhone: e.target.value })}
+                  className="w-full text-xs p-3 rounded-xl border border-stone-300"
+                  placeholder="+919562513642"
                 />
               </div>
 

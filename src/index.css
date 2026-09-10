@@ -8,6 +8,13 @@
     font-family: 'Playfair Display', Georgia, serif;
   }
   .font-display {
-    font-family: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+    font-family: 'Fraunces', 'DM Serif Display', 'Cinzel Decorative', Georgia, serif;
+  }
+  .font-brand {
+    font-family: 'Cinzel Decorative', 'Fraunces', 'DM Serif Display', serif;
+  }
+  .font-subline {
+    font-family: 'Marcellus', 'Cinzel', Georgia, serif;
+    letter-spacing: 0.18em;
   }
 }

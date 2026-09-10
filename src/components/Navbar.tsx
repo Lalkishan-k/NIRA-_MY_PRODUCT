@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X, ShieldCheck, Truck } from 'lucide-react';
+import { CrackedCoconutPiece } from './CrackedCoconutPiece';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
@@ -40,7 +41,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { label: 'Home', path: '/' },
-    { label: 'Shop Coconut Oil', path: '/shop' },
+    { label: 'Shop', path: '/shop' },
     { label: 'How It Is Made', path: '/#how-it-is-made' },
     { label: 'Why Choose Us', path: '/#why-choose-us' },
     { label: 'Track Order', path: '/track-order' },
@@ -86,11 +87,11 @@ export const Navbar: React.FC = () => {
           } px-3.5 sm:px-6 py-2 sm:py-2.5`}
         >
           <div className="flex items-center justify-between h-13 sm:h-15">
-            {/* Left: Mobile Menu Button & Brand Logo */}
+            {/* Left: Mobile/Tablet Menu Button & Brand Logo */}
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
+                className="xl:hidden p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -98,39 +99,88 @@ export const Navbar: React.FC = () => {
 
               {/* Brand Logo */}
               <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-emerald-800 text-amber-200 flex items-center justify-center shadow-xs font-serif text-lg sm:text-xl font-bold border border-emerald-700 group-hover:scale-105 transition-transform shrink-0">
-                  🥥
+                <div className="flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
+                  <CrackedCoconutPiece className="w-7 h-7 sm:w-8 sm:h-8" />
                 </div>
-                <div>
-                  <span className="font-serif text-xl sm:text-2xl font-bold text-stone-900 tracking-tight block leading-tight">
-                    {settings.brandName}
-                  </span>
-                  <span className="text-[9px] sm:text-[10px] uppercase tracking-widest text-emerald-800 font-semibold block -mt-0.5">
-                    Pure Kerala Coconut Oil
-                  </span>
-                </div>
+                <span className="font-brand text-2xl sm:text-3xl font-black text-[#144D29] tracking-wider block leading-none group-hover:text-emerald-950 transition-colors">
+                  {settings.brandName}
+                </span>
               </Link>
             </div>
 
-            {/* Middle: Navigation Links Options (Visible across tablet & desktop) */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 flex-nowrap">
-              {navLinks.map(link => {
-                const active = isLinkActive(link.path);
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={() => handleNavClick(link.path)}
-                    className={`text-xs lg:text-sm font-medium px-2.5 lg:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
-                      active
-                        ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                        : 'text-stone-600 hover:text-emerald-900 hover:bg-stone-100/80'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
+            {/* Middle: Navigation Links with strict responsive priority to prevent overlapping */}
+            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-nowrap shrink min-w-0">
+              {/* Priority 1 (Always visible on md+): Home & Shop */}
+              <Link
+                to="/"
+                onClick={() => handleNavClick('/')}
+                className={`text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                Home
+              </Link>
+              <Link
+                to="/shop"
+                onClick={() => handleNavClick('/shop')}
+                className={`text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/shop')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                Shop
+              </Link>
+
+              {/* Priority 2 (Visible on lg+ screens): Track Order & Contact */}
+              <Link
+                to="/track-order"
+                onClick={() => handleNavClick('/track-order')}
+                className={`hidden lg:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/track-order')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                Track Order
+              </Link>
+              <Link
+                to="/contact"
+                onClick={() => handleNavClick('/contact')}
+                className={`hidden lg:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/contact')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                Contact
+              </Link>
+
+              {/* Priority 3 (Secondary links - cut on smaller screens, visible on xl+ only): How It Is Made & Why Choose Us */}
+              <Link
+                to="/#how-it-is-made"
+                onClick={() => handleNavClick('/#how-it-is-made')}
+                className={`hidden xl:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/#how-it-is-made')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                How It Is Made
+              </Link>
+              <Link
+                to="/#why-choose-us"
+                onClick={() => handleNavClick('/#why-choose-us')}
+                className={`hidden xl:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                  isLinkActive('/#why-choose-us')
+                    ? 'bg-emerald-800 text-white font-semibold shadow-xs'
+                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                }`}
+              >
+                Why Choose Us
+              </Link>
             </nav>
 
             {/* Right: Action Icons */}
@@ -291,32 +341,11 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
           </div>
-
-          {/* Mobile Options Pill Strip - Options are always directly visible on the floating menubar */}
-          <div className="md:hidden flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-0.5 border-t border-stone-100/90 mt-1">
-            {navLinks.map(link => {
-              const active = isLinkActive(link.path);
-              return (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => handleNavClick(link.path)}
-                  className={`text-[11px] font-medium px-3 py-1 rounded-full whitespace-nowrap shrink-0 transition-all ${
-                    active
-                      ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                      : 'bg-stone-100/90 text-stone-700 hover:bg-stone-200 hover:text-emerald-900'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </div>
         </div>
 
-        {/* Floating Mobile Dropdown Menu Island */}
+        {/* Floating Mobile/Tablet Dropdown Menu Island */}
         {isMobileMenuOpen && (
-          <div className="md:hidden mt-2 bg-white/95 backdrop-blur-xl rounded-2xl border border-stone-200/90 shadow-2xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="xl:hidden mt-2 bg-white/98 backdrop-blur-xl rounded-2xl border border-stone-200/90 shadow-2xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
             {navLinks.map(link => {
               const active = isLinkActive(link.path);
               return (
@@ -324,7 +353,7 @@ export const Navbar: React.FC = () => {
                   key={link.path}
                   to={link.path}
                   onClick={() => handleNavClick(link.path)}
-                  className={`block px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+                  className={`block px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
                     active
                       ? 'bg-emerald-800 text-white font-semibold'
                       : 'text-stone-800 hover:bg-stone-100 hover:text-emerald-800'
@@ -338,7 +367,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/admin"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-3 py-2 rounded-xl text-sm font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100"
+                className="block px-3.5 py-2.5 rounded-xl text-sm font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100"
               >
                 Admin Dashboard
               </Link>
@@ -347,14 +376,14 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/account"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-semibold bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-800 transition-colors"
+                className="flex-1 text-center py-2.5 text-xs font-semibold bg-stone-100 hover:bg-stone-200 rounded-xl text-stone-800 transition-colors"
               >
                 {customerProfile ? 'My Account' : 'Login / Register'}
               </Link>
               <Link
                 to="/cart"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex-1 text-center py-2 text-xs font-semibold bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl transition-colors"
+                className="flex-1 text-center py-2.5 text-xs font-semibold bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl transition-colors"
               >
                 Cart ({totalItems})
               </Link>

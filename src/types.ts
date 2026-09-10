@@ -164,6 +164,7 @@ export interface StoreSettings {
   brandName: string;
   tagline: string;
   supportPhone: string;
+  secondaryPhone?: string;
   supportEmail: string;
   whatsappNumber: string;
   address: {

@@ -18,6 +18,8 @@ import { ProductCard } from '../components/ProductCard';
 import {
   heroCoconutOil,
   keralaCooking,
+  niraKeralaCooking,
+  keralaCoconutGrove,
   coconutHarvest,
   childPureOil,
   niraOilBottle
@@ -32,27 +34,48 @@ export const HomePage: React.FC = () => {
     <div className="space-y-16 sm:space-y-24">
       {/* 1. HERO SECTION */}
       <section className="relative bg-gradient-to-b from-[#FAF7F2] via-[#F6F2EA] to-[#EFE7DC] text-stone-900 border-b border-stone-200/80 overflow-hidden">
+        {/* Background Image with carefully balanced overlay for visibility and text priority */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img
+            src={keralaCoconutGrove}
+            alt="Authentic Kerala Coconut Grove Sunrise Landscape"
+            className="w-full h-full object-cover object-center opacity-40 lg:opacity-45 scale-105 filter saturate-110"
+          />
+          {/* Subtle gradient wash to ensure highest priority & contrast for foreground text and card */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/90 via-[#FAF7F2]/75 to-[#FAF7F2]/45 sm:from-[#FAF7F2]/85 sm:via-[#FAF7F2]/70 sm:to-[#FAF7F2]/40" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#EFE7DC]/90 via-transparent to-transparent" />
+        </div>
+
         {/* Soft atmospheric ambient glow */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-100/60 blur-3xl" />
-          <div className="absolute top-1/2 -right-24 w-96 h-96 rounded-full bg-amber-100/50 blur-3xl" />
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
+          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-100/50 blur-3xl" />
+          <div className="absolute top-1/2 -right-24 w-96 h-96 rounded-full bg-amber-100/40 blur-3xl" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-24">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-7 space-y-6 pl-2 sm:pl-6 lg:pl-10 xl:pl-14">
               {/* Refined natural badge */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-300/70 text-emerald-900 text-xs font-semibold backdrop-blur-xs shadow-2xs">
                 <Leaf className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
                 <span className="tracking-wide">100% Raw & Unfiltered Kerala Copra</span>
               </div>
 
-              {/* Title & Subtitle */}
-              <div className="space-y-3">
-                <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-stone-950 leading-[1.08]">
-                  NIRA Coconut Oil
-                </h1>
-                <p className="font-serif italic text-xl sm:text-2xl md:text-3xl text-emerald-800 font-normal tracking-tight">
+              {/* Title & Subtitle styled with the brand identity font */}
+              <div className="space-y-4">
+                <div className="flex flex-col items-start">
+                  <h1 className="font-brand text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[#144D29] tracking-tight leading-[0.92] drop-shadow-xs">
+                    NIRA
+                  </h1>
+                  <div className="flex items-center gap-3 pt-2 pb-1">
+                    <span className="h-0.5 w-6 sm:w-12 bg-[#3C2214]/50"></span>
+                    <span className="font-subline text-sm sm:text-lg md:text-xl font-bold uppercase tracking-[0.25em] text-[#3C2214]">
+                      COCONUT OIL
+                    </span>
+                    <span className="h-0.5 w-6 sm:w-12 bg-[#3C2214]/50"></span>
+                  </div>
+                </div>
+                <p className="font-serif italic text-xl sm:text-2xl md:text-3xl text-emerald-900/90 font-normal tracking-tight">
                   Naturally Better. Zero Filtration.
                 </p>
               </div>
@@ -205,75 +228,90 @@ export const HomePage: React.FC = () => {
 
       {/* 3B. WHY UNFILTERED MEANS MORE NUTRIENTS — DEDICATED SPOTLIGHT */}
       <section id="why-unfiltered" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-br from-emerald-900 via-emerald-950 to-stone-900 text-white rounded-3xl p-6 sm:p-10 lg:p-16 relative overflow-hidden shadow-2xl border border-emerald-800/50">
-          <div className="relative z-10 max-w-3xl">
-            <span className="inline-block px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 text-xs uppercase font-bold tracking-widest border border-amber-400/30 mb-4">
+        <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-10 lg:p-16 relative overflow-hidden shadow-2xl border border-stone-700/50">
+          {/* Background Image: Kerala Coconut Grove Sunrise & Backwaters */}
+          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+            <img
+              src={keralaCoconutGrove}
+              alt="Lush Kerala Coconut Grove Sunrise"
+              className="w-full h-full object-cover object-center transform scale-100 opacity-90 filter saturate-105"
+            />
+            {/* Subtle Vignette & Gradient for High Contrast & Text Legibility */}
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/50 to-stone-950/75" />
+          </div>
+
+          <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-stone-950/80 backdrop-blur-md text-amber-300 text-xs uppercase font-bold tracking-widest border border-amber-400/40 mb-4 shadow-lg">
               Scientific Purity & Nutrition
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight">
-              Why Without Filtration Means More Nutrients
-            </h2>
-            <p className="text-emerald-100/90 text-xs sm:text-sm lg:text-base mt-3 sm:mt-4 leading-relaxed">
-              Most commercial coconut oils pass through aggressive high-pressure micro-mesh filters, chemical adsorbents, or diatomaceous earth to achieve extreme artificial transparency. In doing so, they strip away nature’s most potent health compounds.
-            </p>
+            
+            {/* Headline with High Contrast Background Container */}
+            <div className="bg-stone-950/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/15 shadow-xl max-w-3xl mb-2">
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-md">
+                Why Without Filtration Means More Nutrients
+              </h2>
+              <p className="text-amber-100 text-xs sm:text-sm lg:text-base mt-2.5 leading-relaxed font-normal">
+                Most commercial coconut oils pass through aggressive high-pressure micro-mesh filters, chemical adsorbents, or diatomaceous earth to achieve extreme artificial transparency. In doing so, they strip away nature’s most potent health compounds.
+              </p>
+            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
-              <div className="bg-white/10 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8 w-full text-left">
+              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
                     1
                   </div>
                   <h3 className="font-serif font-bold text-white text-sm sm:text-base">Intact Vitamin E & Tocopherols</h3>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed">
+                <p className="text-xs text-stone-200 leading-relaxed font-normal">
                   Natural Vitamin E is a delicate lipid antioxidant. Unfiltered copra oil retains active tocopherols that protect skin cells from UV damage and deeply nourish hair follicles.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-white/10">
+              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
                     2
                   </div>
                   <h3 className="font-serif font-bold text-white text-sm sm:text-base">Full-Spectrum Polyphenols</h3>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed">
+                <p className="text-xs text-stone-200 leading-relaxed font-normal">
                   Plant polyphenols act as powerful free-radical scavengers. Mechanical filtration separates these micronutrients out — our gentle gravity settling keeps every milligram inside.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-white/10">
+              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
                     3
                   </div>
                   <h3 className="font-serif font-bold text-white text-sm sm:text-base">Bioactive Plant Sterols</h3>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed">
+                <p className="text-xs text-stone-200 leading-relaxed font-normal">
                   Naturally occurring phytosterols support cellular repair and healthy lipid profiles. Unfiltered oil preserves these vital building blocks in their native, unheated state.
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-xs p-4 sm:p-5 rounded-2xl border border-white/10">
+              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center font-bold text-sm shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
                     4
                   </div>
                   <h3 className="font-serif font-bold text-white text-sm sm:text-base">Authentic Roasted Aroma</h3>
                 </div>
-                <p className="text-xs text-stone-300 leading-relaxed">
+                <p className="text-xs text-stone-200 leading-relaxed font-normal">
                   The intoxicating aroma of sun-dried Kerala copra comes from natural volatile aromatic ketones. Deodorizing and heavy filtering remove this signature nostalgic fragrance.
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 sm:mt-8 pt-6 border-t border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="text-xs text-emerald-200">
+            <div className="mt-6 sm:mt-8 pt-6 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4 w-full bg-stone-950/70 backdrop-blur-md px-6 py-4 rounded-2xl border">
+              <div className="text-xs sm:text-sm text-amber-200 font-medium text-center sm:text-left">
                 ✨ Zero mechanical micro-filters. Natural gravity clarification only.
               </div>
               <Link
                 to="/shop"
-                className="w-full sm:w-auto text-center px-6 py-3 bg-amber-400 hover:bg-amber-300 text-stone-900 rounded-full font-bold text-xs uppercase tracking-wider transition-colors shadow-lg"
+                className="w-full sm:w-auto text-center px-6 py-3 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-full font-bold text-xs uppercase tracking-wider transition-all shadow-xl hover:scale-105"
               >
                 Order Unfiltered Oil Now
               </Link>
@@ -313,16 +351,16 @@ export const HomePage: React.FC = () => {
             </div>
 
             <div className="relative mt-4 lg:mt-0">
-              <div className="aspect-4/3 rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
+              <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-stone-900">
                 <img
-                  src={coconutHarvest}
-                  alt="Harvesting fresh coconuts in Kerala"
-                  className="w-full h-full object-cover"
+                  src={niraKeralaCooking}
+                  alt="Authentic Kerala Traditional Cooking with NIRA Pure Coconut Oil"
+                  className="w-full h-auto block transform hover:scale-[1.01] transition-transform duration-500"
                 />
               </div>
-              <div className="absolute -bottom-3 -left-2 sm:-bottom-6 sm:-left-6 bg-emerald-800 text-white p-3.5 sm:p-6 rounded-2xl shadow-xl max-w-xs border-2 border-emerald-600">
-                <p className="font-serif text-xs sm:text-base font-bold">“Purity you can smell the moment you open the seal.”</p>
-                <p className="text-[10px] sm:text-xs text-emerald-200 mt-1">— Sreedharan P., Master Presser</p>
+              <div className="absolute -bottom-3 -left-2 sm:-bottom-5 sm:-left-4 lg:-bottom-6 lg:-left-6 bg-emerald-950/95 backdrop-blur-md text-white p-3.5 sm:p-5 rounded-2xl shadow-2xl max-w-[240px] sm:max-w-xs border border-emerald-500/40">
+                <p className="font-serif text-xs sm:text-sm font-bold leading-snug">“Purity you can smell the moment you open the seal.”</p>
+                <p className="text-[10px] sm:text-xs text-emerald-200 mt-1 font-medium">— Sreedharan P., Master Presser</p>
               </div>
             </div>
           </div>

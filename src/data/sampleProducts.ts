@@ -202,9 +202,10 @@ export const initialCoupons: Coupon[] = [
 export const defaultStoreSettings: StoreSettings = {
   brandName: 'NIRA',
   tagline: 'Pure Coconut Oil. Naturally Better.',
-  supportPhone: '+91 98765 43210',
+  supportPhone: '+91 96563 19693',
+  secondaryPhone: '+91 95625 13642',
   supportEmail: 'hello@niraoil.in',
-  whatsappNumber: '+919876543210',
+  whatsappNumber: '+919562513642',
   address: {
     line1: 'NIRA Agro-Processing Heritage Unit',
     line2: 'Kozhikode-Wayanad Highway, Kunnamangalam',

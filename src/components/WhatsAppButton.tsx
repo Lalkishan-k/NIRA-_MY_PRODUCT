@@ -10,7 +10,10 @@ export const WhatsAppButton: React.FC = () => {
     const text = encodeURIComponent(
       `Hello ${settings.brandName}, I have a question regarding pure Kerala coconut oil.`
     );
-    const cleanNumber = settings.whatsappNumber.replace(/[^0-9]/g, '');
+    let cleanNumber = (settings.whatsappNumber || '9562513642').replace(/[^0-9]/g, '');
+    if (cleanNumber.length === 10) {
+      cleanNumber = '91' + cleanNumber;
+    }
     window.open(`https://wa.me/${cleanNumber}?text=${text}`, '_blank');
   };
 

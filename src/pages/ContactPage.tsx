@@ -76,13 +76,20 @@ export const ContactPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Phone className="w-5 h-5 text-emerald-400 shrink-0" />
+            <div className="flex items-start gap-3">
+              <Phone className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
               <div>
-                <span className="font-bold text-white block text-sm">Direct Phone</span>
-                <a href={`tel:${settings.supportPhone}`} className="hover:text-amber-300">
-                  {settings.supportPhone}
-                </a>
+                <span className="font-bold text-white block text-sm">Direct Phone Numbers</span>
+                <div className="mt-0.5 space-y-0.5">
+                  <a href={`tel:${settings.supportPhone}`} className="hover:text-amber-300 block">
+                    {settings.supportPhone} <span className="text-[10px] text-emerald-400 font-normal">(Primary)</span>
+                  </a>
+                  {settings.secondaryPhone && (
+                    <a href={`tel:${settings.secondaryPhone}`} className="hover:text-amber-300 block text-stone-400">
+                      {settings.secondaryPhone} <span className="text-[10px] text-stone-400 font-normal">(WhatsApp / Support)</span>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
 
