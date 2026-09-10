@@ -1,0 +1,6 @@
+{
+  "name": "NIRA - Pure Coconut Oil",
+  "description": "100% Raw Unfiltered Kerala Coconut Oil in 200 ml, 500 ml, and 1 Litre bottles. Naturally settled without industrial filtration to preserve maximum Vitamin E, polyphenols, and healthy nutrients.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
