@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -11,7 +11,10 @@ import {
   Truck,
   Leaf,
   Clock,
-  Star
+  Star,
+  Play,
+  Pause,
+  RotateCcw
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
@@ -22,60 +25,124 @@ import {
   keralaCoconutGrove,
   coconutHarvest,
   childPureOil,
-  niraOilBottle
+  niraOilBottle,
+  niraPure1LBottle,
+  productRotationVideo,
+  unfilteredVideo
 } from '../assets/images';
 
 export const HomePage: React.FC = () => {
   const { products, isLoadingProducts, settings } = useStore();
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleVideo = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+        setIsVideoPlaying(true);
+      } else {
+        videoRef.current.pause();
+        setIsVideoPlaying(false);
+      }
+    }
+  };
 
   const featuredProducts = products.filter(p => p.featured && p.active).slice(0, 4);
 
   return (
     <div className="space-y-16 sm:space-y-24">
-      {/* 1. HERO SECTION */}
-      <section className="relative bg-gradient-to-b from-[#FAF7F2] via-[#F6F2EA] to-[#EFE7DC] text-stone-900 border-b border-stone-200/80 overflow-hidden">
-        {/* Background Image with carefully balanced overlay for visibility and text priority */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+      {/* 1. HERO SECTION - Seamless Studio Atmosphere with Color Blending */}
+      <section className="relative bg-[#5C664D] text-white border-b border-stone-700/40 overflow-hidden min-h-[580px] sm:min-h-[620px] lg:min-h-[660px] flex items-center">
+        {/* Unified Studio Wall Backdrop covering the entire section */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none select-none">
+          {/* Base Tone matching the authentic studio wall */}
+          <div className="absolute inset-0 bg-[#5C664D]" />
+
+          {/* Seamless Studio Backdrop directly sampled and texture-matched to the video's studio canvas */}
           <img
-            src={keralaCoconutGrove}
-            alt="Authentic Kerala Coconut Grove Sunrise Landscape"
-            className="w-full h-full object-cover object-center opacity-40 lg:opacity-45 scale-105 filter saturate-110"
+            src="/images/studio-backdrop-seamless.jpg?v=2"
+            alt=""
+            className="w-full h-full object-cover object-bottom pointer-events-none select-none"
           />
-          {/* Subtle gradient wash to ensure highest priority & contrast for foreground text and card */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#FAF7F2]/90 via-[#FAF7F2]/75 to-[#FAF7F2]/45 sm:from-[#FAF7F2]/85 sm:via-[#FAF7F2]/70 sm:to-[#FAF7F2]/40" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#EFE7DC]/90 via-transparent to-transparent" />
         </div>
 
-        {/* Soft atmospheric ambient glow */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-30">
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-100/50 blur-3xl" />
-          <div className="absolute top-1/2 -right-24 w-96 h-96 rounded-full bg-amber-100/40 blur-3xl" />
+        {/* Video element positioned at the right side with zero letterboxing / zero right seam */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div 
+            onClick={toggleVideo}
+            className="absolute right-0 top-0 bottom-0 h-full w-full sm:w-auto sm:aspect-square max-w-full flex justify-end items-end cursor-pointer pointer-events-auto"
+            title="Click to play or pause product rotation"
+          >
+            <video
+              ref={videoRef}
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="w-full h-full object-cover object-right select-none"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 12%, rgba(0,0,0,0.35) 25%, rgba(0,0,0,0.75) 40%, black 52%)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.08) 12%, rgba(0,0,0,0.35) 25%, rgba(0,0,0,0.75) 40%, black 52%)',
+              }}
+            >
+              <source src={productRotationVideo} type="video/mp4" />
+              <source src="/videos/nira-product-rotation.mp4" type="video/mp4" />
+              <source src="/videos/create-a-smooth-realistic-product-rotation (4).mp4" type="video/mp4" />
+              <source src="/videos/create-a-smooth-realistic-product-rotation (3).mp4" type="video/mp4" />
+            </video>
+          </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
-            <div className="lg:col-span-7 space-y-6 pl-2 sm:pl-6 lg:pl-10 xl:pl-14">
+        {/* Unified Studio Atmosphere & Balanced Lighting across BOTH sides */}
+        <div className="absolute inset-0 z-[5] pointer-events-none select-none">
+          {/* Subtle balanced warm studio ambient glow across the whole scene */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_35%,rgba(230,210,160,0.06)_0%,transparent_70%)]" />
+          {/* Subtle framing at very top and bottom */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/8 via-transparent to-black/10" />
+        </div>
+
+        {/* Floating 360° Indicator & Play/Pause Controller */}
+        <div className="absolute top-4 right-4 sm:top-6 sm:right-8 z-20 flex items-center gap-2">
+          <div className="bg-stone-900/60 backdrop-blur-md text-white text-[10px] sm:text-xs font-semibold tracking-wider uppercase px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5 shadow-lg select-none">
+            <RotateCcw className="w-3.5 h-3.5 text-emerald-300 animate-spin" style={{ animationDuration: '8s' }} />
+            <span>360° View</span>
+          </div>
+          <button
+            onClick={toggleVideo}
+            type="button"
+            aria-label={isVideoPlaying ? 'Pause rotation video' : 'Play rotation video'}
+            className="w-8 h-8 rounded-full bg-stone-900/60 hover:bg-stone-900/80 backdrop-blur-md text-white border border-white/20 flex items-center justify-center transition-colors shadow-lg"
+          >
+            {isVideoPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 fill-white ml-0.5" />}
+          </button>
+        </div>
+
+        {/* Hero Content on the left side */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-14 sm:py-20 lg:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 xl:col-span-6 space-y-6 max-w-xl pl-4 sm:pl-8 md:pl-10 lg:pl-12 xl:pl-16">
               {/* Refined natural badge */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-100/80 border border-emerald-300/70 text-emerald-900 text-xs font-semibold backdrop-blur-xs shadow-2xs">
-                <Leaf className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/25 border border-white/20 text-white text-xs font-semibold backdrop-blur-sm shadow-xs">
+                <Leaf className="w-3.5 h-3.5 text-emerald-300 shrink-0" />
                 <span className="tracking-wide">100% Raw & Unfiltered Kerala Copra</span>
               </div>
 
               {/* Title & Subtitle styled with the brand identity font */}
               <div className="space-y-4">
                 <div className="flex flex-col items-start">
-                  <h1 className="font-brand text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-[#144D29] tracking-tight leading-[0.92] drop-shadow-xs">
+                  <h1 className="font-brand text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white tracking-tight leading-[0.92] drop-shadow-md">
                     NIRA
                   </h1>
                   <div className="flex items-center gap-3 pt-2 pb-1">
-                    <span className="h-0.5 w-6 sm:w-12 bg-[#3C2214]/50"></span>
-                    <span className="font-subline text-sm sm:text-lg md:text-xl font-bold uppercase tracking-[0.25em] text-[#3C2214]">
+                    <span className="h-0.5 w-6 sm:w-12 bg-[#D9CEBA]/60"></span>
+                    <span className="font-subline text-sm sm:text-lg md:text-xl font-bold uppercase tracking-[0.25em] text-[#F4EFE6] drop-shadow-xs">
                       COCONUT OIL
                     </span>
-                    <span className="h-0.5 w-6 sm:w-12 bg-[#3C2214]/50"></span>
+                    <span className="h-0.5 w-6 sm:w-12 bg-[#D9CEBA]/60"></span>
                   </div>
                 </div>
-                <p className="font-serif italic text-xl sm:text-2xl md:text-3xl text-emerald-900/90 font-normal tracking-tight">
+                <p className="font-serif italic text-xl sm:text-2xl md:text-3xl text-[#EFE7D8] font-normal tracking-tight">
                   Naturally Better. Zero Filtration.
                 </p>
               </div>
@@ -84,61 +151,42 @@ export const HomePage: React.FC = () => {
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-1">
                 <Link
                   to="/shop"
-                  className="w-full sm:w-auto px-8 py-3.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-full font-semibold text-sm transition-all shadow-md hover:shadow-emerald-900/20 flex items-center justify-center gap-2 text-center"
+                  className="w-full sm:w-auto px-8 py-3.5 bg-white hover:bg-[#FAF7F2] text-[#144D29] rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 text-center"
                 >
                   <span>Shop 3 Packaging Sizes</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <a
                   href="#why-unfiltered"
-                  className="w-full sm:w-auto px-7 py-3.5 bg-white hover:bg-stone-50 text-stone-800 border border-stone-300/80 rounded-full font-semibold text-sm transition-colors shadow-2xs text-center"
+                  className="w-full sm:w-auto px-7 py-3.5 bg-black/25 hover:bg-black/40 text-white border border-white/30 rounded-full font-semibold text-sm transition-colors shadow-2xs text-center backdrop-blur-xs"
                 >
                   Why Unfiltered = More Nutrients
                 </a>
               </div>
 
               {/* Quick trust metrics */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-6 border-t border-stone-300/70 text-xs text-stone-700 font-medium">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-6 border-t border-white/20 text-xs text-stone-100 font-medium max-w-xl">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <ShieldCheck className="w-4 h-4 text-emerald-300 shrink-0" />
                   <span>Zero Filtration (100% Nutrients)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <Droplets className="w-4 h-4 text-emerald-300 shrink-0" />
                   <span>Cold Expeller Pressed</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Truck className="w-4 h-4 text-emerald-700 shrink-0" />
+                  <Truck className="w-4 h-4 text-emerald-300 shrink-0" />
                   <span>200ml, 500ml & 1L Packs</span>
                 </div>
               </div>
             </div>
 
-            {/* Showcase Card featuring NIRA product image */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-end">
-              <div className="relative max-w-sm sm:max-w-md w-full">
-                <div className="rounded-3xl overflow-hidden border border-stone-200/90 shadow-2xl bg-white group ring-1 ring-stone-950/5">
-                  <img
-                    src={niraOilBottle}
-                    alt="NIRA Coconut Oil Bottle with Coconuts"
-                    className="w-full aspect-square object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="p-4 sm:p-5 bg-white border-t border-stone-100 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-widest text-emerald-800 font-bold">100% Pure & Unfiltered</p>
-                      <p className="font-serif text-base font-bold text-stone-900">NIRA Coconut Oil</p>
-                    </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold">
-                      Zero Filtration
-                    </span>
-                  </div>
-                </div>
-                <div className="absolute -bottom-3 -left-3 sm:-bottom-4 sm:-left-4 bg-white text-stone-900 px-4 py-2.5 rounded-2xl shadow-xl border border-stone-200 flex items-center gap-2 text-xs font-bold">
-                  <Sparkles className="w-4 h-4 text-amber-600" />
-                  <span>Live Bioactive Nutrients Preserved</span>
-                </div>
-              </div>
-            </div>
+            {/* Clickable open area on the right showcasing the background bottle rotation */}
+            <div 
+              onClick={toggleVideo}
+              className="hidden lg:block lg:col-span-5 xl:col-span-6 h-[460px] xl:h-[520px] cursor-pointer"
+              title="Click to play or pause product rotation"
+            />
           </div>
         </div>
       </section>
@@ -226,9 +274,9 @@ export const HomePage: React.FC = () => {
         )}
       </section>
 
-      {/* 3B. WHY UNFILTERED MEANS MORE NUTRIENTS — DEDICATED SPOTLIGHT */}
+      {/* 3B. WHY UNFILTERED MEANS MORE NUTRIENTS — DEDICATED SPOTLIGHT (2-COLUMN) */}
       <section id="why-unfiltered" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-10 lg:p-16 relative overflow-hidden shadow-2xl border border-stone-700/50">
+        <div className="bg-stone-900 text-white rounded-3xl p-6 sm:p-8 lg:p-12 relative overflow-hidden shadow-2xl border border-stone-700/50">
           {/* Background Image: Kerala Coconut Grove Sunrise & Backwaters */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <img
@@ -237,75 +285,131 @@ export const HomePage: React.FC = () => {
               className="w-full h-full object-cover object-center transform scale-100 opacity-90 filter saturate-105"
             />
             {/* Subtle Vignette & Gradient for High Contrast & Text Legibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/90 via-stone-950/50 to-stone-950/75" />
+            <div className="absolute inset-0 bg-gradient-to-t from-stone-950/95 via-stone-950/70 to-stone-950/80" />
           </div>
 
-          <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
-            <span className="inline-block px-4 py-1.5 rounded-full bg-stone-950/80 backdrop-blur-md text-amber-300 text-xs uppercase font-bold tracking-widest border border-amber-400/40 mb-4 shadow-lg">
-              Scientific Purity & Nutrition
-            </span>
-            
-            {/* Headline with High Contrast Background Container */}
-            <div className="bg-stone-950/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/15 shadow-xl max-w-3xl mb-2">
-              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight drop-shadow-md">
-                Why Without Filtration Means More Nutrients
-              </h2>
-              <p className="text-amber-100 text-xs sm:text-sm lg:text-base mt-2.5 leading-relaxed font-normal">
-                Most commercial coconut oils pass through aggressive high-pressure micro-mesh filters, chemical adsorbents, or diatomaceous earth to achieve extreme artificial transparency. In doing so, they strip away nature’s most potent health compounds.
-              </p>
+          <div className="relative z-10">
+            {/* 2-Column Responsive Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+              
+              {/* LEFT COLUMN: Video with Non-Blocking Wordings Above */}
+              <div className="lg:col-span-5 flex flex-col items-start w-full">
+                {/* Wordings above the video (cleanly placed above without blocking the video view) */}
+                <div className="mb-4 w-full">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-stone-950/80 backdrop-blur-md text-amber-300 text-xs uppercase font-bold tracking-widest border border-amber-400/40 mb-2 shadow-md">
+                    <Droplets className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Raw Clarification</span>
+                  </div>
+                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-white leading-snug drop-shadow-md">
+                    Natural Decantation in Action
+                  </h3>
+                  <p className="text-amber-100/90 text-xs sm:text-sm mt-1.5 leading-relaxed font-normal">
+                    Experience slow, unheated gravity settling — preserving living nutrients without aggressive micro-mesh or chemical processing.
+                  </p>
+                </div>
+
+                {/* Video Player Frame */}
+                <div className="relative w-full rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-stone-950/90 group">
+                  <video
+                    id="unfiltered-process-video"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full aspect-square sm:aspect-[4/3] lg:aspect-square object-cover"
+                  >
+                    <source src="/images/video_260912_174240.mp4" type="video/mp4" />
+                    <source src="/videos/video_260912_174240.mp4" type="video/mp4" />
+                    <source src={unfilteredVideo} type="video/mp4" />
+                    Your browser does not support HTML5 video.
+                  </video>
+
+                  {/* Corner indicator badges (non-blocking, positioned at base edges) */}
+                  <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+                    <span className="text-[11px] font-semibold tracking-wide text-amber-300 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-amber-400/30 shadow-md">
+                      Pure Copra Extract
+                    </span>
+                    <span className="text-[11px] font-medium text-stone-200 bg-stone-950/85 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow-md">
+                      100% Unfiltered
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: Scientific Purity & Nutrition Details */}
+              <div className="lg:col-span-7 flex flex-col justify-center">
+                <div className="mb-4">
+                  <span className="inline-block px-4 py-1 rounded-full bg-stone-950/80 backdrop-blur-md text-amber-300 text-xs uppercase font-bold tracking-widest border border-amber-400/40 mb-3 shadow-lg">
+                    Scientific Purity & Nutrition
+                  </span>
+                  
+                  {/* Headline with High Contrast Background Container */}
+                  <div className="bg-stone-950/75 backdrop-blur-md px-5 sm:px-6 py-4 rounded-2xl border border-white/15 shadow-xl">
+                    <h2 className="font-serif text-2xl sm:text-3xl font-bold text-white leading-tight drop-shadow-md">
+                      Why Without Filtration Means More Nutrients
+                    </h2>
+                    <p className="text-amber-100 text-xs sm:text-sm mt-2 leading-relaxed font-normal">
+                      Most commercial coconut oils pass through aggressive high-pressure micro-mesh filters, chemical adsorbents, or diatomaceous earth to achieve extreme artificial transparency. In doing so, they strip away nature’s most potent health compounds.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 4 Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 w-full text-left">
+                  <div className="bg-stone-950/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-xl">
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-xs shrink-0 shadow-md">
+                        1
+                      </div>
+                      <h3 className="font-serif font-bold text-white text-sm">Intact Vitamin E & Tocopherols</h3>
+                    </div>
+                    <p className="text-xs text-stone-200 leading-relaxed font-normal">
+                      Natural Vitamin E is a delicate lipid antioxidant. Unfiltered copra oil retains active tocopherols that protect skin cells from UV damage and deeply nourish hair follicles.
+                    </p>
+                  </div>
+
+                  <div className="bg-stone-950/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-xl">
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-xs shrink-0 shadow-md">
+                        2
+                      </div>
+                      <h3 className="font-serif font-bold text-white text-sm">Full-Spectrum Polyphenols</h3>
+                    </div>
+                    <p className="text-xs text-stone-200 leading-relaxed font-normal">
+                      Plant polyphenols act as powerful free-radical scavengers. Mechanical filtration separates these micronutrients out — our gentle gravity settling keeps every milligram inside.
+                    </p>
+                  </div>
+
+                  <div className="bg-stone-950/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-xl">
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-xs shrink-0 shadow-md">
+                        3
+                      </div>
+                      <h3 className="font-serif font-bold text-white text-sm">Bioactive Plant Sterols</h3>
+                    </div>
+                    <p className="text-xs text-stone-200 leading-relaxed font-normal">
+                      Naturally occurring phytosterols support cellular repair and healthy lipid profiles. Unfiltered oil preserves these vital building blocks in their native, unheated state.
+                    </p>
+                  </div>
+
+                  <div className="bg-stone-950/80 backdrop-blur-md p-3.5 sm:p-4 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-xl">
+                    <div className="flex items-center gap-2.5 mb-1.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-xs shrink-0 shadow-md">
+                        4
+                      </div>
+                      <h3 className="font-serif font-bold text-white text-sm">Authentic Roasted Aroma</h3>
+                    </div>
+                    <p className="text-xs text-stone-200 leading-relaxed font-normal">
+                      The intoxicating aroma of sun-dried Kerala copra comes from natural volatile aromatic ketones. Deodorizing and heavy filtering remove this signature nostalgic fragrance.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8 w-full text-left">
-              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
-                    1
-                  </div>
-                  <h3 className="font-serif font-bold text-white text-sm sm:text-base">Intact Vitamin E & Tocopherols</h3>
-                </div>
-                <p className="text-xs text-stone-200 leading-relaxed font-normal">
-                  Natural Vitamin E is a delicate lipid antioxidant. Unfiltered copra oil retains active tocopherols that protect skin cells from UV damage and deeply nourish hair follicles.
-                </p>
-              </div>
-
-              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
-                    2
-                  </div>
-                  <h3 className="font-serif font-bold text-white text-sm sm:text-base">Full-Spectrum Polyphenols</h3>
-                </div>
-                <p className="text-xs text-stone-200 leading-relaxed font-normal">
-                  Plant polyphenols act as powerful free-radical scavengers. Mechanical filtration separates these micronutrients out — our gentle gravity settling keeps every milligram inside.
-                </p>
-              </div>
-
-              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
-                    3
-                  </div>
-                  <h3 className="font-serif font-bold text-white text-sm sm:text-base">Bioactive Plant Sterols</h3>
-                </div>
-                <p className="text-xs text-stone-200 leading-relaxed font-normal">
-                  Naturally occurring phytosterols support cellular repair and healthy lipid profiles. Unfiltered oil preserves these vital building blocks in their native, unheated state.
-                </p>
-              </div>
-
-              <div className="bg-stone-950/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-white/20 hover:border-amber-400/70 transition-all shadow-2xl">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-amber-400 text-stone-950 font-black flex items-center justify-center text-sm shrink-0 shadow-md">
-                    4
-                  </div>
-                  <h3 className="font-serif font-bold text-white text-sm sm:text-base">Authentic Roasted Aroma</h3>
-                </div>
-                <p className="text-xs text-stone-200 leading-relaxed font-normal">
-                  The intoxicating aroma of sun-dried Kerala copra comes from natural volatile aromatic ketones. Deodorizing and heavy filtering remove this signature nostalgic fragrance.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 sm:mt-8 pt-6 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4 w-full bg-stone-950/70 backdrop-blur-md px-6 py-4 rounded-2xl border">
+            {/* Bottom Guarantee & CTA Banner */}
+            <div className="mt-8 pt-6 border-t border-white/20 flex flex-col sm:flex-row items-center justify-between gap-4 w-full bg-stone-950/70 backdrop-blur-md px-6 py-4 rounded-2xl border border-white/10 shadow-xl">
               <div className="text-xs sm:text-sm text-amber-200 font-medium text-center sm:text-left">
                 ✨ Zero mechanical micro-filters. Natural gravity clarification only.
               </div>

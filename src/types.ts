@@ -1,5 +1,11 @@
 export type ProductSize = '200 ml' | '500 ml' | '1 Litre' | '2 Litre' | '5 Litre' | string;
 
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
+
 export interface Product {
   id: string;
   name: string;

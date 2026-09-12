@@ -310,15 +310,6 @@ export const Navbar: React.FC = () => {
                         >
                           Track Guest Order
                         </Link>
-                        <div className="border-t border-stone-100 mt-1 pt-1">
-                          <Link
-                            to="/admin"
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="block px-4 py-2 text-xs text-stone-500 hover:text-emerald-800"
-                          >
-                            Store Admin Portal
-                          </Link>
-                        </div>
                       </>
                     )}
                   </div>

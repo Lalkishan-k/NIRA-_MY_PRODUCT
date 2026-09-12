@@ -24,17 +24,45 @@ import {
   Printer,
   ShieldCheck,
   ArrowUpRight,
-  ExternalLink
+  ExternalLink,
+  Lock,
+  KeyRound,
+  ShieldAlert,
+  Key,
+  LogOut,
+  XCircle,
+  Info,
+  Check
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
 import { Product, Order, Coupon, StoreSettings, ProductSize } from '../types';
+import { RazorpayModal } from '../components/RazorpayModal';
 
 export const AdminDashboard: React.FC = () => {
-  const { isAdmin, customerProfile, loginAsDemoAdmin } = useAuth();
-  const { addToast } = useStore();
+  const { isAdmin, customerProfile, setAdminAuthenticated } = useAuth();
+  const { addToast, razorpayKeyId, isTestMode } = useStore();
   const navigate = useNavigate();
+
+  // Admin Auth Gate State
+  const [authMode, setAuthMode] = useState<'pin' | 'password'>('pin');
+  const [adminPin, setAdminPin] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [rememberDevice, setRememberDevice] = useState(true);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+
+  // Security PIN update state in Settings tab
+  const [currentPinInput, setCurrentPinInput] = useState('');
+  const [newPinInput, setNewPinInput] = useState('');
+  const [confirmPinInput, setConfirmPinInput] = useState('');
+  const [isUpdatingPin, setIsUpdatingPin] = useState(false);
+  const [pinUpdateMsg, setPinUpdateMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Demo Razorpay Modal state for admin testing
+  const [showDemoRazorpayModal, setShowDemoRazorpayModal] = useState(false);
 
   const [activeTab, setActiveTab] = useState<
     'overview' | 'products' | 'inventory' | 'orders' | 'customers' | 'coupons' | 'settings'
@@ -94,34 +122,232 @@ export const AdminDashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    loadAdminData();
-  }, []);
+    if (isAdmin) {
+      loadAdminData();
+    }
+  }, [isAdmin]);
 
-  // If user is not admin, show permission gate with 1-click admin unlock for review
+  // Handle Admin Login
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError(null);
+    try {
+      if (authMode === 'pin') {
+        if (!adminPin.trim()) {
+          setLoginError('Please enter the 6-digit Store Owner PIN');
+          setIsLoggingIn(false);
+          return;
+        }
+        await api.loginAdmin({ pin: adminPin.trim(), rememberDevice });
+      } else {
+        if (!adminEmail.trim() || !adminPassword) {
+          setLoginError('Please enter admin email and password');
+          setIsLoggingIn(false);
+          return;
+        }
+        await api.loginAdmin({ email: adminEmail.trim(), password: adminPassword, rememberDevice });
+      }
+
+      setAdminAuthenticated(true);
+      addToast('Admin authenticated successfully. Welcome!', 'success');
+      setAdminPin('');
+      setAdminPassword('');
+      loadAdminData();
+    } catch (err: any) {
+      setLoginError(err.message || 'Authentication failed. Access denied.');
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    await api.logoutAdmin();
+    setAdminAuthenticated(false);
+    addToast('Admin portal locked and signed out', 'info');
+  };
+
+  const handleUpdatePin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPinInput || !newPinInput || !confirmPinInput) {
+      setPinUpdateMsg({ type: 'error', text: 'All PIN fields are required' });
+      return;
+    }
+    if (newPinInput.length !== 6 || !/^\d{6}$/.test(newPinInput)) {
+      setPinUpdateMsg({ type: 'error', text: 'New PIN must be exactly 6 numeric digits' });
+      return;
+    }
+    if (newPinInput !== confirmPinInput) {
+      setPinUpdateMsg({ type: 'error', text: 'New PIN and Confirmation PIN do not match' });
+      return;
+    }
+    setIsUpdatingPin(true);
+    setPinUpdateMsg(null);
+    try {
+      await api.changeAdminPin(currentPinInput, newPinInput);
+      setPinUpdateMsg({ type: 'success', text: 'Admin security PIN updated successfully!' });
+      setCurrentPinInput('');
+      setNewPinInput('');
+      setConfirmPinInput('');
+      addToast('Admin security PIN changed', 'success');
+    } catch (err: any) {
+      setPinUpdateMsg({ type: 'error', text: err.message || 'Failed to update PIN' });
+    } finally {
+      setIsUpdatingPin(false);
+    }
+  };
+
+  // If user is not admin, show real secure authentication gate
   if (!isAdmin) {
     return (
-      <div className="max-w-md mx-auto px-4 py-20 text-center space-y-6">
-        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-900 flex items-center justify-center mx-auto">
-          <ShieldCheck className="w-8 h-8" />
-        </div>
-        <h2 className="font-serif text-2xl font-bold text-stone-900">Admin Portal Authentication</h2>
-        <p className="text-xs text-stone-500 leading-relaxed">
-          Access to the NIRA store management system is restricted to verified store managers (such as <b>lalkishankkichu@gmail.com</b>).
-        </p>
-        <div className="pt-2 space-y-3">
-          <button
-            onClick={() => {
-              loginAsDemoAdmin();
-              addToast('Authorized as Store Admin!', 'success');
-              loadAdminData();
-            }}
-            className="w-full py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition-colors shadow-md"
-          >
-            Unlock Admin Access (One-Click Store Owner Login)
-          </button>
-          <Link to="/" className="block text-xs text-stone-500 hover:underline">
-            Return to Storefront
-          </Link>
+      <div className="min-h-[85vh] flex items-center justify-center px-4 py-16 bg-stone-950 text-stone-100">
+        <div className="w-full max-w-md bg-stone-900/90 backdrop-blur-xl border border-stone-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+          {/* Header */}
+          <div className="text-center space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h2 className="font-serif text-2xl font-bold text-white tracking-tight">NIRA Staff & Admin Portal</h2>
+            <p className="text-xs text-stone-400 leading-relaxed max-w-xs mx-auto">
+              Restricted management portal for NIRA Pure Coconut Oil operations. Authenticate to manage inventory, orders, and pricing.
+            </p>
+          </div>
+
+          {/* Mode Switcher */}
+          <div className="grid grid-cols-2 p-1 bg-stone-950 rounded-2xl border border-stone-800 text-xs font-semibold">
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('pin');
+                setLoginError(null);
+              }}
+              className={`py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'pin' ? 'bg-amber-500 text-stone-950 font-bold shadow-md' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Owner PIN</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode('password');
+                setLoginError(null);
+              }}
+              className={`py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 ${
+                authMode === 'password' ? 'bg-amber-500 text-stone-950 font-bold shadow-md' : 'text-stone-400 hover:text-stone-200'
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Credentials</span>
+            </button>
+          </div>
+
+          {/* Error notice */}
+          {loginError && (
+            <div className="p-3.5 rounded-2xl bg-rose-950/70 border border-rose-800/80 text-rose-200 text-xs flex items-start gap-2.5 animate-in fade-in duration-150">
+              <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div className="flex-1 leading-relaxed">{loginError}</div>
+            </div>
+          )}
+
+          {/* Auth Form */}
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            {authMode === 'pin' ? (
+              <div className="space-y-2">
+                <label className="block text-xs font-semibold text-stone-300">
+                  Store Owner Security PIN (6 Digits)
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    autoComplete="current-password"
+                    value={adminPin}
+                    onChange={e => setAdminPin(e.target.value.replace(/\D/g, ''))}
+                    placeholder="••••••"
+                    className="w-full text-center tracking-[0.5em] text-lg font-mono py-3 px-4 rounded-xl bg-stone-950 border border-stone-800 text-white placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                    autoFocus
+                  />
+                  <KeyRound className="w-4 h-4 text-stone-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                </div>
+                <div className="flex items-center justify-between text-[11px] text-stone-500 pt-1">
+                  <span>Authorized Staff & Store Owner Only</span>
+                  <span className="text-stone-600">Encrypted 256-bit session</span>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-stone-300 mb-1">
+                    Store Owner Email
+                  </label>
+                  <input
+                    type="email"
+                    value={adminEmail}
+                    onChange={e => setAdminEmail(e.target.value)}
+                    placeholder="Enter owner email"
+                    required
+                    className="w-full text-xs py-2.5 px-3 rounded-xl bg-stone-950 border border-stone-800 text-white placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-stone-300 mb-1">
+                    Admin Password
+                  </label>
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={e => setAdminPassword(e.target.value)}
+                    placeholder="••••••••"
+                    required
+                    className="w-full text-xs py-2.5 px-3 rounded-xl bg-stone-950 border border-stone-800 text-white placeholder-stone-600 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Remember device checkbox */}
+            <label className="flex items-center gap-2 cursor-pointer pt-1">
+              <input
+                type="checkbox"
+                checked={rememberDevice}
+                onChange={e => setRememberDevice(e.target.checked)}
+                className="rounded border-stone-700 bg-stone-950 text-amber-500 focus:ring-amber-500/40"
+              />
+              <span className="text-xs text-stone-400">Remember this admin workstation (30 days)</span>
+            </label>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={isLoggingIn}
+              className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-lg hover:shadow-amber-500/20 disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isLoggingIn ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  <span>Verifying Credentials...</span>
+                </>
+              ) : (
+                <>
+                  <Lock className="w-4 h-4" />
+                  <span>Authenticate & Enter Portal</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer note */}
+          <div className="pt-2 border-t border-stone-800/80 text-center">
+            <Link
+              to="/"
+              className="text-xs text-stone-400 hover:text-white transition-colors inline-flex items-center gap-1"
+            >
+              <span>← Return to Customer Storefront</span>
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -235,23 +461,30 @@ export const AdminDashboard: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-3 sm:gap-4 text-xs">
             <Link
               to="/"
               target="_blank"
-              className="hidden sm:flex items-center gap-1 text-stone-300 hover:text-white"
+              className="hidden md:flex items-center gap-1 text-stone-300 hover:text-white transition-colors"
             >
-              <span>View Live Store</span>
+              <span>Live Storefront</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
-            <div className="h-4 w-px bg-stone-700 hidden sm:block" />
-            <span className="text-stone-400 truncate max-w-[150px]">{customerProfile?.email}</span>
+            <div className="h-4 w-px bg-stone-700 hidden md:block" />
             <button
               onClick={loadAdminData}
-              className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300"
-              title="Refresh data"
+              className="p-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 transition-colors"
+              title="Refresh store data"
             >
               <RefreshCw className="w-4 h-4" />
+            </button>
+            <button
+              onClick={handleAdminLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/70 hover:bg-rose-900 border border-rose-800 text-rose-200 transition-colors font-semibold"
+              title="Lock portal and terminate session"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Lock Portal</span>
             </button>
           </div>
         </div>
@@ -840,7 +1073,8 @@ export const AdminDashboard: React.FC = () => {
         {/* TAB 7: STORE SETTINGS                                */}
         {/* ==================================================== */}
         {activeTab === 'settings' && storeSettings && (
-          <form onSubmit={handleSaveSettings} className="bg-white p-8 rounded-3xl border border-stone-200 shadow-xs space-y-6 max-w-3xl">
+          <div className="space-y-8 max-w-3xl">
+            <form onSubmit={handleSaveSettings} className="bg-white p-8 rounded-3xl border border-stone-200 shadow-xs space-y-6">
             <div>
               <h2 className="font-serif text-2xl font-bold text-stone-900">Store Configuration & Delivery Rules</h2>
               <p className="text-xs text-stone-500">Update shipping threshold, contact details, and announcement banner.</p>
@@ -952,7 +1186,174 @@ export const AdminDashboard: React.FC = () => {
               <span>{isSavingSettings ? 'Saving Settings...' : 'Save All Settings'}</span>
             </button>
           </form>
-        )}
+
+          {/* Master Store Security & PIN Management Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
+                  <Lock className="w-5 h-5 text-amber-600" />
+                  <span>Admin Security & Master PIN</span>
+                </h3>
+                <p className="text-xs text-stone-500 mt-1">
+                  Change the 6-digit PIN used to unlock this operations portal. Protects against unauthorized real-world visitors.
+                </p>
+              </div>
+              <span className="inline-flex items-center gap-1 self-start px-3 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-full text-xs font-semibold">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                <span>Protected Credentials</span>
+              </span>
+            </div>
+
+            {pinUpdateMsg && (
+              <div className={`p-3.5 rounded-2xl text-xs flex items-center gap-2 ${
+                pinUpdateMsg.type === 'success' 
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' 
+                  : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}>
+                {pinUpdateMsg.type === 'success' ? <Check className="w-4 h-4 text-emerald-600" /> : <AlertTriangle className="w-4 h-4 text-rose-600" />}
+                <span>{pinUpdateMsg.text}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdatePin} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">Current PIN *</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={currentPinInput}
+                  onChange={e => setCurrentPinInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••••"
+                  required
+                  className="w-full text-xs p-3 rounded-xl border border-stone-300 font-mono tracking-widest bg-stone-50 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">New 6-Digit PIN *</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={newPinInput}
+                  onChange={e => setNewPinInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••••"
+                  required
+                  className="w-full text-xs p-3 rounded-xl border border-stone-300 font-mono tracking-widest bg-stone-50 focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-stone-700 mb-1">Confirm New PIN *</label>
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={confirmPinInput}
+                  onChange={e => setConfirmPinInput(e.target.value.replace(/\D/g, ''))}
+                  placeholder="••••••"
+                  required
+                  className="w-full text-xs p-3 rounded-xl border border-stone-300 font-mono tracking-widest bg-stone-50 focus:bg-white"
+                />
+              </div>
+
+              <div className="sm:col-span-3 flex justify-end pt-2">
+                <button
+                  type="submit"
+                  disabled={isUpdatingPin}
+                  className="px-6 py-2.5 bg-stone-900 hover:bg-black text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-colors disabled:opacity-50"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{isUpdatingPin ? 'Updating PIN...' : 'Save New Security PIN'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Razorpay Payment Gateway Status & Testing Card */}
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#0c2340] text-white flex items-center justify-center font-bold text-xs">
+                    R
+                  </div>
+                  <h3 className="font-serif text-lg font-bold text-stone-900">
+                    Razorpay Payment Gateway Setup
+                  </h3>
+                </div>
+                <p className="text-xs text-stone-500 mt-1">
+                  Online payments via UPI (Google Pay, PhonePe, Paytm), Credit & Debit Cards, Net Banking, and Wallets.
+                </p>
+              </div>
+
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold self-start ${
+                !isTestMode
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : 'bg-amber-50 text-amber-900 border border-amber-200'
+              }`}>
+                <ShieldCheck className={`w-3.5 h-3.5 ${!isTestMode ? 'text-emerald-600' : 'text-amber-600'}`} />
+                <span>{!isTestMode ? 'Live Credentials Connected' : 'Interactive Sandbox Active'}</span>
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                  Configured Key ID
+                </div>
+                <div className="font-mono text-xs font-semibold text-stone-900 break-all">
+                  {razorpayKeyId || 'rzp_test_SANDBOX_READY'}
+                </div>
+                <p className="text-[11px] text-stone-500">
+                  Passed to client for initiating payment orders securely.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
+                <div className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+                  Signature Verification (HMAC-SHA256)
+                </div>
+                <div className="text-xs font-semibold text-stone-900 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>Server-Side Endpoint Active: /api/payment/verify</span>
+                </div>
+                <p className="text-[11px] text-stone-500">
+                  Cryptographically validates authentic Razorpay order IDs and transaction tokens.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 space-y-3">
+              <div className="text-xs font-bold text-emerald-950 flex items-center gap-2">
+                <Info className="w-4 h-4 text-emerald-700" />
+                <span>How to connect your Live or Test Razorpay Account:</span>
+              </div>
+              <ol className="text-xs text-stone-700 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li>Log in to your <b>Razorpay Dashboard</b> at <a href="https://dashboard.razorpay.com/#/access/api-keys" target="_blank" rel="noreferrer" className="text-emerald-800 underline font-semibold inline-flex items-center gap-0.5">dashboard.razorpay.com <ExternalLink className="w-3 h-3" /></a></li>
+                <li>Go to <b>Account & Settings</b> &rarr; <b>API Keys</b> &rarr; Click <b>Generate Key</b>.</li>
+                <li>Set your <b>Key Id</b> as <code className="bg-white px-1.5 py-0.5 rounded border text-[11px] font-mono">RAZORPAY_KEY_ID</code> and <b>Key Secret</b> as <code className="bg-white px-1.5 py-0.5 rounded border text-[11px] font-mono">RAZORPAY_KEY_SECRET</code> in the project environment variables.</li>
+              </ol>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
+              <p className="text-xs text-stone-500">
+                You can test the checkout payment window right now:
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowDemoRazorpayModal(true)}
+                className="w-full sm:w-auto px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-xs"
+              >
+                <CreditCard className="w-4 h-4" />
+                <span>Open Test Payment Window</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </main>
 
       {/* MODAL: PRODUCT CREATE / EDIT */}
@@ -1278,6 +1679,30 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Demo Razorpay Payment Window Modal for Admin Testing */}
+      <RazorpayModal
+        isOpen={showDemoRazorpayModal}
+        onClose={() => setShowDemoRazorpayModal(false)}
+        orderId="TEST-DEMO-PAYMENT"
+        razorpayOrderId={`order_admin_demo_${Date.now()}`}
+        amount={100}
+        customer={{
+          name: customerProfile?.name || 'Store Administrator',
+          email: customerProfile?.email || 'admin@niracoconutoil.com',
+          phone: '+91 98470 12345'
+        }}
+        onSuccess={(data) => {
+          setShowDemoRazorpayModal(false);
+          addToast(`Test payment approved! Ref: ${data.razorpayPaymentId}`, 'success');
+        }}
+        onFailure={(msg) => {
+          setShowDemoRazorpayModal(false);
+          addToast(`Test payment simulation error: ${msg}`, 'error');
+        }}
+        brandName="NIRA Pure Coconut Oil"
+        isTestMode={isTestMode}
+      />
     </div>
   );
 };

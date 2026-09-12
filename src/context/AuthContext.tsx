@@ -9,6 +9,7 @@ import {
 } from 'firebase/auth';
 import { auth } from '../lib/firebase';
 import { CustomerProfile, ShippingAddress } from '../types';
+import { api, getAdminToken, clearAdminToken } from '../services/api';
 
 interface AuthContextType {
   currentUser: User | null;
@@ -21,8 +22,9 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<void>;
   updateProfileAddress: (address: ShippingAddress) => void;
   savedAddresses: ShippingAddress[];
-  loginAsDemoAdmin: () => void;
   loginAsDemoCustomer: () => void;
+  verifyAdminStatus: () => Promise<boolean>;
+  setAdminAuthenticated: (status: boolean) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -59,16 +61,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  // Check Firebase Auth state or stored local demo user
+  const verifyAdminStatus = async (): Promise<boolean> => {
+    const res = await api.verifyAdminSession();
+    if (res.valid) {
+      setIsAdmin(true);
+      return true;
+    } else {
+      setIsAdmin(false);
+      return false;
+    }
+  };
+
+  // Check Firebase Auth state and verify admin token
   useEffect(() => {
-    // Check if demo user is stored
+    // 1. Verify admin token with server
+    const checkAdmin = async () => {
+      const token = getAdminToken();
+      if (token) {
+        const adminRes = await api.verifyAdminSession();
+        setIsAdmin(Boolean(adminRes.valid));
+      } else {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+
+    // 2. Check if demo user is stored
     const demoStored = localStorage.getItem(DEMO_USER_KEY);
     if (demoStored) {
       try {
         const parsed = JSON.parse(demoStored);
         setCustomerProfile(parsed);
-        setIsAdmin(parsed.email === 'lalkishankkichu@gmail.com' || parsed.email.includes('admin'));
-        setIsLoading(false);
       } catch (e) {
         console.warn('Failed to parse demo user', e);
       }
@@ -78,8 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const unsubscribe = onAuthStateChanged(auth, user => {
         if (user) {
           setCurrentUser(user);
-          const isUserAdmin = user.email === 'lalkishankkichu@gmail.com' || user.email?.includes('admin');
-          setIsAdmin(Boolean(isUserAdmin));
           setCustomerProfile({
             id: user.uid,
             uid: user.uid,
@@ -93,7 +114,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         } else if (!demoStored) {
           setCurrentUser(null);
-          // If no Firebase user and no demo user, start as guest with demo admin option
         }
         setIsLoading(false);
       });
@@ -152,8 +172,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       };
       setCustomerProfile(profile);
     } catch (firebaseErr) {
-      // Local fallback
-      const isUserAdmin = email === 'lalkishankkichu@gmail.com';
+      // Local fallback for customer
       const profile: CustomerProfile = {
         id: `usr_${Date.now()}`,
         uid: `usr_${Date.now()}`,
@@ -166,7 +185,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         createdAt: new Date().toISOString()
       };
       setCustomerProfile(profile);
-      setIsAdmin(isUserAdmin);
       localStorage.setItem(DEMO_USER_KEY, JSON.stringify(profile));
     } finally {
       setIsLoading(false);
@@ -176,12 +194,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = async () => {
     try {
       await signOut(auth);
+      await api.logoutAdmin();
     } catch (e) {
       // ignore
     }
     setCurrentUser(null);
     setCustomerProfile(null);
     setIsAdmin(false);
+    clearAdminToken();
     localStorage.removeItem(DEMO_USER_KEY);
   };
 
@@ -203,23 +223,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (e) {}
       return updated;
     });
-  };
-
-  const loginAsDemoAdmin = () => {
-    const adminProfile: CustomerProfile = {
-      id: 'admin_master_001',
-      uid: 'admin_master_001',
-      name: 'Kishan Lal (Store Admin)',
-      email: 'lalkishankkichu@gmail.com',
-      phone: '+91 98460 12345',
-      addresses: savedAddresses,
-      ordersCount: 15,
-      totalSpent: 8450,
-      createdAt: '2026-08-01T00:00:00.000Z'
-    };
-    setCustomerProfile(adminProfile);
-    setIsAdmin(true);
-    localStorage.setItem(DEMO_USER_KEY, JSON.stringify(adminProfile));
   };
 
   const loginAsDemoCustomer = () => {
@@ -252,8 +255,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPassword,
         updateProfileAddress,
         savedAddresses,
-        loginAsDemoAdmin,
-        loginAsDemoCustomer
+        loginAsDemoCustomer,
+        verifyAdminStatus,
+        setAdminAuthenticated: setIsAdmin
       }}
     >
       {children}

@@ -10,13 +10,15 @@ import {
   ArrowRight,
   AlertCircle,
   Clock,
-  Sparkles
+  Sparkles,
+  Smartphone
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { ShippingAddress } from '../types';
 import { api } from '../services/api';
+import { RazorpayModal } from '../components/RazorpayModal';
 
 declare global {
   interface Window {
@@ -51,6 +53,14 @@ export const CheckoutPage: React.FC = () => {
   const [paymentMethod, setPaymentMethod] = useState<'Razorpay' | 'Cash on Delivery (COD)'>('Razorpay');
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // In-app Razorpay Payment Window Modal state
+  const [showRazorpayModal, setShowRazorpayModal] = useState(false);
+  const [activePaymentOrderData, setActivePaymentOrderData] = useState<{
+    orderId: string;
+    razorpayOrderId: string;
+    amount: number;
+  } | null>(null);
 
   // Auto redirect if cart is empty
   useEffect(() => {
@@ -135,13 +145,23 @@ export const CheckoutPage: React.FC = () => {
       // Handle Razorpay Online Payment
       const razorpayOrderId = res.razorpayOrderId;
       const orderId = res.orderId;
-      const amount = res.amount;
+      const amount = res.amount; // amount in paise
+
+      const launchInAppRazorpayWindow = () => {
+        setActivePaymentOrderData({
+          orderId,
+          razorpayOrderId,
+          amount: amount / 100
+        });
+        setShowRazorpayModal(true);
+        setIsProcessing(false);
+      };
 
       // Check if real Razorpay Key ID is present or if running in demo sandbox
       const activeRazorpayKey = razorpayKeyId || (import.meta as any).env?.VITE_RAZORPAY_KEY_ID;
 
-      // Check if Razorpay script loaded and we have a valid format key
-      if (window.Razorpay && activeRazorpayKey && !activeRazorpayKey.includes('YourTestKeyId')) {
+      // If backend created a live Razorpay order and checkout.js is available:
+      if (res.isRealRazorpayOrder && window.Razorpay && activeRazorpayKey && !activeRazorpayKey.includes('YourTestKeyId')) {
         try {
           const options = {
             key: activeRazorpayKey,
@@ -158,12 +178,12 @@ export const CheckoutPage: React.FC = () => {
                   orderId,
                   razorpayOrderId: response.razorpay_order_id || razorpayOrderId,
                   razorpayPaymentId: response.razorpay_payment_id || `pay_${Date.now()}`,
-                  razorpaySignature: response.razorpay_signature || 'sig_demo'
+                  razorpaySignature: response.razorpay_signature
                 });
 
                 if (verifyRes.success) {
                   clearCart();
-                  addToast('Payment successful! Your order is placed.', 'success');
+                  addToast('Payment successful! Your order has been placed.', 'success');
                   navigate(`/order-confirmation/${orderId}`);
                 }
               } catch (verErr: any) {
@@ -194,40 +214,52 @@ export const CheckoutPage: React.FC = () => {
           });
           rzp.open();
         } catch (rzpErr: any) {
-          console.warn('Razorpay open encountered an error, falling back to sandbox simulator:', rzpErr);
-          // Auto fallback to sandbox confirmation
-          const verifyRes = await api.verifyPayment({
-            orderId,
-            razorpayOrderId,
-            razorpayPaymentId: `pay_sandbox_${Date.now()}`,
-            razorpaySignature: 'sig_sandbox_verified'
-          });
-
-          if (verifyRes.success) {
-            clearCart();
-            addToast('Order confirmed via Sandbox Payment Simulator!', 'success');
-            navigate(`/order-confirmation/${orderId}`);
-          }
+          console.warn('Razorpay checkout.js error, opening interactive payment window:', rzpErr);
+          launchInAppRazorpayWindow();
         }
       } else {
-        // Instant Sandbox/Demo verification flow when no real Razorpay Key is configured
-        const verifyRes = await api.verifyPayment({
-          orderId,
-          razorpayOrderId,
-          razorpayPaymentId: `pay_test_${Date.now()}`,
-          razorpaySignature: 'sig_test_sandbox'
-        });
-
-        if (verifyRes.success) {
-          clearCart();
-          addToast('Payment verified successfully in test sandbox mode!', 'success');
-          navigate(`/order-confirmation/${orderId}`);
-        }
+        // Open the interactive Razorpay Payment Window
+        launchInAppRazorpayWindow();
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to place order. Please try again.');
       setIsProcessing(false);
     }
+  };
+
+  const handleModalPaymentSuccess = async (paymentData: {
+    razorpayOrderId: string;
+    razorpayPaymentId: string;
+    razorpaySignature: string;
+  }) => {
+    if (!activePaymentOrderData) return;
+    setIsProcessing(true);
+    try {
+      const verifyRes = await api.verifyPayment({
+        orderId: activePaymentOrderData.orderId,
+        razorpayOrderId: paymentData.razorpayOrderId,
+        razorpayPaymentId: paymentData.razorpayPaymentId,
+        razorpaySignature: paymentData.razorpaySignature
+      });
+
+      if (verifyRes.success) {
+        setShowRazorpayModal(false);
+        clearCart();
+        addToast('Payment verified successfully! Your order is confirmed.', 'success');
+        navigate(`/order-confirmation/${activePaymentOrderData.orderId}`);
+      }
+    } catch (verErr: any) {
+      setErrorMessage('Payment verification failed: ' + verErr.message);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleModalPaymentFailure = (errMsg: string) => {
+    setShowRazorpayModal(false);
+    setIsProcessing(false);
+    setErrorMessage(`Payment Failed: ${errMsg}`);
+    addToast('Payment was not completed. You can retry with another method.', 'error');
   };
 
   return (
@@ -600,6 +632,30 @@ export const CheckoutPage: React.FC = () => {
           </div>
         </div>
       </form>
+
+      {/* Interactive Razorpay Payment Window Modal */}
+      {activePaymentOrderData && (
+        <RazorpayModal
+          isOpen={showRazorpayModal}
+          onClose={() => {
+            setShowRazorpayModal(false);
+            setIsProcessing(false);
+            addToast('Payment cancelled. You can retry anytime.', 'info');
+          }}
+          orderId={activePaymentOrderData.orderId}
+          razorpayOrderId={activePaymentOrderData.razorpayOrderId}
+          amount={activePaymentOrderData.amount}
+          customer={{
+            name: fullName,
+            email: email,
+            phone: phone
+          }}
+          onSuccess={handleModalPaymentSuccess}
+          onFailure={handleModalPaymentFailure}
+          brandName={settings.brandName || 'NIRA Pure Coconut Oil'}
+          isTestMode={!razorpayKeyId || razorpayKeyId.includes('SANDBOX') || razorpayKeyId.includes('YourTestKeyId')}
+        />
+      )}
     </div>
   );
 };

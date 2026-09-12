@@ -30,7 +30,6 @@ export const AccountPage: React.FC = () => {
     isAdmin,
     savedAddresses,
     updateProfileAddress,
-    loginAsDemoAdmin,
     loginAsDemoCustomer
   } = useAuth();
   const { addToast } = useStore();
@@ -258,25 +257,16 @@ export const AccountPage: React.FC = () => {
             </form>
           )}
 
-          {/* Instant Demo Login Buttons */}
+          {/* Quick Demo Customer Login for Testing */}
           <div className="pt-4 border-t border-stone-100 space-y-2">
-            <p className="text-[11px] text-stone-400 text-center font-medium">Instant Test Logins (1-Click)</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={loginAsDemoCustomer}
-                className="py-2 px-3 rounded-xl border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-800 text-[11px] font-semibold transition-colors"
-              >
-                Sign in as Customer
-              </button>
-              <button
-                type="button"
-                onClick={loginAsDemoAdmin}
-                className="py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-[11px] font-semibold transition-colors"
-              >
-                Sign in as Admin
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={loginAsDemoCustomer}
+              className="w-full py-2.5 px-3 rounded-xl border border-dashed border-stone-300 bg-stone-50 hover:bg-stone-100 text-stone-700 text-xs font-semibold transition-colors flex items-center justify-center gap-2"
+            >
+              <User className="w-3.5 h-3.5 text-stone-500" />
+              <span>Quick Test: Sign in as Demo Customer</span>
+            </button>
           </div>
         </div>
       </div>

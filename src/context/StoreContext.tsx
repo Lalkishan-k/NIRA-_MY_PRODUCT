@@ -35,9 +35,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isTestMode, setIsTestMode] = useState(true);
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-    setToasts(prev => [...prev, { id, message, type }]);
-    setTimeout(() => removeToast(id), 4000);
+    setToasts(prev => {
+      // Prevent duplicate identical toast from showing simultaneously
+      if (prev.some(t => t.message === message)) {
+        return prev;
+      }
+      const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+      setTimeout(() => removeToast(id), 3500);
+      return [...prev, { id, message, type }];
+    });
   };
 
   const removeToast = (id: string) => {
@@ -88,34 +94,6 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }}
     >
       {children}
-      {/* Global Toast Notification Container */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-md w-full pointer-events-none px-4">
-        {toasts.map(toast => (
-          <div
-            key={toast.id}
-            className={`pointer-events-auto flex items-center justify-between p-4 rounded-xl shadow-lg border backdrop-blur-sm transition-all animate-in fade-in slide-in-from-bottom-5 duration-200 ${
-              toast.type === 'error'
-                ? 'bg-rose-900/90 text-white border-rose-700'
-                : toast.type === 'info'
-                ? 'bg-stone-900/90 text-white border-stone-700'
-                : 'bg-emerald-950/95 text-emerald-100 border-emerald-700'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-lg">
-                {toast.type === 'error' ? '⚠️' : toast.type === 'info' ? 'ℹ️' : '🌿'}
-              </span>
-              <p className="text-sm font-medium">{toast.message}</p>
-            </div>
-            <button
-              onClick={() => removeToast(toast.id)}
-              className="ml-3 text-stone-400 hover:text-white text-sm p-1 rounded-md transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-      </div>
     </StoreContext.Provider>
   );
 };

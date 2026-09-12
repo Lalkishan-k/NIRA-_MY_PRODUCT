@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Phone, Mail, MapPin, ShieldCheck, Heart, ArrowUpRight, MessageCircle } from 'lucide-react';
+import { Phone, Mail, MapPin, ShieldCheck, Heart, ArrowUpRight, MessageCircle, Lock } from 'lucide-react';
 import { CrackedCoconutPiece } from './CrackedCoconutPiece';
 import { useStore } from '../context/StoreContext';
 
@@ -169,8 +169,13 @@ export const Footer: React.FC = () => {
               Secured with <span className="font-semibold text-stone-300">Razorpay</span>
             </span>
             <span>•</span>
-            <Link to="/admin" className="text-stone-600 hover:text-stone-400">
-              Admin Portal
+            <Link
+              to="/admin"
+              className="text-stone-700 hover:text-stone-400 text-[11px] flex items-center gap-1 transition-colors"
+              title="Authorized Staff Portal"
+            >
+              <Lock className="w-2.5 h-2.5" />
+              <span>Staff Login</span>
             </Link>
           </div>
         </div>

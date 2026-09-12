@@ -2,6 +2,8 @@ import { Product, Coupon, StoreSettings } from '../types';
 import {
   pureOilBottle,
   virginOilBottle,
+  niraPure1LBottle,
+  niraPouch200ml,
   heroCoconutOil,
   childPureOil,
   keralaCooking,
@@ -14,7 +16,7 @@ export const initialProducts: Product[] = [
     name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
     slug: 'unfiltered-pure-coconut-oil-200ml',
     category: 'Unfiltered Pure Coconut Oil',
-    shortDescription: '100% Raw, Unfiltered Kerala Coconut Oil in a convenient 200 ml bottle. Unfiltered means maximum natural nutrients, Vitamin E & polyphenols intact.',
+    shortDescription: '100% Raw, Unfiltered Kerala Coconut Oil in an authentic 200 ml pouch pack. Unfiltered means maximum natural nutrients, Vitamin E & polyphenols intact.',
     description: 'Extracted from prime Kerala coconuts sun-dried without sulphur and expeller pressed at gentle room temperatures. Unlike industrially filtered commercial oils, NIRA is completely unfiltered — naturally settled by gravity. Leaving the oil unfiltered preserves the full spectrum of micronutrients, natural tocopherols (Vitamin E), plant sterols, and healthy medium-chain triglycerides (MCTs / Lauric acid) that industrial micro-filtering and chemical bleaching routinely strip away. Perfect compact size for daily hair root nourishment, infant massage, face hydration, and trial.',
     price: 95,
     compareAtPrice: 120,
@@ -22,9 +24,9 @@ export const initialProducts: Product[] = [
     stock: 110,
     sku: 'NIRA-UF-200',
     size: '200 ml',
-    unit: 'Bottle',
+    unit: 'Pouch',
     images: [
-      pureOilBottle,
+      niraPouch200ml,
       childPureOil,
       keralaCooking,
       heroCoconutOil
@@ -124,9 +126,9 @@ export const initialProducts: Product[] = [
     size: '1 Litre',
     unit: 'Bottle',
     images: [
-      pureOilBottle,
+      niraPure1LBottle,
       keralaCooking,
-      childPureOil,
+      pureOilBottle,
       coconutHarvest
     ],
     ingredients: ['100% Raw Unfiltered Pure Coconut Oil (Cocos nucifera)'],

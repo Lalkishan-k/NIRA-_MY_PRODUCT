@@ -1,5 +1,37 @@
 import { Product, Order, Coupon, Review, StoreSettings, ShippingAddress } from '../types';
 
+const ADMIN_TOKEN_KEY = 'nira_admin_session_token';
+
+// Admin Token Store Helper
+export const getAdminToken = (): string | null => {
+  return localStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_TOKEN_KEY);
+};
+
+export const setAdminToken = (token: string, remember = false): void => {
+  if (remember) {
+    localStorage.setItem(ADMIN_TOKEN_KEY, token);
+  } else {
+    sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+  }
+};
+
+export const clearAdminToken = (): void => {
+  localStorage.removeItem(ADMIN_TOKEN_KEY);
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+};
+
+const getAdminHeaders = (extraHeaders: Record<string, string> = {}) => {
+  const token = getAdminToken();
+  const headers: Record<string, string> = {
+    ...extraHeaders
+  };
+  if (token) {
+    headers['x-admin-token'] = token;
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 export const api = {
   // Store Config
   async getConfig(): Promise<{ settings: StoreSettings; razorpayKeyId: string; testMode: boolean }> {
@@ -126,16 +158,76 @@ export const api = {
     return result;
   },
 
-  // Admin Endpoints
+  // ----------------------------------------------------
+  // ADMIN AUTHENTICATION & SECURITY ENDPOINTS
+  // ----------------------------------------------------
+  async loginAdmin(credentials: { pin?: string; email?: string; password?: string; rememberDevice?: boolean }) {
+    const res = await fetch('/api/admin/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials)
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error || 'Admin authentication failed');
+    }
+    if (data.token) {
+      setAdminToken(data.token, Boolean(credentials.rememberDevice));
+    }
+    return data;
+  },
+
+  async verifyAdminSession() {
+    const token = getAdminToken();
+    if (!token) return { valid: false };
+    try {
+      const res = await fetch('/api/admin/auth/verify', {
+        headers: getAdminHeaders()
+      });
+      if (!res.ok) return { valid: false };
+      return res.json();
+    } catch {
+      return { valid: false };
+    }
+  },
+
+  async logoutAdmin() {
+    try {
+      await fetch('/api/admin/auth/logout', {
+        method: 'POST',
+        headers: getAdminHeaders()
+      });
+    } catch {}
+    clearAdminToken();
+  },
+
+  async changeAdminPin(currentPin: string, newPin: string) {
+    const res = await fetch('/api/admin/auth/change-pin', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ currentPin, newPin })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update PIN');
+    return data;
+  },
+
+  // ----------------------------------------------------
+  // PROTECTED ADMIN ENDPOINTS
+  // ----------------------------------------------------
   async getAdminStats() {
-    const res = await fetch('/api/admin/stats');
-    if (!res.ok) throw new Error('Failed to load admin stats');
+    const res = await fetch('/api/admin/stats', {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load admin stats. Please log in.');
     return res.json();
   },
 
   async getAdminProducts(): Promise<Product[]> {
-    const res = await fetch('/api/admin/products');
-    if (!res.ok) throw new Error('Failed to load admin products');
+    const res = await fetch('/api/admin/products', {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load admin products. Please log in.');
     return res.json();
   },
 
@@ -144,7 +236,7 @@ export const api = {
     const method = isEdit ? 'PUT' : 'POST';
     const res = await fetch(url, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(productData)
     });
     if (!res.ok) throw new Error('Failed to save product');
@@ -152,14 +244,17 @@ export const api = {
   },
 
   async deleteAdminProduct(id: string): Promise<void> {
-    const res = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/admin/products/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
     if (!res.ok) throw new Error('Failed to delete product');
   },
 
   async adjustStock(productId: string, delta?: number, newStock?: number) {
     const res = await fetch('/api/admin/inventory/adjust', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ productId, delta, newStock })
     });
     if (!res.ok) throw new Error('Failed to adjust stock');
@@ -171,7 +266,9 @@ export const api = {
     if (params?.status) query.set('status', params.status);
     if (params?.payment) query.set('payment', params.payment);
     if (params?.search) query.set('search', params.search);
-    const res = await fetch(`/api/admin/orders?${query.toString()}`);
+    const res = await fetch(`/api/admin/orders?${query.toString()}`, {
+      headers: getAdminHeaders()
+    });
     if (!res.ok) throw new Error('Failed to load admin orders');
     return res.json();
   },
@@ -179,7 +276,7 @@ export const api = {
   async updateOrderStatus(id: string, orderStatus?: string, paymentStatus?: string): Promise<Order> {
     const res = await fetch(`/api/admin/orders/${id}/status`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ orderStatus, paymentStatus })
     });
     if (!res.ok) throw new Error('Failed to update order status');
@@ -187,13 +284,17 @@ export const api = {
   },
 
   async getAdminCustomers() {
-    const res = await fetch('/api/admin/customers');
+    const res = await fetch('/api/admin/customers', {
+      headers: getAdminHeaders()
+    });
     if (!res.ok) throw new Error('Failed to load customers');
     return res.json();
   },
 
   async getAdminCoupons(): Promise<Coupon[]> {
-    const res = await fetch('/api/admin/coupons');
+    const res = await fetch('/api/admin/coupons', {
+      headers: getAdminHeaders()
+    });
     if (!res.ok) throw new Error('Failed to load coupons');
     return res.json();
   },
@@ -201,7 +302,7 @@ export const api = {
   async createAdminCoupon(coupon: Partial<Coupon>): Promise<Coupon> {
     const res = await fetch('/api/admin/coupons', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(coupon)
     });
     if (!res.ok) throw new Error('Failed to create coupon');
@@ -211,7 +312,7 @@ export const api = {
   async toggleAdminCoupon(code: string, active: boolean): Promise<Coupon> {
     const res = await fetch(`/api/admin/coupons/${code}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ active })
     });
     if (!res.ok) throw new Error('Failed to update coupon');
@@ -219,7 +320,9 @@ export const api = {
   },
 
   async getAdminSettings(): Promise<StoreSettings> {
-    const res = await fetch('/api/admin/settings');
+    const res = await fetch('/api/admin/settings', {
+      headers: getAdminHeaders()
+    });
     if (!res.ok) throw new Error('Failed to load settings');
     return res.json();
   },
@@ -227,7 +330,7 @@ export const api = {
   async saveAdminSettings(settings: Partial<StoreSettings>): Promise<StoreSettings> {
     const res = await fetch('/api/admin/settings', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(settings)
     });
     if (!res.ok) throw new Error('Failed to save settings');
@@ -235,7 +338,10 @@ export const api = {
   },
 
   async seedDatabase() {
-    const res = await fetch('/api/admin/seed', { method: 'POST' });
+    const res = await fetch('/api/admin/seed', {
+      method: 'POST',
+      headers: getAdminHeaders()
+    });
     return res.json();
   }
 };

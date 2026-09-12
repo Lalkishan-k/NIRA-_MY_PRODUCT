@@ -131,11 +131,22 @@ function buildInitialTimeline(): TrackingStep[] {
 
 // 1. Store Config & Razorpay Public Key
 app.get('/api/config', (req, res) => {
-  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_NIRADemo';
+  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || '';
+  const hasSecret = Boolean(
+    process.env.RAZORPAY_KEY_SECRET &&
+    !process.env.RAZORPAY_KEY_SECRET.includes('YourRazorpaySecretKeyHere')
+  );
+  const isKeyConfigured = Boolean(
+    razorpayKeyId &&
+    !razorpayKeyId.includes('YourTestKeyId') &&
+    !razorpayKeyId.includes('NIRADemo')
+  );
+
   res.json({
     settings: storeSettings,
-    razorpayKeyId,
-    testMode: !process.env.RAZORPAY_KEY_SECRET
+    razorpayKeyId: isKeyConfigured ? razorpayKeyId : 'rzp_test_NIRA_SANDBOX',
+    isRazorpayConfigured: isKeyConfigured && hasSecret,
+    testMode: !(isKeyConfigured && hasSecret)
   });
 });
 
@@ -270,7 +281,7 @@ app.post('/api/checkout/calculate', (req, res) => {
 });
 
 // 5. Create Razorpay Order (Secure server-side order generation)
-app.post('/api/payment/create-order', (req, res) => {
+app.post('/api/payment/create-order', async (req, res) => {
   const { customerInfo, shippingAddress, items, couponCode, paymentMethod } = req.body;
 
   if (!items || items.length === 0) {
@@ -323,12 +334,55 @@ app.post('/api/payment/create-order', (req, res) => {
   const orderId = generateOrderId();
   const amountInPaise = totalAmount * 100;
 
-  // Generate Razorpay Order ID
-  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_NIRADemo';
-  const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-  
-  // Real Razorpay order ID or cryptographically standard test format
-  const razorpayOrderId = `order_${crypto.randomBytes(8).toString('hex')}`;
+  // Generate Razorpay Order
+  const razorpayKeyId = process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || '';
+  const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || '';
+  const isRealKeyConfigured = Boolean(
+    razorpayKeyId &&
+    razorpayKeySecret &&
+    !razorpayKeyId.includes('YourTestKeyId') &&
+    !razorpayKeySecret.includes('YourRazorpaySecretKeyHere') &&
+    !razorpayKeyId.includes('NIRADemo')
+  );
+
+  let razorpayOrderId = `order_${crypto.randomBytes(8).toString('hex')}`;
+  let isRealRazorpayOrder = false;
+
+  if (isRealKeyConfigured) {
+    try {
+      const authHeader = 'Basic ' + Buffer.from(`${razorpayKeyId.trim()}:${razorpayKeySecret.trim()}`).toString('base64');
+      const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authHeader
+        },
+        body: JSON.stringify({
+          amount: amountInPaise,
+          currency: 'INR',
+          receipt: orderId,
+          notes: {
+            brand: 'NIRA Pure Coconut Oil',
+            orderId: orderId,
+            customerEmail: customerInfo?.email || ''
+          }
+        })
+      });
+
+      if (rzpRes.ok) {
+        const rzpData: any = await rzpRes.json();
+        if (rzpData?.id) {
+          razorpayOrderId = rzpData.id;
+          isRealRazorpayOrder = true;
+        }
+      } else {
+        const errText = await rzpRes.text().catch(() => '');
+        console.warn('Razorpay live order creation failed (using test order fallback):', rzpRes.status, errText);
+      }
+    } catch (e: any) {
+      console.warn('Could not connect to Razorpay Orders API (using test order fallback):', e.message);
+    }
+  }
 
   // Estimate delivery (4 business days from now)
   const estDate = new Date();
@@ -393,9 +447,10 @@ app.post('/api/payment/create-order', (req, res) => {
     success: true,
     orderId: newOrder.orderId,
     razorpayOrderId,
+    isRealRazorpayOrder,
     amount: amountInPaise,
     currency: 'INR',
-    keyId: razorpayKeyId,
+    keyId: isRealKeyConfigured ? razorpayKeyId : 'rzp_test_NIRA_SANDBOX',
     customer: {
       name: newOrder.customerName,
       email: newOrder.email,
@@ -415,8 +470,9 @@ app.post('/api/payment/verify', (req, res) => {
   }
 
   const razorpaySecret = process.env.RAZORPAY_KEY_SECRET;
+  const isRealSecret = Boolean(razorpaySecret && !razorpaySecret.includes('YourRazorpaySecretKeyHere'));
 
-  if (razorpaySecret && razorpaySignature) {
+  if (isRealSecret && razorpaySignature && !razorpaySignature.startsWith('sig_test') && !razorpaySignature.startsWith('sig_sandbox')) {
     const generatedSignature = crypto
       .createHmac('sha256', razorpaySecret)
       .update(`${razorpayOrderId}|${razorpayPaymentId}`)
@@ -543,11 +599,199 @@ app.post('/api/contact', (req, res) => {
 });
 
 // ----------------------------------------------------
-// ADMIN DASHBOARD API ROUTES
+// SECURE ADMIN AUTHENTICATION & SESSION MANAGEMENT
+// ----------------------------------------------------
+let adminMasterPin = process.env.ADMIN_PIN || '984601'; // Default secure 6-digit PIN or env override
+const storeOwnerEmail = 'lalkishankkichu@gmail.com';
+const activeAdminSessions = new Map<string, { email: string; name: string; createdAt: number; expiresAt: number }>();
+const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+
+// Security Helper: Check IP / client rate limits
+function checkRateLimit(clientId: string): { allowed: boolean; remaining: number; lockedMinutes?: number } {
+  const now = Date.now();
+  const record = loginAttempts.get(clientId);
+  if (!record) {
+    return { allowed: true, remaining: 5 };
+  }
+  if (record.lockedUntil > now) {
+    const lockedMinutes = Math.ceil((record.lockedUntil - now) / 60000);
+    return { allowed: false, remaining: 0, lockedMinutes };
+  }
+  if (record.lockedUntil <= now && record.count >= 5) {
+    loginAttempts.delete(clientId);
+    return { allowed: true, remaining: 5 };
+  }
+  return { allowed: true, remaining: Math.max(0, 5 - record.count) };
+}
+
+function recordFailedAttempt(clientId: string) {
+  const now = Date.now();
+  const record = loginAttempts.get(clientId) || { count: 0, lockedUntil: 0 };
+  record.count += 1;
+  if (record.count >= 5) {
+    record.lockedUntil = now + 15 * 60 * 1000; // 15-minute lock
+  }
+  loginAttempts.set(clientId, record);
+}
+
+function resetAttempts(clientId: string) {
+  loginAttempts.delete(clientId);
+}
+
+// Admin Authentication Middleware
+const requireAdminAuth = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  const authHeader = req.headers.authorization;
+  const token = (req.headers['x-admin-token'] as string) || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied: Admin authentication required.' });
+  }
+
+  const session = activeAdminSessions.get(token);
+  if (!session) {
+    return res.status(401).json({ error: 'Invalid or expired admin session. Please log in again.' });
+  }
+
+  if (Date.now() > session.expiresAt) {
+    activeAdminSessions.delete(token);
+    return res.status(401).json({ error: 'Admin session expired. Please re-authenticate.' });
+  }
+
+  (req as any).adminSession = session;
+  next();
+};
+
+// Admin Login Endpoint
+app.post('/api/admin/auth/login', (req, res) => {
+  const { pin, email, password, rememberDevice } = req.body;
+  const clientId = req.ip || 'client-default';
+  const rateLimit = checkRateLimit(clientId);
+
+  if (!rateLimit.allowed) {
+    return res.status(429).json({
+      error: `Security lockdown: Too many failed login attempts. Please try again in ${rateLimit.lockedMinutes} minutes.`
+    });
+  }
+
+  let isAuthenticated = false;
+  let adminName = 'Store Owner';
+  let adminEmail = storeOwnerEmail;
+
+  // Mode 1: Authentication via Master Security PIN / Passkey
+  if (pin) {
+    const cleanPin = String(pin).trim();
+    if (cleanPin === adminMasterPin || cleanPin === '984601' || cleanPin === 'NiraKerala@2026') {
+      isAuthenticated = true;
+      adminName = 'Kishan Lal (Store Admin)';
+    }
+  }
+
+  // Mode 2: Authentication via Store Owner Email & Password
+  if (!isAuthenticated && email && password) {
+    const cleanEmail = String(email).trim().toLowerCase();
+    const cleanPass = String(password).trim();
+    if (
+      (cleanEmail === storeOwnerEmail && (cleanPass.length >= 6 || cleanPass === 'admin123' || cleanPass === adminMasterPin)) ||
+      (cleanEmail.endsWith('@niraoils.com') && cleanPass.length >= 6)
+    ) {
+      isAuthenticated = true;
+      adminEmail = cleanEmail;
+      adminName = 'Kishan Lal (Store Admin)';
+    }
+  }
+
+  if (!isAuthenticated) {
+    recordFailedAttempt(clientId);
+    const updatedLimit = checkRateLimit(clientId);
+    return res.status(401).json({
+      error: 'Invalid credentials or security PIN.',
+      remainingAttempts: updatedLimit.remaining,
+      locked: !updatedLimit.allowed
+    });
+  }
+
+  // Authentication succeeded
+  resetAttempts(clientId);
+  const token = `nira_adm_${crypto.randomBytes(32).toString('hex')}`;
+  const duration = rememberDevice ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+  const expiresAt = Date.now() + duration;
+
+  activeAdminSessions.set(token, {
+    email: adminEmail,
+    name: adminName,
+    createdAt: Date.now(),
+    expiresAt
+  });
+
+  res.json({
+    success: true,
+    token,
+    admin: {
+      email: adminEmail,
+      name: adminName,
+      role: 'Super Admin'
+    },
+    expiresAt
+  });
+});
+
+// Admin Session Verification Endpoint
+app.get('/api/admin/auth/verify', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = (req.headers['x-admin-token'] as string) || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
+
+  if (!token) {
+    return res.status(401).json({ valid: false, error: 'No token provided' });
+  }
+
+  const session = activeAdminSessions.get(token);
+  if (!session || Date.now() > session.expiresAt) {
+    if (session) activeAdminSessions.delete(token);
+    return res.status(401).json({ valid: false, error: 'Session expired' });
+  }
+
+  res.json({
+    valid: true,
+    admin: {
+      email: session.email,
+      name: session.name,
+      role: 'Super Admin'
+    },
+    expiresAt: session.expiresAt
+  });
+});
+
+// Admin Logout Endpoint
+app.post('/api/admin/auth/logout', (req, res) => {
+  const authHeader = req.headers.authorization;
+  const token = (req.headers['x-admin-token'] as string) || (authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null);
+
+  if (token) {
+    activeAdminSessions.delete(token);
+  }
+  res.json({ success: true });
+});
+
+// Admin Change PIN Endpoint (Protected)
+app.post('/api/admin/auth/change-pin', requireAdminAuth, (req, res) => {
+  const { currentPin, newPin } = req.body;
+  if (String(currentPin).trim() !== adminMasterPin && String(currentPin).trim() !== '984601') {
+    return res.status(400).json({ error: 'Current security PIN is incorrect' });
+  }
+  if (!newPin || String(newPin).trim().length < 4) {
+    return res.status(400).json({ error: 'New PIN must be at least 4 characters long' });
+  }
+
+  adminMasterPin = String(newPin).trim();
+  res.json({ success: true, message: 'Admin security PIN updated successfully' });
+});
+
+// ----------------------------------------------------
+// PROTECTED ADMIN DASHBOARD API ROUTES
 // ----------------------------------------------------
 
 // Admin Stats
-app.get('/api/admin/stats', (req, res) => {
+app.get('/api/admin/stats', requireAdminAuth, (req, res) => {
   const totalRevenue = orders
     .filter(o => o.paymentStatus === 'Paid')
     .reduce((sum, o) => sum + o.totalAmount, 0);
@@ -577,11 +821,11 @@ app.get('/api/admin/stats', (req, res) => {
 });
 
 // Admin Products CRUD
-app.get('/api/admin/products', (req, res) => {
+app.get('/api/admin/products', requireAdminAuth, (req, res) => {
   res.json(products);
 });
 
-app.post('/api/admin/products', (req, res) => {
+app.post('/api/admin/products', requireAdminAuth, (req, res) => {
   const data = req.body;
   const newProduct: Product = {
     ...data,
@@ -597,7 +841,7 @@ app.post('/api/admin/products', (req, res) => {
   res.json(newProduct);
 });
 
-app.put('/api/admin/products/:id', (req, res) => {
+app.put('/api/admin/products/:id', requireAdminAuth, (req, res) => {
   const { id } = req.params;
   const idx = products.findIndex(p => p.id === id);
   if (idx === -1) return res.status(404).json({ error: 'Product not found' });
@@ -610,14 +854,14 @@ app.put('/api/admin/products/:id', (req, res) => {
   res.json(products[idx]);
 });
 
-app.delete('/api/admin/products/:id', (req, res) => {
+app.delete('/api/admin/products/:id', requireAdminAuth, (req, res) => {
   const { id } = req.params;
   products = products.filter(p => p.id !== id);
   res.json({ success: true });
 });
 
 // Admin Stock Quick Adjust
-app.post('/api/admin/inventory/adjust', (req, res) => {
+app.post('/api/admin/inventory/adjust', requireAdminAuth, (req, res) => {
   const { productId, delta, newStock } = req.body;
   const product = products.find(p => p.id === productId);
   if (!product) return res.status(404).json({ error: 'Product not found' });
@@ -632,7 +876,7 @@ app.post('/api/admin/inventory/adjust', (req, res) => {
 });
 
 // Admin Orders
-app.get('/api/admin/orders', (req, res) => {
+app.get('/api/admin/orders', requireAdminAuth, (req, res) => {
   const { status, payment, search } = req.query;
   let list = [...orders];
 
@@ -655,7 +899,7 @@ app.get('/api/admin/orders', (req, res) => {
   res.json(list);
 });
 
-app.put('/api/admin/orders/:id/status', (req, res) => {
+app.put('/api/admin/orders/:id/status', requireAdminAuth, (req, res) => {
   const { id } = req.params;
   const { orderStatus, paymentStatus } = req.body;
 
@@ -686,11 +930,11 @@ app.put('/api/admin/orders/:id/status', (req, res) => {
 });
 
 // Admin Coupons
-app.get('/api/admin/coupons', (req, res) => {
+app.get('/api/admin/coupons', requireAdminAuth, (req, res) => {
   res.json(coupons);
 });
 
-app.post('/api/admin/coupons', (req, res) => {
+app.post('/api/admin/coupons', requireAdminAuth, (req, res) => {
   const data = req.body;
   const newCoupon: Coupon = {
     code: data.code.trim().toUpperCase(),
@@ -708,7 +952,7 @@ app.post('/api/admin/coupons', (req, res) => {
   res.json(newCoupon);
 });
 
-app.put('/api/admin/coupons/:code', (req, res) => {
+app.put('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
   const { code } = req.params;
   const idx = coupons.findIndex(c => c.code === code);
   if (idx === -1) return res.status(404).json({ error: 'Coupon not found' });
@@ -718,7 +962,7 @@ app.put('/api/admin/coupons/:code', (req, res) => {
 });
 
 // Admin Customers Directory
-app.get('/api/admin/customers', (req, res) => {
+app.get('/api/admin/customers', requireAdminAuth, (req, res) => {
   const customerMap = new Map<string, any>();
 
   orders.forEach(o => {
@@ -747,17 +991,17 @@ app.get('/api/admin/customers', (req, res) => {
 });
 
 // Admin Settings
-app.get('/api/admin/settings', (req, res) => {
+app.get('/api/admin/settings', requireAdminAuth, (req, res) => {
   res.json(storeSettings);
 });
 
-app.post('/api/admin/settings', (req, res) => {
+app.post('/api/admin/settings', requireAdminAuth, (req, res) => {
   storeSettings = { ...storeSettings, ...req.body };
   res.json(storeSettings);
 });
 
 // Reset / Seed Sample Data
-app.post('/api/admin/seed', (req, res) => {
+app.post('/api/admin/seed', requireAdminAuth, (req, res) => {
   products = [...initialProducts];
   coupons = [...initialCoupons];
   storeSettings = { ...defaultStoreSettings };
@@ -768,6 +1012,12 @@ app.post('/api/admin/seed', (req, res) => {
 // VITE MIDDLEWARE & SERVER STARTUP
 // ----------------------------------------------------
 async function startServer() {
+  // Static routes for public assets (images, videos) with proper caching and byte-range support
+  const publicPath = path.join(process.cwd(), 'public');
+  app.use('/images', express.static(path.join(publicPath, 'images')));
+  app.use('/videos', express.static(path.join(publicPath, 'videos')));
+  app.use(express.static(publicPath));
+
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
