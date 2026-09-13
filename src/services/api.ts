@@ -319,6 +319,24 @@ export const api = {
     return res.json();
   },
 
+  async updateAdminCoupon(code: string, coupon: Partial<Coupon>): Promise<Coupon> {
+    const res = await fetch(`/api/admin/coupons/${code}`, {
+      method: 'PUT',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(coupon)
+    });
+    if (!res.ok) throw new Error('Failed to update coupon');
+    return res.json();
+  },
+
+  async deleteAdminCoupon(code: string): Promise<void> {
+    const res = await fetch(`/api/admin/coupons/${code}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete coupon');
+  },
+
   async getAdminSettings(): Promise<StoreSettings> {
     const res = await fetch('/api/admin/settings', {
       headers: getAdminHeaders()

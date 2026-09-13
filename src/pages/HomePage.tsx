@@ -639,7 +639,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* 7. WELLNESS & CULINARY USE CASES */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 items-center">
           <div className="order-2 lg:order-1">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -716,28 +716,7 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 8. DISCOUNT CALLOUT BANNER */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-emerald-900 to-emerald-950 rounded-3xl p-6 sm:p-10 lg:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8 shadow-xl">
-          <div className="space-y-2 text-center md:text-left">
-            <span className="text-amber-300 font-mono text-xs uppercase tracking-widest font-bold">
-              Special Welcome Discount
-            </span>
-            <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold">
-              Enjoy 10% OFF on Your First Pure Batch
-            </h3>
-            <p className="text-emerald-200 text-xs sm:text-sm max-w-lg">
-              Use promo code <span className="font-mono font-bold text-white bg-emerald-800 px-2 py-0.5 rounded">PURE10</span> during checkout on orders above ₹350.
-            </p>
-          </div>
-          <Link
-            to="/shop"
-            className="w-full sm:w-auto text-center px-8 py-3.5 bg-amber-400 hover:bg-amber-300 text-stone-950 rounded-full font-bold text-sm transition-colors shrink-0 shadow-md"
-          >
-            Apply & Shop Now
-          </Link>
-        </div>
-      </section>
+
 
       {/* Video Customization Modal */}
       {isVideoModalOpen && (

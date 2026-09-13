@@ -954,11 +954,20 @@ app.post('/api/admin/coupons', requireAdminAuth, (req, res) => {
 
 app.put('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
   const { code } = req.params;
-  const idx = coupons.findIndex(c => c.code === code);
+  const idx = coupons.findIndex(c => c.code.toLowerCase() === code.toLowerCase());
   if (idx === -1) return res.status(404).json({ error: 'Coupon not found' });
 
   coupons[idx] = { ...coupons[idx], ...req.body };
   res.json(coupons[idx]);
+});
+
+app.delete('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
+  const { code } = req.params;
+  const idx = coupons.findIndex(c => c.code.toLowerCase() === code.toLowerCase());
+  if (idx === -1) return res.status(404).json({ error: 'Coupon not found' });
+
+  coupons.splice(idx, 1);
+  res.json({ success: true });
 });
 
 // Admin Customers Directory

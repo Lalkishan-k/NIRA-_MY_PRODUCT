@@ -32,7 +32,9 @@ import {
   LogOut,
   XCircle,
   Info,
-  Check
+  Check,
+  Download,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
@@ -82,12 +84,106 @@ export const AdminDashboard: React.FC = () => {
   const [paymentFilter, setPaymentFilter] = useState<string>('All');
   const [selectedOrderDetails, setSelectedOrderDetails] = useState<Order | null>(null);
 
+  // Master Orders & Export Hub States
+  const [isMasterExportModalOpen, setIsMasterExportModalOpen] = useState(false);
+  const [masterSelectedOrderIds, setMasterSelectedOrderIds] = useState<string[]>([]);
+  const [statusFilterCheckboxes, setStatusFilterCheckboxes] = useState({
+    Confirmed: true,
+    Processing: true,
+    Packed: true,
+    Shipped: true,
+    'Out for Delivery': true,
+    Delivered: true,
+    Cancelled: false,
+    'Pending Payment': true
+  });
+  const [masterSearch, setMasterSearch] = useState('');
+
+  const exportOrdersToCsv = (ordersToExport: Order[], filename = 'nira-customer-orders.csv') => {
+    if (!ordersToExport || ordersToExport.length === 0) {
+      addToast('No orders found to export', 'info');
+      return;
+    }
+    const headers = ['Order ID', 'Date', 'Customer Name', 'Phone', 'Email', 'Shipping Address', 'City', 'PinCode', 'Items', 'Total Amount (INR)', 'Payment Method', 'Payment Status', 'Order Status'];
+    const rows = ordersToExport.map(o => [
+      o.orderId,
+      new Date(o.createdAt).toLocaleString('en-IN'),
+      `"${(o.customerName || '').replace(/"/g, '""')}"`,
+      `"${(o.phone || '').replace(/"/g, '""')}"`,
+      `"${(o.email || '').replace(/"/g, '""')}"`,
+      `"${((o.shippingAddress?.house || '') + ' ' + (o.shippingAddress?.street || '')).replace(/"/g, '""')}"`,
+      `"${(o.shippingAddress?.city || '').replace(/"/g, '""')}"`,
+      `"${(o.shippingAddress?.pinCode || '').replace(/"/g, '""')}"`,
+      `"${o.items.map(i => `${i.name} (${i.size} x${i.quantity})`).join('; ')}"`.replace(/"/g, '""'),
+      o.totalAmount,
+      o.paymentMethod,
+      o.paymentStatus,
+      o.orderStatus
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast(`Successfully downloaded ${ordersToExport.length} orders as Excel/CSV!`, 'success');
+  };
+
+  const handleExportSelectedOrders = () => {
+    const selected = orders.filter(o => masterSelectedOrderIds.includes(o.orderId));
+    if (selected.length === 0) {
+      addToast('Please select at least one order using the checkboxes', 'error');
+      return;
+    }
+    exportOrdersToCsv(selected, `nira-selected-orders-${Date.now()}.csv`);
+  };
+
+  const handleExportByStatus = (statusName: string) => {
+    const matching = orders.filter(o => o.orderStatus === statusName);
+    if (matching.length === 0) {
+      addToast(`No orders found with status "${statusName}"`, 'info');
+      return;
+    }
+    exportOrdersToCsv(matching, `nira-orders-${statusName.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.csv`);
+  };
+
+  const handleExportSeparatedByCheckedStatuses = () => {
+    const activeStatuses = Object.entries(statusFilterCheckboxes)
+      .filter(([_, isChecked]) => isChecked)
+      .map(([status]) => status);
+
+    if (activeStatuses.length === 0) {
+      addToast('Please check at least one status category', 'error');
+      return;
+    }
+
+    let count = 0;
+    activeStatuses.forEach(st => {
+      const matching = orders.filter(o => o.orderStatus === st);
+      if (matching.length > 0) {
+        exportOrdersToCsv(matching, `nira-orders-${st.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}.csv`);
+        count += matching.length;
+      }
+    });
+
+    if (count === 0) {
+      addToast('No orders match the checked status categories', 'info');
+    } else {
+      addToast(`Successfully generated separate Excel exports for ${activeStatuses.length} status categories!`, 'success');
+    }
+  };
+
   // Customers
   const [customers, setCustomers] = useState<any[]>([]);
 
   // Coupons
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [editingCouponCode, setEditingCouponCode] = useState<string | null>(null);
   const [newCouponCode, setNewCouponCode] = useState('');
   const [newCouponType, setNewCouponType] = useState<'percentage' | 'flat'>('percentage');
   const [newCouponValue, setNewCouponValue] = useState(10);
@@ -405,26 +501,69 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Handle Create Coupon
-  const handleCreateCoupon = async (e: React.FormEvent) => {
+  // Handle Coupon CRUD
+  const handleOpenCreateCoupon = () => {
+    setEditingCouponCode(null);
+    setNewCouponCode('');
+    setNewCouponType('percentage');
+    setNewCouponValue(10);
+    setNewCouponMin(499);
+    setNewCouponMax(200);
+    setNewCouponDesc('');
+    setIsCouponModalOpen(true);
+  };
+
+  const handleOpenEditCoupon = (c: Coupon) => {
+    setEditingCouponCode(c.code);
+    setNewCouponCode(c.code);
+    setNewCouponType(c.discountType);
+    setNewCouponValue(c.discountValue);
+    setNewCouponMin(c.minimumOrderAmount);
+    setNewCouponMax(c.maximumDiscount || 200);
+    setNewCouponDesc(c.description || '');
+    setIsCouponModalOpen(true);
+  };
+
+  const handleSaveCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCouponCode.trim()) return;
     try {
-      await api.createAdminCoupon({
+      const payload = {
         code: newCouponCode.trim().toUpperCase(),
         discountType: newCouponType,
         discountValue: Number(newCouponValue),
         minimumOrderAmount: Number(newCouponMin),
         maximumDiscount: newCouponType === 'percentage' ? Number(newCouponMax) : undefined,
         description: newCouponDesc || `${newCouponValue}${newCouponType === 'percentage' ? '%' : '₹'} discount`,
-        active: true
-      });
-      addToast(`Coupon ${newCouponCode} created!`, 'success');
+      };
+
+      if (editingCouponCode) {
+        await api.updateAdminCoupon(editingCouponCode, payload);
+        addToast(`Coupon ${newCouponCode} updated successfully!`, 'success');
+      } else {
+        await api.createAdminCoupon({
+          ...payload,
+          active: true
+        });
+        addToast(`Coupon ${newCouponCode} created successfully!`, 'success');
+      }
       setIsCouponModalOpen(false);
+      setEditingCouponCode(null);
       setNewCouponCode('');
       loadAdminData();
     } catch (err: any) {
-      addToast(err.message || 'Failed to create coupon', 'error');
+      addToast(err.message || 'Failed to save coupon', 'error');
+    }
+  };
+
+  const handleDeleteCoupon = async (code: string) => {
+    if (!window.confirm(`Are you sure you want to delete coupon "${code}"?`)) return;
+    try {
+      await api.deleteAdminCoupon(code);
+      addToast(`Coupon ${code} deleted successfully`, 'success');
+      loadAdminData();
+    } catch (err: any) {
+      addToast(err.message || 'Failed to delete coupon', 'error');
     }
   };
 
@@ -822,15 +961,28 @@ export const AdminDashboard: React.FC = () => {
         {/* ==================================================== */}
         {activeTab === 'orders' && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
               <div>
                 <h2 className="font-serif text-2xl font-bold text-stone-900">Customer Orders</h2>
                 <p className="text-xs text-stone-500">Track shipments, verify payments, and update transit status.</p>
               </div>
 
-              {/* Filters */}
-              <div className="flex flex-wrap items-center gap-3 text-xs">
-                <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-xl border border-stone-200">
+              {/* Master Hub & Excel Export Button */}
+              <div className="flex flex-wrap items-center gap-3">
+                <button
+                  onClick={() => setIsMasterExportModalOpen(true)}
+                  className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-amber-300 rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition-all border border-amber-400/30"
+                >
+                  <FileSpreadsheet className="w-4 h-4 text-amber-400" />
+                  <span>Master Orders & Excel Hub ({orders.length})</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center justify-between gap-3 text-xs bg-white p-4 rounded-2xl border border-stone-200">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-200">
                   <span className="text-stone-500">Status:</span>
                   <select
                     value={orderFilter}
@@ -1013,11 +1165,11 @@ export const AdminDashboard: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-serif text-2xl font-bold text-stone-900">Promotions & Coupons</h2>
-                <p className="text-xs text-stone-500">Create promotional discount codes for marketing campaigns.</p>
+                <p className="text-xs text-stone-500">Create, edit, remove, and manage promotional discount codes.</p>
               </div>
 
               <button
-                onClick={() => setIsCouponModalOpen(true)}
+                onClick={handleOpenCreateCoupon}
                 className="px-5 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition-colors shadow-sm"
               >
                 <Plus className="w-4 h-4" />
@@ -1027,41 +1179,61 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {coupons.map(c => (
-                <div key={c.code} className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-lg font-bold text-emerald-950 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-                      {c.code}
-                    </span>
-                    <button
-                      onClick={async () => {
-                        await api.toggleAdminCoupon(c.code, !c.active);
-                        loadAdminData();
-                      }}
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        c.active ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-200 text-stone-600'
-                      }`}
-                    >
-                      {c.active ? 'ACTIVE' : 'PAUSED'}
-                    </button>
+                <div key={c.code} className="bg-white p-6 rounded-3xl border border-stone-200 shadow-xs space-y-4 flex flex-col justify-between">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-lg font-bold text-emerald-950 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
+                        {c.code}
+                      </span>
+                      <button
+                        onClick={async () => {
+                          await api.toggleAdminCoupon(c.code, !c.active);
+                          loadAdminData();
+                        }}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full transition-colors ${
+                          c.active ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                        }`}
+                      >
+                        {c.active ? 'ACTIVE' : 'PAUSED'}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-stone-600 leading-relaxed font-medium">{c.description}</p>
+
+                    <div className="divide-y divide-stone-100 text-[11px] text-stone-500 pt-2">
+                      <div className="py-1.5 flex justify-between">
+                        <span>Discount:</span>
+                        <span className="font-bold text-stone-900">
+                          {c.discountValue}{c.discountType === 'percentage' ? '%' : '₹'}
+                        </span>
+                      </div>
+                      <div className="py-1.5 flex justify-between">
+                        <span>Min Order:</span>
+                        <span className="font-semibold text-stone-900">₹{c.minimumOrderAmount}</span>
+                      </div>
+                      <div className="py-1.5 flex justify-between">
+                        <span>Redeemed:</span>
+                        <span className="font-semibold text-stone-900">{c.usedCount} times</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <p className="text-xs text-stone-600 leading-relaxed font-medium">{c.description}</p>
-
-                  <div className="divide-y divide-stone-100 text-[11px] text-stone-500 pt-2">
-                    <div className="py-1.5 flex justify-between">
-                      <span>Discount:</span>
-                      <span className="font-bold text-stone-900">
-                        {c.discountValue}{c.discountType === 'percentage' ? '%' : '₹'}
-                      </span>
-                    </div>
-                    <div className="py-1.5 flex justify-between">
-                      <span>Min Order:</span>
-                      <span className="font-semibold text-stone-900">₹{c.minimumOrderAmount}</span>
-                    </div>
-                    <div className="py-1.5 flex justify-between">
-                      <span>Redeemed:</span>
-                      <span className="font-semibold text-stone-900">{c.usedCount} times</span>
-                    </div>
+                  {/* Edit & Remove Action Buttons */}
+                  <div className="flex items-center gap-2 pt-3 border-t border-stone-100">
+                    <button
+                      onClick={() => handleOpenEditCoupon(c)}
+                      className="flex-1 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5 text-stone-600" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCoupon(c.code)}
+                      className="py-2 px-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+                      title="Delete Coupon"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -1507,13 +1679,15 @@ export const AdminDashboard: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: CREATE COUPON */}
+      {/* MODAL: CREATE OR EDIT COUPON */}
       {isCouponModalOpen && (
         <div className="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-stone-200">
-            <h3 className="font-serif text-lg font-bold text-stone-900">Create Promotional Coupon</h3>
+            <h3 className="font-serif text-lg font-bold text-stone-900">
+              {editingCouponCode ? `Edit Coupon (${editingCouponCode})` : 'Create Promotional Coupon'}
+            </h3>
 
-            <form onSubmit={handleCreateCoupon} className="space-y-3">
+            <form onSubmit={handleSaveCoupon} className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-stone-700 mb-1">Coupon Code *</label>
                 <input
@@ -1522,8 +1696,10 @@ export const AdminDashboard: React.FC = () => {
                   value={newCouponCode}
                   onChange={e => setNewCouponCode(e.target.value.toUpperCase())}
                   required
-                  className="w-full text-xs p-2.5 rounded-xl border border-stone-300 font-mono uppercase"
+                  disabled={Boolean(editingCouponCode)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-stone-300 font-mono uppercase disabled:bg-stone-100 disabled:text-stone-500"
                 />
+                {editingCouponCode && <p className="text-[10px] text-stone-400 mt-1">Coupon code identifier cannot be changed once created.</p>}
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -1594,9 +1770,9 @@ export const AdminDashboard: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-800 text-white text-xs font-semibold rounded-xl"
+                  className="px-5 py-2 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-semibold rounded-xl transition-colors"
                 >
-                  Create Coupon
+                  {editingCouponCode ? 'Update Coupon' : 'Create Coupon'}
                 </button>
               </div>
             </form>
@@ -1674,6 +1850,255 @@ export const AdminDashboard: React.FC = () => {
                 className="px-5 py-2 bg-stone-100 text-stone-700 text-xs font-semibold rounded-xl"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: MASTER ORDERS & EXCEL EXPORT HUB */}
+      {isMasterExportModalOpen && (
+        <div className="fixed inset-0 z-50 bg-stone-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-5xl w-full p-6 sm:p-8 space-y-6 shadow-2xl border border-stone-200 max-h-[92vh] overflow-y-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+              <div>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-stone-900 flex items-center gap-2">
+                  <FileSpreadsheet className="w-6 h-6 text-emerald-800" />
+                  Master Orders & Excel Export Hub
+                </h3>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Single comprehensive window to view all customer orders, select orders via checkboxes, sort/filter by status, and download separate Excel (CSV) reports.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsMasterExportModalOpen(false)}
+                className="text-stone-400 hover:text-stone-700 p-2 rounded-xl bg-stone-100 text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Top Action Bar & Filters */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-stone-50 p-4 rounded-2xl border border-stone-200">
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">Search Master Orders</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={masterSearch}
+                    onChange={e => setMasterSearch(e.target.value)}
+                    placeholder="Search name, phone, order ID, city..."
+                    className="w-full text-xs py-2 px-3 pl-8 rounded-xl bg-white border border-stone-300 text-stone-900 focus:outline-none focus:ring-2 focus:ring-emerald-700"
+                  />
+                  <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">Quick Excel Downloads</label>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => exportOrdersToCsv(orders, `nira-all-orders-master-${Date.now()}.csv`)}
+                    className="flex-1 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download All ({orders.length})</span>
+                  </button>
+                  <button
+                    onClick={handleExportSelectedOrders}
+                    disabled={masterSelectedOrderIds.length === 0}
+                    className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Selected ({masterSelectedOrderIds.length})</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">Separated Status Batch Export</label>
+                <button
+                  onClick={handleExportSeparatedByCheckedStatuses}
+                  className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-amber-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all border border-amber-400/30"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Download Checked Statuses Separately</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Status Category Checkboxes for Separation */}
+            <div className="space-y-2">
+              <span className="block text-xs font-bold text-stone-800">
+                Filter & Separate by Delivery Status Checkboxes:
+              </span>
+              <div className="flex flex-wrap items-center gap-2.5 bg-stone-100 p-3 rounded-2xl text-xs">
+                {Object.keys(statusFilterCheckboxes).map(statusKey => {
+                  const isChecked = (statusFilterCheckboxes as any)[statusKey];
+                  const count = orders.filter(o => o.orderStatus === statusKey).length;
+                  return (
+                    <label
+                      key={statusKey}
+                      className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer transition-all ${
+                        isChecked
+                          ? 'bg-white border-emerald-700 text-stone-900 shadow-xs font-semibold'
+                          : 'bg-stone-50 border-stone-200 text-stone-400'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={e =>
+                          setStatusFilterCheckboxes({
+                            ...statusFilterCheckboxes,
+                            [statusKey]: e.target.checked
+                          })
+                        }
+                        className="rounded border-stone-300 text-emerald-800 focus:ring-emerald-700"
+                      />
+                      <span>{statusKey}</span>
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-full bg-stone-200 text-stone-700">
+                        {count}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Master Orders Table with Row Checkboxes */}
+            <div className="bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs">
+              <div className="p-3 bg-stone-50 border-b border-stone-200 flex items-center justify-between text-xs text-stone-600">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      if (masterSelectedOrderIds.length === orders.length) {
+                        setMasterSelectedOrderIds([]);
+                      } else {
+                        setMasterSelectedOrderIds(orders.map(o => o.orderId));
+                      }
+                    }}
+                    className="font-bold text-emerald-800 hover:underline"
+                  >
+                    {masterSelectedOrderIds.length === orders.length ? 'Deselect All' : 'Select All Orders'}
+                  </button>
+                  <span>•</span>
+                  <span>{masterSelectedOrderIds.length} of {orders.length} selected</span>
+                </div>
+                <div className="text-[11px] text-stone-500">
+                  Showing all customer orders in a unified master ledger
+                </div>
+              </div>
+
+              <div className="max-h-[380px] overflow-y-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-stone-50/80 sticky top-0 border-b border-stone-200 text-stone-500 uppercase tracking-wider font-semibold z-10">
+                    <tr>
+                      <th className="p-3.5 w-10 text-center">
+                        <span className="sr-only">Select</span>
+                      </th>
+                      <th className="p-3.5">Order ID & Date</th>
+                      <th className="p-3.5">Customer Name & Contact</th>
+                      <th className="p-3.5">Destination (City, PIN)</th>
+                      <th className="p-3.5">Items</th>
+                      <th className="p-3.5">Total (₹)</th>
+                      <th className="p-3.5">Payment</th>
+                      <th className="p-3.5">Order Status</th>
+                      <th className="p-3.5 text-right">Separate Export</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-100 text-stone-700">
+                    {orders
+                      .filter(o => {
+                        if (masterSearch.trim()) {
+                          const q = masterSearch.toLowerCase();
+                          const matchesId = o.orderId.toLowerCase().includes(q);
+                          const matchesName = (o.customerName || '').toLowerCase().includes(q);
+                          const matchesPhone = (o.phone || '').includes(q);
+                          const matchesCity = (o.shippingAddress?.city || '').toLowerCase().includes(q);
+                          if (!matchesId && !matchesName && !matchesPhone && !matchesCity) return false;
+                        }
+                        if (!(statusFilterCheckboxes as any)[o.orderStatus]) {
+                          return false;
+                        }
+                        return true;
+                      })
+                      .map(o => {
+                        const isSelected = masterSelectedOrderIds.includes(o.orderId);
+                        return (
+                          <tr key={o.orderId} className={`hover:bg-stone-50/80 ${isSelected ? 'bg-amber-50/60' : ''}`}>
+                            <td className="p-3.5 text-center">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={e => {
+                                  if (e.target.checked) {
+                                    setMasterSelectedOrderIds([...masterSelectedOrderIds, o.orderId]);
+                                  } else {
+                                    setMasterSelectedOrderIds(masterSelectedOrderIds.filter(id => id !== o.orderId));
+                                  }
+                                }}
+                                className="rounded border-stone-300 text-emerald-800 focus:ring-emerald-700"
+                              />
+                            </td>
+                            <td className="p-3.5 font-mono">
+                              <span className="font-bold text-stone-900">{o.orderId}</span>
+                              <span className="block text-[10px] text-stone-400">
+                                {new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <p className="font-bold text-stone-900">{o.customerName}</p>
+                              <p className="text-[10px] text-stone-400 font-mono">{o.phone || 'N/A'}</p>
+                            </td>
+                            <td className="p-3.5">
+                              <p className="text-stone-800 font-medium">{o.shippingAddress?.city || 'Kerala'}</p>
+                              <p className="text-[10px] text-stone-400">{o.shippingAddress?.pinCode || ''}</p>
+                            </td>
+                            <td className="p-3.5">
+                              <span className="font-medium text-stone-800">{o.items.length} items</span>
+                            </td>
+                            <td className="p-3.5 font-bold text-stone-900">₹{o.totalAmount}</td>
+                            <td className="p-3.5">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                o.paymentStatus === 'Paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'
+                              }`}>
+                                {o.paymentStatus}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <span className="px-2 py-1 rounded-lg text-[10px] font-bold bg-stone-100 text-stone-800 border border-stone-200">
+                                {o.orderStatus}
+                              </span>
+                            </td>
+                            <td className="p-3.5 text-right">
+                              <button
+                                onClick={() => handleExportByStatus(o.orderStatus)}
+                                className="px-2.5 py-1 bg-stone-100 hover:bg-stone-200 text-stone-700 text-[10px] font-semibold rounded-lg"
+                                title="Download all orders matching this status"
+                              >
+                                Export {o.orderStatus}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Footer Modal Actions */}
+            <div className="flex items-center justify-between pt-2 border-t border-stone-100">
+              <span className="text-xs text-stone-500 font-medium">
+                💡 Tip: Check delivery statuses above and click <b>"Download Checked Statuses Separately"</b> to get categorized Excel files instantly.
+              </span>
+              <button
+                onClick={() => setIsMasterExportModalOpen(false)}
+                className="px-6 py-2.5 bg-stone-900 text-white rounded-xl text-xs font-bold hover:bg-stone-800 transition-all"
+              >
+                Close Hub
               </button>
             </div>
           </div>
