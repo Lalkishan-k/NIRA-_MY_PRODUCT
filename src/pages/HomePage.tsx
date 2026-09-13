@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -14,7 +14,9 @@ import {
   Star,
   Play,
   Pause,
-  RotateCcw
+  RotateCcw,
+  Film,
+  X
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
@@ -34,7 +36,14 @@ import {
 export const HomePage: React.FC = () => {
   const { products, isLoadingProducts, settings } = useStore();
   const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const [customVideoSrc, setCustomVideoSrc] = useState<string>(unfilteredVideo);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [tempVideoUrl, setTempVideoUrl] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    setCustomVideoSrc(unfilteredVideo);
+  }, []);
 
   const toggleVideo = () => {
     if (videoRef.current) {
@@ -87,6 +96,7 @@ export const HomePage: React.FC = () => {
               }}
             >
               <source src={productRotationVideo} type="video/mp4" />
+              <source src="/videos/video_260912_174240.mp4" type="video/mp4" />
               <source src="/videos/nira-product-rotation.mp4" type="video/mp4" />
               <source src="/videos/create-a-smooth-realistic-product-rotation (4).mp4" type="video/mp4" />
               <source src="/videos/create-a-smooth-realistic-product-rotation (3).mp4" type="video/mp4" />
@@ -311,18 +321,32 @@ export const HomePage: React.FC = () => {
                 {/* Video Player Frame */}
                 <div className="relative w-full rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-stone-950/90 group">
                   <video
+                    ref={videoRef}
                     id="unfiltered-process-video"
                     autoPlay
                     loop
                     muted
                     playsInline
                     className="w-full aspect-square sm:aspect-[4/3] lg:aspect-square object-cover"
+                    key={customVideoSrc}
                   >
-                    <source src="/images/video_260912_174240.mp4" type="video/mp4" />
-                    <source src="/videos/video_260912_174240.mp4" type="video/mp4" />
-                    <source src={unfilteredVideo} type="video/mp4" />
+                    <source src={customVideoSrc} type="video/mp4" />
                     Your browser does not support HTML5 video.
                   </video>
+
+                  {/* Change Video Button on Top-Right */}
+                  <div className="absolute top-3 right-3 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button
+                      onClick={() => {
+                        setTempVideoUrl(customVideoSrc);
+                        setIsVideoModalOpen(true);
+                      }}
+                      className="bg-stone-950/90 hover:bg-amber-600 text-amber-300 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-xl border border-amber-400/40 backdrop-blur-md transition-all"
+                    >
+                      <Film className="w-3.5 h-3.5" />
+                      <span>Change Video</span>
+                    </button>
+                  </div>
 
                   {/* Corner indicator badges (non-blocking, positioned at base edges) */}
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
@@ -714,6 +738,91 @@ export const HomePage: React.FC = () => {
           </Link>
         </div>
       </section>
+
+      {/* Video Customization Modal */}
+      {isVideoModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="bg-stone-900 border border-stone-800 rounded-2xl w-full max-w-lg p-6 shadow-2xl text-stone-100 relative">
+            <button
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-4 right-4 text-stone-400 hover:text-white p-1 rounded-lg hover:bg-stone-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <Film className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-serif font-bold text-white">Change Spotlight Video</h3>
+                <p className="text-xs text-stone-400">Update the video shown in the "Why Without Filtration" section</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Video URL (Direct MP4 link or asset path)
+                </label>
+                <input
+                  type="text"
+                  value={tempVideoUrl}
+                  onChange={(e) => setTempVideoUrl(e.target.value)}
+                  placeholder="/images/your-video.mp4 or https://..."
+                  className="w-full bg-stone-950 border border-stone-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-stone-500 focus:outline-none focus:border-amber-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-stone-300 mb-1.5">
+                  Or Upload Video File (.mp4)
+                </label>
+                <input
+                  type="file"
+                  accept="video/mp4,video/webm"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = URL.createObjectURL(file);
+                      setTempVideoUrl(url);
+                    }
+                  }}
+                  className="w-full text-xs text-stone-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-amber-500/10 file:text-amber-400 hover:file:bg-amber-500/20 file:cursor-pointer cursor-pointer border border-stone-800 rounded-xl bg-stone-950 p-2"
+                />
+              </div>
+
+              <div className="bg-stone-950/60 p-3 rounded-xl border border-stone-800/80 text-xs text-stone-400 space-y-1">
+                <p className="font-medium text-stone-300">💡 How to change it permanently in code:</p>
+                <p>1. Place your <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">.mp4</code> file in <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">public/videos/</code> or <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">public/images/</code>.</p>
+                <p>2. Update <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">src/assets/images/index.ts</code> or update the <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">&lt;source&gt;</code> path in <code className="text-amber-300 bg-stone-900 px-1 py-0.5 rounded">src/pages/HomePage.tsx</code>.</p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setIsVideoModalOpen(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-medium text-stone-300 hover:text-white hover:bg-stone-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (tempVideoUrl.trim()) {
+                      setCustomVideoSrc(tempVideoUrl.trim());
+                      setIsVideoModalOpen(false);
+                    }
+                  }}
+                  className="px-5 py-2 rounded-xl text-xs font-medium bg-amber-500 hover:bg-amber-600 text-stone-950 font-bold shadow-lg shadow-amber-500/20 transition-all"
+                >
+                  Apply Video
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

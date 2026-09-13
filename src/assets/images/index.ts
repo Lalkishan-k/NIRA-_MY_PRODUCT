@@ -13,6 +13,6 @@ export const childPureOil = '/images/nira_child_oil_master.png';
 export const pureOilBottle = '/images/nira_500ml_bottle_showcase.jpg';
 export const virginOilBottle = '/images/nira_500ml_bottle_showcase.jpg';
 export const productRotationVideo = '/videos/nira-product-rotation.mp4';
-export const unfilteredVideo = '/images/video_260912_174240.mp4';
+export const unfilteredVideo = '/videos/video_260912_174240.mp4';
 
 
