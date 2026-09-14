@@ -6,7 +6,7 @@ import { initialProducts, initialCoupons, defaultStoreSettings } from './src/dat
 import { Product, Order, Coupon, Review, StoreSettings, TrackingStep } from './src/types.ts';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json());
 

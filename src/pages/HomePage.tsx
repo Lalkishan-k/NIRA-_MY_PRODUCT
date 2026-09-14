@@ -96,7 +96,6 @@ export const HomePage: React.FC = () => {
               }}
             >
               <source src={productRotationVideo} type="video/mp4" />
-              <source src="/videos/video_260912_174240.mp4" type="video/mp4" />
               <source src="/videos/nira-product-rotation.mp4" type="video/mp4" />
               <source src="/videos/create-a-smooth-realistic-product-rotation (4).mp4" type="video/mp4" />
               <source src="/videos/create-a-smooth-realistic-product-rotation (3).mp4" type="video/mp4" />
