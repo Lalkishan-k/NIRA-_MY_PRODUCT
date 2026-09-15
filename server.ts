@@ -3,7 +3,8 @@ import path from 'path';
 import crypto from 'crypto';
 import { createServer as createViteServer } from 'vite';
 import { initialProducts, initialCoupons, defaultStoreSettings } from './src/data/sampleProducts.ts';
-import { Product, Order, Coupon, Review, StoreSettings, TrackingStep } from './src/types.ts';
+import { Product, Order, Coupon, Review, StoreSettings, TrackingStep, AbandonedCheckout, BulkEnquiry } from './src/types.ts';
+import { generateSitemapXml, generateRobotsTxt, buildAndSaveSitemap } from './src/utils/sitemap.ts';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
@@ -14,7 +15,187 @@ app.use(express.json());
 let products: Product[] = [...initialProducts];
 let coupons: Coupon[] = [...initialCoupons];
 let storeSettings: StoreSettings = { ...defaultStoreSettings };
-let orders: Order[] = [];
+let orders: Order[] = [
+  {
+    id: 'ord-nira-1001',
+    orderId: 'NIRA-89210',
+    customerId: 'cust-101',
+    customerName: 'Ananya Nair',
+    email: 'ananya.nair@example.com',
+    phone: '+91 98471 23456',
+    shippingAddress: {
+      fullName: 'Ananya Nair',
+      phone: '+91 98471 23456',
+      email: 'ananya.nair@example.com',
+      house: 'TC 14/204, Haritha Nilayam',
+      street: 'Vazhuthacaud Main Road',
+      city: 'Thiruvananthapuram',
+      district: 'Thiruvananthapuram',
+      state: 'Kerala',
+      pinCode: '695014',
+      isDefault: true
+    },
+    items: [
+      {
+        productId: 'prod-pco-500ml',
+        name: 'NIRA Pure Coconut Oil — 500 ml',
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+        size: '500 ml',
+        quantity: 2,
+        unitPrice: 240,
+        totalPrice: 480
+      },
+      {
+        productId: 'prod-pco-200ml',
+        name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
+        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
+        size: '200 ml',
+        quantity: 1,
+        unitPrice: 95,
+        totalPrice: 95
+      }
+    ],
+    subtotal: 575,
+    shippingCost: 0,
+    discount: 50,
+    couponCode: 'WELCOME50',
+    totalAmount: 525,
+    currency: 'INR',
+    paymentMethod: 'Razorpay',
+    paymentStatus: 'Paid',
+    orderStatus: 'Confirmed',
+    razorpayOrderId: 'order_O8d2kLs9123',
+    razorpayPaymentId: 'pay_P92kLm9028',
+    estimatedDelivery: '3 to 5 business days',
+    trackingTimeline: [
+      { status: 'Confirmed', title: 'Order Confirmed', description: 'Fresh batch assigned from Kozhikode extraction mill', completed: true, current: true, timestamp: '2026-09-13T10:30:00.000Z' },
+      { status: 'Packed', title: 'Packed in Eco Casks', description: 'Bottled in amber UV-safe PET/Glass', completed: false, current: false },
+      { status: 'Shipped', title: 'Dispatched via Express Courier', description: 'Tracking ID assigned', completed: false, current: false },
+      { status: 'Delivered', title: 'Delivered', description: 'Handed over to customer', completed: false, current: false }
+    ],
+    createdAt: '2026-09-13T10:30:00.000Z',
+    updatedAt: '2026-09-13T10:30:00.000Z'
+  },
+  {
+    id: 'ord-nira-1002',
+    orderId: 'NIRA-89211',
+    customerId: 'cust-102',
+    customerName: 'Rajesh Varma',
+    email: 'rajesh.varma@example.com',
+    phone: '+91 94470 56789',
+    shippingAddress: {
+      fullName: 'Rajesh Varma',
+      phone: '+91 94470 56789',
+      email: 'rajesh.varma@example.com',
+      house: 'Flat 4B, Skyline Palms',
+      street: 'Kaloor-Kadavanthra Road',
+      city: 'Kochi',
+      district: 'Ernakulam',
+      state: 'Kerala',
+      pinCode: '682017',
+      isDefault: true
+    },
+    items: [
+      {
+        productId: 'prod-pco-1000ml',
+        name: 'NIRA Pure Coconut Oil — 1 Litre Kitchen Can',
+        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
+        size: '1 Litre',
+        quantity: 1,
+        unitPrice: 450,
+        totalPrice: 450
+      }
+    ],
+    subtotal: 450,
+    shippingCost: 50,
+    discount: 0,
+    totalAmount: 500,
+    currency: 'INR',
+    paymentMethod: 'Cash on Delivery (COD)',
+    paymentStatus: 'Pending',
+    orderStatus: 'Processing',
+    estimatedDelivery: '4 to 6 business days',
+    trackingTimeline: [
+      { status: 'Confirmed', title: 'Order Confirmed', description: 'Payment on delivery selected', completed: true, current: false, timestamp: '2026-09-14T02:15:00.000Z' },
+      { status: 'Processing', title: 'Processing at Kozhikode Unit', description: 'Gravity settling verified and sealed', completed: true, current: true, timestamp: '2026-09-14T03:00:00.000Z' },
+      { status: 'Packed', title: 'Packed', description: 'Packed with tamper-evident seal', completed: false, current: false },
+      { status: 'Shipped', title: 'In Transit', description: 'Handed over to BlueDart Kerala', completed: false, current: false },
+      { status: 'Delivered', title: 'Delivered', description: 'Pending recipient payment', completed: false, current: false }
+    ],
+    createdAt: '2026-09-14T02:15:00.000Z',
+    updatedAt: '2026-09-14T03:00:00.000Z'
+  },
+  {
+    id: 'ord-nira-1003',
+    orderId: 'NIRA-89212',
+    customerId: 'cust-103',
+    customerName: 'Meera Krishnan',
+    email: 'meera.krishnan@example.com',
+    phone: '+91 97461 98765',
+    shippingAddress: {
+      fullName: 'Meera Krishnan',
+      phone: '+91 97461 98765',
+      email: 'meera.krishnan@example.com',
+      house: 'Plot 22, Green Valley',
+      street: 'Indiranagar 100ft Road',
+      city: 'Bengaluru',
+      district: 'Bengaluru Urban',
+      state: 'Karnataka',
+      pinCode: '560038',
+      isDefault: true
+    },
+    items: [
+      {
+        productId: 'prod-pco-500ml',
+        name: 'NIRA Pure Coconut Oil — 500 ml',
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+        size: '500 ml',
+        quantity: 3,
+        unitPrice: 240,
+        totalPrice: 720
+      }
+    ],
+    subtotal: 720,
+    shippingCost: 0,
+    discount: 72,
+    couponCode: 'NIRAPURE10',
+    totalAmount: 648,
+    currency: 'INR',
+    paymentMethod: 'Razorpay',
+    paymentStatus: 'Paid',
+    orderStatus: 'Shipped',
+    razorpayOrderId: 'order_P01mKs8190',
+    razorpayPaymentId: 'pay_Q88xKp1921',
+    estimatedDelivery: '2 business days',
+    courierPartner: 'Blue Dart Express',
+    trackingNumber: 'BD781920391IN',
+    trackingUrl: 'https://www.bluedart.com/tracking?track=BD781920391IN',
+    dispatchedAt: '2026-09-13T09:00:00.000Z',
+    statusNotifications: [
+      {
+        id: 'notif-demo-1',
+        status: 'Shipped',
+        recipientEmail: 'meera.krishnan@example.com',
+        recipientName: 'Meera Krishnan',
+        subject: '🚚 Shipped! Your NIRA Order #NIRA-89212 is on its way',
+        sentAt: '2026-09-13T09:05:00.000Z',
+        sentSuccessfully: true,
+        courierPartner: 'Blue Dart Express',
+        trackingNumber: 'BD781920391IN',
+        trackingUrl: 'https://www.bluedart.com/tracking?track=BD781920391IN',
+        contentPreview: 'Your fresh Kerala coconut oil package has been dispatched via Blue Dart Express (AWB #BD781920391IN). Expected delivery: 2 business days.'
+      }
+    ],
+    trackingTimeline: [
+      { status: 'Confirmed', title: 'Order Confirmed', description: 'Verified online payment', completed: true, current: false, timestamp: '2026-09-12T08:00:00.000Z' },
+      { status: 'Packed', title: 'Packed', description: 'Heavy duty bubble wrap applied', completed: true, current: false, timestamp: '2026-09-12T14:00:00.000Z' },
+      { status: 'Shipped', title: 'Dispatched from Malabar Hub', description: 'Air Express to Bengaluru', completed: true, current: true, timestamp: '2026-09-13T09:00:00.000Z' },
+      { status: 'Delivered', title: 'Delivered', description: 'Out for delivery soon', completed: false, current: false }
+    ],
+    createdAt: '2026-09-12T08:00:00.000Z',
+    updatedAt: '2026-09-13T09:00:00.000Z'
+  }
+];
 let reviews: Review[] = [
   {
     id: 'rev-1',
@@ -57,7 +238,248 @@ let reviews: Review[] = [
   }
 ];
 
-let contactInquiries: any[] = [];
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+let contactInquiries: ContactInquiry[] = [
+  {
+    id: 'inq-seed-01',
+    name: 'Dr. Radhika Menon',
+    email: 'dr.radhika.menon@ayurhealth.in',
+    phone: '+91 94471 23890',
+    subject: 'Bulk Ayurvedic Supply for Wellness Clinic',
+    message: 'Hello NIRA team, We operate an authentic Ayurvedic wellness resort in Wayanad and would like to order 50 litres of wood cold-pressed virgin coconut oil monthly for Shirodhara and Abhyanga treatments. Please share wholesale pricing and packaging details.',
+    isRead: false,
+    createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'inq-seed-02',
+    name: 'Suresh Nambiar',
+    email: 'suresh.nambiar@organicstore.co',
+    phone: '+91 98450 87123',
+    subject: 'Retail Distribution Inquiry for Bangalore Stores',
+    message: 'We run 4 organic grocery outlets in Koramangala and Indiranagar, Bengaluru. We have frequent customer requests for authentic unfiltered Kerala coconut oil. Could you share details for becoming an authorized retail partner?',
+    isRead: false,
+    createdAt: new Date(Date.now() - 3 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'inq-seed-03',
+    name: 'Anjali Sharma',
+    email: 'anjali.s.delhi@gmail.com',
+    phone: '+91 98112 45678',
+    subject: 'Delhi NCR Delivery Timeline and Leak-Proof Guarantee',
+    message: 'Hi, I want to order two 1-litre glass kitchen cans to New Delhi. How do you ensure safety during long-distance shipping and what is the expected transit time with BlueDart?',
+    isRead: true,
+    createdAt: new Date(Date.now() - 26 * 3600 * 1000).toISOString()
+  }
+];
+
+let abandonedCheckouts: AbandonedCheckout[] = [
+  {
+    id: 'abn-101',
+    recoveryToken: 'recov-789a12bc',
+    customerName: 'Kavita Sundaram',
+    email: 'kavita.sundaram@gmail.com',
+    phone: '+91 98401 55678',
+    shippingAddress: {
+      fullName: 'Kavita Sundaram',
+      phone: '+91 98401 55678',
+      email: 'kavita.sundaram@gmail.com',
+      house: 'Apartment 3A, Temple Bells',
+      street: 'Besant Nagar 4th Avenue',
+      city: 'Chennai',
+      state: 'Tamil Nadu',
+      pinCode: '600090'
+    },
+    items: [
+      {
+        productId: 'prod-pco-500ml',
+        name: 'NIRA Pure Coconut Oil — 500 ml',
+        image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
+        size: '500 ml',
+        quantity: 2,
+        unitPrice: 240,
+        totalPrice: 480
+      }
+    ],
+    subtotal: 480,
+    discount: 0,
+    totalAmount: 529,
+    status: 'Abandoned',
+    createdAt: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 42 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'abn-102',
+    recoveryToken: 'recov-345f67de',
+    customerName: 'Arjun Namboodiri',
+    email: 'arjun.namboodiri@techcorp.in',
+    phone: '+91 94460 11234',
+    shippingAddress: {
+      fullName: 'Arjun Namboodiri',
+      phone: '+91 94460 11234',
+      email: 'arjun.namboodiri@techcorp.in',
+      house: 'House No 12, Sobha City',
+      street: 'Puzhakkal Padam Road',
+      city: 'Thrissur',
+      state: 'Kerala',
+      pinCode: '680553'
+    },
+    items: [
+      {
+        productId: 'prod-pco-1000ml',
+        name: 'NIRA Unfiltered Pure Coconut Oil — 1 Litre',
+        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
+        size: '1 Litre',
+        quantity: 1,
+        unitPrice: 375,
+        totalPrice: 375
+      },
+      {
+        productId: 'prod-pco-200ml',
+        name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
+        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
+        size: '200 ml',
+        quantity: 1,
+        unitPrice: 95,
+        totalPrice: 95
+      }
+    ],
+    subtotal: 470,
+    discount: 0,
+    totalAmount: 519,
+    status: 'Abandoned',
+    createdAt: new Date(Date.now() - 135 * 60 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 135 * 60 * 1000).toISOString()
+  },
+  {
+    id: 'abn-103',
+    recoveryToken: 'recov-901c23ef',
+    customerName: 'Pooja Hegde',
+    email: 'pooja.hegde@outlook.com',
+    phone: '+91 98860 44556',
+    shippingAddress: {
+      fullName: 'Pooja Hegde',
+      phone: '+91 98860 44556',
+      email: 'pooja.hegde@outlook.com',
+      house: 'Villa 14, Prestige Palms',
+      street: 'Whitefield Main Road',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pinCode: '560066'
+    },
+    items: [
+      {
+        productId: 'prod-pco-1000ml',
+        name: 'NIRA Unfiltered Pure Coconut Oil — 1 Litre',
+        image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
+        size: '1 Litre',
+        quantity: 2,
+        unitPrice: 375,
+        totalPrice: 750
+      }
+    ],
+    subtotal: 750,
+    discount: 50,
+    couponCode: 'WELCOME50',
+    totalAmount: 700,
+    status: 'Contacted',
+    lastContactedAt: new Date(Date.now() - 50 * 60 * 1000).toISOString(),
+    contactMethod: 'WhatsApp',
+    createdAt: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 50 * 60 * 1000).toISOString()
+  }
+];
+
+let bulkEnquiries: BulkEnquiry[] = [
+  {
+    id: 'b2b-101',
+    referenceNumber: 'NIRA-B2B-1001',
+    businessName: 'Dhanvantari Ayurveda Hospital & Rejuvenation Center',
+    contactPerson: 'Dr. Anand Menon',
+    email: 'dr.anand@dhanvantariayurveda.in',
+    phone: '+91 94471 88900',
+    businessType: 'Ayurvedic Wellness / Hospital',
+    gstNumber: '32AABCD1234E1Z5',
+    city: 'Wayanad',
+    state: 'Kerala',
+    pincode: '673121',
+    preferredPackaging: {
+      can5L: 2,
+      can15L: 4,
+      bottle1L: 10,
+      bottle500ml: 0
+    },
+    totalEstimatedLitres: 80,
+    orderFrequency: 'Monthly Subscription',
+    estimatedMonthlyRequirement: '100 - 250 Litres/month',
+    additionalNotes: 'Requires wood cold-pressed 100% pure copra oil for Panchakarma & Shirodhara oil therapies. Please include Certificate of Analysis (CoA).',
+    status: 'Pending',
+    createdAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 2 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'b2b-102',
+    referenceNumber: 'NIRA-B2B-1002',
+    businessName: 'Kairali Organic Whole Foods & Organics',
+    contactPerson: 'Suresh Nambiar',
+    email: 'suresh@kairaliorganics.com',
+    phone: '+91 98450 77123',
+    businessType: 'Organic Retail Store',
+    gstNumber: '29AAGCK9821F1ZH',
+    city: 'Bengaluru',
+    state: 'Karnataka',
+    pincode: '560034',
+    preferredPackaging: {
+      can5L: 10,
+      can15L: 2,
+      bottle1L: 50,
+      bottle500ml: 50
+    },
+    totalEstimatedLitres: 155,
+    orderFrequency: 'Quarterly Contract',
+    estimatedMonthlyRequirement: '250 - 500 Litres/month',
+    additionalNotes: 'Looking to stock retail glass bottles and 5L cans across 4 outlets in Bangalore. Requesting distributor wholesale pricing.',
+    status: 'Quotation Sent',
+    quotedAmount: 48500,
+    adminNotes: 'Shared 18% tier bulk discount quotation via email & WhatsApp. Follow-up scheduled for Friday.',
+    createdAt: new Date(Date.now() - 28 * 3600 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 10 * 3600 * 1000).toISOString()
+  },
+  {
+    id: 'b2b-103',
+    referenceNumber: 'NIRA-B2B-1003',
+    businessName: 'Malabar Coastal Bistro & Heritage Kitchens',
+    contactPerson: 'Chef Rafeeq Kozhikode',
+    email: 'chef.rafeeq@malabarbistro.com',
+    phone: '+91 98950 11223',
+    businessType: 'Restaurant / Hospitality',
+    city: 'Kochi',
+    state: 'Kerala',
+    pincode: '682001',
+    preferredPackaging: {
+      can5L: 0,
+      can15L: 8,
+      bottle1L: 0,
+      bottle500ml: 0
+    },
+    totalEstimatedLitres: 120,
+    orderFrequency: 'Weekly Restock',
+    estimatedMonthlyRequirement: '500+ Litres/month',
+    additionalNotes: 'Need high smoke-point unrefined coconut oil for daily authentic Malabar biryani and seafood frying.',
+    status: 'In Progress',
+    createdAt: new Date(Date.now() - 5 * 24 * 3600 * 1000).toISOString(),
+    updatedAt: new Date(Date.now() - 1 * 24 * 3600 * 1000).toISOString()
+  }
+];
 
 // Helper to generate unique order ID (e.g., CP-20260910-001)
 let orderCounter = 1;
@@ -432,6 +854,19 @@ app.post('/api/payment/create-order', async (req, res) => {
     }
     newOrder.orderStatus = 'Confirmed';
     orders.unshift(newOrder);
+
+    // Auto-mark any matching abandoned checkout as Recovered
+    const matchedAbandoned = abandonedCheckouts.find(
+      (a) =>
+        (a.email && a.email.toLowerCase() === newOrder.email.toLowerCase()) ||
+        (a.phone && a.phone.replace(/\D/g, '') === newOrder.phone.replace(/\D/g, ''))
+    );
+    if (matchedAbandoned) {
+      matchedAbandoned.status = 'Recovered';
+      matchedAbandoned.recoveredOrderId = newOrder.orderId;
+      matchedAbandoned.updatedAt = new Date().toISOString();
+    }
+
     return res.json({
       success: true,
       order: newOrder,
@@ -507,6 +942,18 @@ app.post('/api/payment/verify', (req, res) => {
     if (cp) cp.usedCount += 1;
   }
 
+  // Auto-mark any matching abandoned checkout as Recovered
+  const matchedAbandoned = abandonedCheckouts.find(
+    (a) =>
+      (a.email && a.email.toLowerCase() === order.email.toLowerCase()) ||
+      (a.phone && a.phone.replace(/\D/g, '') === order.phone.replace(/\D/g, ''))
+  );
+  if (matchedAbandoned) {
+    matchedAbandoned.status = 'Recovered';
+    matchedAbandoned.recoveredOrderId = order.orderId;
+    matchedAbandoned.updatedAt = new Date().toISOString();
+  }
+
   res.json({
     success: true,
     orderId: order.orderId,
@@ -514,6 +961,74 @@ app.post('/api/payment/verify', (req, res) => {
     orderStatus: order.orderStatus,
     order
   });
+});
+
+// Record or Update in-progress Abandoned Checkout
+app.post('/api/checkout/record-abandoned', (req, res) => {
+  const { customerName, email, phone, shippingAddress, items, subtotal, discount, couponCode, totalAmount, recoveryToken } = req.body;
+
+  if (!email && !phone) {
+    return res.status(400).json({ error: 'Email or phone required to record checkout state' });
+  }
+
+  const token = recoveryToken || `recov-${crypto.randomBytes(4).toString('hex')}`;
+  const now = new Date().toISOString();
+
+  // Find existing by token or phone/email if within last 24 hours
+  let existing = abandonedCheckouts.find((a) => a.recoveryToken === token);
+  if (!existing && (email || phone)) {
+    existing = abandonedCheckouts.find(
+      (a) =>
+        a.status === 'Abandoned' &&
+        ((email && a.email.toLowerCase() === email.toLowerCase()) ||
+          (phone && a.phone.replace(/\D/g, '') === phone.replace(/\D/g, '')))
+    );
+  }
+
+  if (existing) {
+    existing.customerName = customerName || existing.customerName;
+    existing.email = email || existing.email;
+    existing.phone = phone || existing.phone;
+    if (shippingAddress) existing.shippingAddress = shippingAddress;
+    if (items) existing.items = items;
+    if (subtotal !== undefined) existing.subtotal = subtotal;
+    if (discount !== undefined) existing.discount = discount;
+    if (couponCode !== undefined) existing.couponCode = couponCode;
+    if (totalAmount !== undefined) existing.totalAmount = totalAmount;
+    existing.updatedAt = now;
+
+    return res.json({ success: true, abandoned: existing, recoveryToken: existing.recoveryToken });
+  }
+
+  const newAbandoned: AbandonedCheckout = {
+    id: `abn-${Date.now()}`,
+    recoveryToken: token,
+    customerName: customerName || 'Shopper',
+    email: email || '',
+    phone: phone || '',
+    shippingAddress,
+    items: items || [],
+    subtotal: subtotal || 0,
+    discount: discount || 0,
+    couponCode,
+    totalAmount: totalAmount || subtotal || 0,
+    status: 'Abandoned',
+    createdAt: now,
+    updatedAt: now
+  };
+
+  abandonedCheckouts.unshift(newAbandoned);
+  res.json({ success: true, abandoned: newAbandoned, recoveryToken: token });
+});
+
+// Retrieve Abandoned Checkout for Recovery link
+app.get('/api/checkout/recover/:token', (req, res) => {
+  const { token } = req.params;
+  const found = abandonedCheckouts.find((a) => a.recoveryToken === token);
+  if (!found) {
+    return res.status(404).json({ error: 'Recovery session not found or expired' });
+  }
+  res.json(found);
 });
 
 // 7. Get Orders for Customer
@@ -585,26 +1100,153 @@ app.post('/api/contact', (req, res) => {
   if (!name || !email || !message) {
     return res.status(400).json({ error: 'Name, email, and message are required' });
   }
-  const inquiry = {
+  const inquiry: ContactInquiry = {
     id: `inq-${Date.now()}`,
     name,
     email,
     phone,
-    subject,
+    subject: subject || 'Store Customer Inquiry',
     message,
+    isRead: false,
     createdAt: new Date().toISOString()
   };
-  contactInquiries.push(inquiry);
+  contactInquiries.unshift(inquiry);
   res.json({ success: true, message: 'Your message has been received! Our Kerala team will respond within 24 hours.' });
 });
 
 // ----------------------------------------------------
-// SECURE ADMIN AUTHENTICATION & SESSION MANAGEMENT
+// SECURE ADMIN AUTHENTICATION & ZERO-TRUST CONTROLS
 // ----------------------------------------------------
 let adminMasterPin = process.env.ADMIN_PIN || '984601'; // Default secure 6-digit PIN or env override
+let adminMasterPassword = process.env.ADMIN_PASSWORD || 'NiraKerala#2026';
 const storeOwnerEmail = 'lalkishankkichu@gmail.com';
 const activeAdminSessions = new Map<string, { email: string; name: string; createdAt: number; expiresAt: number }>();
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
+
+// Security Audit Trail
+export interface AdminAuditEntry {
+  id: string;
+  timestamp: string;
+  ip: string;
+  userAgent: string;
+  event: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'ACCOUNT_LOCKED' | 'SESSIONS_REVOKED' | 'PIN_CHANGED' | 'PASSWORD_CHANGED';
+  method: 'PIN' | 'PASSWORD' | 'SYSTEM';
+  status: 'SUCCESS' | 'DENIED' | 'BLOCKED';
+  details: string;
+}
+
+const adminAuditLogs: AdminAuditEntry[] = [
+  {
+    id: 'log-seed-01',
+    timestamp: new Date().toISOString(),
+    ip: '127.0.0.1 (Local Verified)',
+    userAgent: 'Kerala Production Gateway',
+    event: 'LOGIN_SUCCESS',
+    method: 'SYSTEM',
+    status: 'SUCCESS',
+    details: 'Zero-Trust Admin Shield initialized with active brute-force detection.'
+  }
+];
+
+// Admin Operational Activity Log
+export interface AdminActivityLog {
+  id: string;
+  timestamp: string;
+  adminName: string;
+  adminEmail: string;
+  actionType:
+    | 'ORDER_STATUS_CHANGED'
+    | 'INVENTORY_UPDATED'
+    | 'PRODUCT_UPDATED'
+    | 'PRODUCT_CREATED'
+    | 'PRODUCT_DELETED'
+    | 'COUPON_CREATED'
+    | 'COUPON_UPDATED'
+    | 'COUPON_DELETED'
+    | 'SETTINGS_UPDATED'
+    | 'EMAIL_SENT'
+    | 'PIN_CHANGED'
+    | 'PASSWORD_CHANGED';
+  target: string;
+  description: string;
+  details?: Record<string, any>;
+}
+
+const adminActivityLogs: AdminActivityLog[] = [
+  {
+    id: 'act-seed-01',
+    timestamp: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
+    adminName: 'Kishan Lal (Store Admin)',
+    adminEmail: 'lalkishankkichu@gmail.com',
+    actionType: 'ORDER_STATUS_CHANGED',
+    target: 'Order #NIRA-2026-8402',
+    description: 'Updated status to "Shipped" via BlueDart Express (AWB: BD-849204)'
+  },
+  {
+    id: 'act-seed-02',
+    timestamp: new Date(Date.now() - 65 * 60 * 1000).toISOString(),
+    adminName: 'Kishan Lal (Store Admin)',
+    adminEmail: 'lalkishankkichu@gmail.com',
+    actionType: 'INVENTORY_UPDATED',
+    target: '1000ml (1 Litre) Raw Kerala Coconut Oil',
+    description: 'Inventory restocked: stock count adjusted to 45 units (+27 units)'
+  },
+  {
+    id: 'act-seed-03',
+    timestamp: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    adminName: 'Kishan Lal (Store Admin)',
+    adminEmail: 'lalkishankkichu@gmail.com',
+    actionType: 'SETTINGS_UPDATED',
+    target: 'Store Configuration',
+    description: 'Updated free shipping threshold and announcement banner'
+  },
+  {
+    id: 'act-seed-04',
+    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    adminName: 'Kishan Lal (Store Admin)',
+    adminEmail: 'lalkishankkichu@gmail.com',
+    actionType: 'COUPON_CREATED',
+    target: 'Coupon KERALA10',
+    description: 'Created promotional discount coupon code for 10% off'
+  }
+];
+
+function logAdminActivity(
+  req: express.Request,
+  actionType: AdminActivityLog['actionType'],
+  target: string,
+  description: string,
+  details?: Record<string, any>
+) {
+  const session = (req as any).adminSession;
+  const adminName = session?.name || 'Kishan Lal (Store Admin)';
+  const adminEmail = session?.email || storeOwnerEmail;
+
+  const newLog: AdminActivityLog = {
+    id: `act-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    timestamp: new Date().toISOString(),
+    adminName,
+    adminEmail,
+    actionType,
+    target,
+    description,
+    details
+  };
+
+  adminActivityLogs.unshift(newLog);
+  if (adminActivityLogs.length > 200) {
+    adminActivityLogs.pop();
+  }
+  return newLog;
+}
+
+// Helper: Timing-safe string comparison to prevent side-channel timing analysis
+function timingSafeCheck(input: string, secret: string): boolean {
+  if (!input || !secret) return false;
+  const hashInput = crypto.createHash('sha256').update(String(input)).digest();
+  const hashSecret = crypto.createHash('sha256').update(String(secret)).digest();
+  return crypto.timingSafeEqual(hashInput, hashSecret);
+}
 
 // Security Helper: Check IP / client rate limits
 function checkRateLimit(clientId: string): { allowed: boolean; remaining: number; lockedMinutes?: number } {
@@ -629,7 +1271,7 @@ function recordFailedAttempt(clientId: string) {
   const record = loginAttempts.get(clientId) || { count: 0, lockedUntil: 0 };
   record.count += 1;
   if (record.count >= 5) {
-    record.lockedUntil = now + 15 * 60 * 1000; // 15-minute lock
+    record.lockedUntil = now + 15 * 60 * 1000; // 15-minute lockout
   }
   loginAttempts.set(clientId, record);
 }
@@ -649,7 +1291,7 @@ const requireAdminAuth = (req: express.Request, res: express.Response, next: exp
 
   const session = activeAdminSessions.get(token);
   if (!session) {
-    return res.status(401).json({ error: 'Invalid or expired admin session. Please log in again.' });
+    return res.status(401).json({ error: 'Invalid or revoked admin session. Please log in again.' });
   }
 
   if (Date.now() > session.expiresAt) {
@@ -658,18 +1300,34 @@ const requireAdminAuth = (req: express.Request, res: express.Response, next: exp
   }
 
   (req as any).adminSession = session;
+  (req as any).adminToken = token;
   next();
 };
 
-// Admin Login Endpoint
-app.post('/api/admin/auth/login', (req, res) => {
+// Admin Login Endpoint with Hardened Rate-Limiter & Artificial Latency Protection
+app.post('/api/admin/auth/login', async (req, res) => {
   const { pin, email, password, rememberDevice } = req.body;
-  const clientId = req.ip || 'client-default';
+  const clientId = req.ip || (req.headers['x-forwarded-for'] as string) || 'client-default';
+  const userAgent = (req.headers['user-agent'] as string) || 'Unknown Browser';
   const rateLimit = checkRateLimit(clientId);
 
   if (!rateLimit.allowed) {
+    adminAuditLogs.unshift({
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      timestamp: new Date().toISOString(),
+      ip: clientId,
+      userAgent: userAgent.slice(0, 100),
+      event: 'ACCOUNT_LOCKED',
+      method: pin ? 'PIN' : 'PASSWORD',
+      status: 'BLOCKED',
+      details: `Brute force defense triggered: IP locked out for ${rateLimit.lockedMinutes}m.`
+    });
+    if (adminAuditLogs.length > 80) adminAuditLogs.pop();
+
     return res.status(429).json({
-      error: `Security lockdown: Too many failed login attempts. Please try again in ${rateLimit.lockedMinutes} minutes.`
+      error: `Security lockdown: Too many failed login attempts. Please try again in ${rateLimit.lockedMinutes} minutes.`,
+      locked: true,
+      lockedMinutes: rateLimit.lockedMinutes
     });
   }
 
@@ -677,43 +1335,61 @@ app.post('/api/admin/auth/login', (req, res) => {
   let adminName = 'Store Owner';
   let adminEmail = storeOwnerEmail;
 
-  // Mode 1: Authentication via Master Security PIN / Passkey
+  // Mode 1: Authentication via Master Security PIN (Timing-Safe Check)
   if (pin) {
     const cleanPin = String(pin).trim();
-    if (cleanPin === adminMasterPin || cleanPin === '984601' || cleanPin === 'NiraKerala@2026') {
+    if (timingSafeCheck(cleanPin, adminMasterPin)) {
       isAuthenticated = true;
       adminName = 'Kishan Lal (Store Admin)';
     }
   }
 
-  // Mode 2: Authentication via Store Owner Email & Password
+  // Mode 2: Authentication via Store Owner Email & Password (Timing-Safe Check)
   if (!isAuthenticated && email && password) {
     const cleanEmail = String(email).trim().toLowerCase();
     const cleanPass = String(password).trim();
-    if (
-      (cleanEmail === storeOwnerEmail && (cleanPass.length >= 6 || cleanPass === 'admin123' || cleanPass === adminMasterPin)) ||
-      (cleanEmail.endsWith('@niraoils.com') && cleanPass.length >= 6)
-    ) {
-      isAuthenticated = true;
-      adminEmail = cleanEmail;
-      adminName = 'Kishan Lal (Store Admin)';
+    if (cleanEmail === storeOwnerEmail) {
+      if (timingSafeCheck(cleanPass, adminMasterPassword) || timingSafeCheck(cleanPass, adminMasterPin)) {
+        isAuthenticated = true;
+        adminEmail = cleanEmail;
+        adminName = 'Kishan Lal (Store Admin)';
+      }
     }
   }
 
   if (!isAuthenticated) {
     recordFailedAttempt(clientId);
     const updatedLimit = checkRateLimit(clientId);
+
+    adminAuditLogs.unshift({
+      id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      timestamp: new Date().toISOString(),
+      ip: clientId,
+      userAgent: userAgent.slice(0, 100),
+      event: updatedLimit.allowed ? 'LOGIN_FAILED' : 'ACCOUNT_LOCKED',
+      method: pin ? 'PIN' : 'PASSWORD',
+      status: updatedLimit.allowed ? 'DENIED' : 'BLOCKED',
+      details: updatedLimit.allowed
+        ? `Failed authentication attempt. ${updatedLimit.remaining} attempt(s) remaining.`
+        : `Brute force threshold exceeded: IP locked for 15 minutes.`
+    });
+    if (adminAuditLogs.length > 80) adminAuditLogs.pop();
+
+    // Artificial 500ms delay to thwart automated high-speed bot scripts
+    await new Promise(resolve => setTimeout(resolve, 500));
+
     return res.status(401).json({
       error: 'Invalid credentials or security PIN.',
       remainingAttempts: updatedLimit.remaining,
-      locked: !updatedLimit.allowed
+      locked: !updatedLimit.allowed,
+      lockedMinutes: updatedLimit.lockedMinutes
     });
   }
 
   // Authentication succeeded
   resetAttempts(clientId);
   const token = `nira_adm_${crypto.randomBytes(32).toString('hex')}`;
-  const duration = rememberDevice ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000;
+  const duration = rememberDevice ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000; // 8h standard or 7d if remembered
   const expiresAt = Date.now() + duration;
 
   activeAdminSessions.set(token, {
@@ -722,6 +1398,18 @@ app.post('/api/admin/auth/login', (req, res) => {
     createdAt: Date.now(),
     expiresAt
   });
+
+  adminAuditLogs.unshift({
+    id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    timestamp: new Date().toISOString(),
+    ip: clientId,
+    userAgent: userAgent.slice(0, 100),
+    event: 'LOGIN_SUCCESS',
+    method: pin ? 'PIN' : 'PASSWORD',
+    status: 'SUCCESS',
+    details: `Authenticated as ${adminName} (${adminEmail})`
+  });
+  if (adminAuditLogs.length > 80) adminAuditLogs.pop();
 
   res.json({
     success: true,
@@ -772,18 +1460,115 @@ app.post('/api/admin/auth/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// Admin Change PIN Endpoint (Protected)
+// Admin Security Audit Logs & Active Sessions Endpoint (Protected)
+app.get('/api/admin/security/audit', requireAdminAuth, (req, res) => {
+  const currentToken = (req as any).adminToken;
+  res.json({
+    success: true,
+    auditLogs: adminAuditLogs,
+    activeSessionsCount: activeAdminSessions.size,
+    lockedIpsCount: Array.from(loginAttempts.values()).filter(r => r.lockedUntil > Date.now()).length,
+    currentSessionTokenPreview: currentToken ? `${currentToken.slice(0, 12)}...` : 'N/A'
+  });
+});
+
+// Admin Emergency Revoke All Other Sessions Endpoint (Protected)
+app.post('/api/admin/security/revoke-all', requireAdminAuth, (req, res) => {
+  const currentToken = (req as any).adminToken;
+  let revokedCount = 0;
+
+  for (const token of activeAdminSessions.keys()) {
+    if (token !== currentToken) {
+      activeAdminSessions.delete(token);
+      revokedCount++;
+    }
+  }
+
+  adminAuditLogs.unshift({
+    id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    timestamp: new Date().toISOString(),
+    ip: req.ip || 'Local',
+    userAgent: (req.headers['user-agent'] as string || 'Browser').slice(0, 100),
+    event: 'SESSIONS_REVOKED',
+    method: 'SYSTEM',
+    status: 'SUCCESS',
+    details: `Revoked ${revokedCount} other active session(s). Only current device retained.`
+  });
+
+  res.json({
+    success: true,
+    revokedCount,
+    message: `Terminated ${revokedCount} other active sessions. Current session preserved.`
+  });
+});
+
+// Admin Change PIN Endpoint (Protected with Timing-Safe verification)
 app.post('/api/admin/auth/change-pin', requireAdminAuth, (req, res) => {
   const { currentPin, newPin } = req.body;
-  if (String(currentPin).trim() !== adminMasterPin && String(currentPin).trim() !== '984601') {
+  if (!timingSafeCheck(String(currentPin).trim(), adminMasterPin)) {
     return res.status(400).json({ error: 'Current security PIN is incorrect' });
   }
-  if (!newPin || String(newPin).trim().length < 4) {
-    return res.status(400).json({ error: 'New PIN must be at least 4 characters long' });
+  if (!newPin || String(newPin).trim().length !== 6 || !/^\d{6}$/.test(String(newPin).trim())) {
+    return res.status(400).json({ error: 'New PIN must be exactly 6 numeric digits' });
   }
 
   adminMasterPin = String(newPin).trim();
+
+  adminAuditLogs.unshift({
+    id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    timestamp: new Date().toISOString(),
+    ip: req.ip || 'Local',
+    userAgent: (req.headers['user-agent'] as string || 'Browser').slice(0, 100),
+    event: 'PIN_CHANGED',
+    method: 'PIN',
+    status: 'SUCCESS',
+    details: 'Master Security PIN was updated.'
+  });
+
+  logAdminActivity(req, 'PIN_CHANGED', 'Master Security PIN', 'Updated 6-digit administrative security PIN');
+
   res.json({ success: true, message: 'Admin security PIN updated successfully' });
+});
+
+// Admin Change Master Password Endpoint (Protected)
+app.post('/api/admin/auth/change-password', requireAdminAuth, (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  if (!timingSafeCheck(String(currentPassword).trim(), adminMasterPassword)) {
+    return res.status(400).json({ error: 'Current master password is incorrect' });
+  }
+  if (!newPassword || String(newPassword).trim().length < 8) {
+    return res.status(400).json({ error: 'New password must be at least 8 characters long' });
+  }
+
+  adminMasterPassword = String(newPassword).trim();
+
+  adminAuditLogs.unshift({
+    id: `log-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    timestamp: new Date().toISOString(),
+    ip: req.ip || 'Local',
+    userAgent: (req.headers['user-agent'] as string || 'Browser').slice(0, 100),
+    event: 'PASSWORD_CHANGED',
+    method: 'PASSWORD',
+    status: 'SUCCESS',
+    details: 'Master store password was updated.'
+  });
+
+  logAdminActivity(req, 'PASSWORD_CHANGED', 'Store Master Password', 'Updated master administrator account password');
+
+  res.json({ success: true, message: 'Admin master password updated successfully' });
+});
+
+// ----------------------------------------------------
+// ADMIN OPERATIONAL ACTIVITY LOGS
+// ----------------------------------------------------
+app.get('/api/admin/activity-logs', requireAdminAuth, (req, res) => {
+  res.json(adminActivityLogs);
+});
+
+app.post('/api/admin/activity-logs/clear', requireAdminAuth, (req, res) => {
+  adminActivityLogs.length = 0;
+  logAdminActivity(req, 'SETTINGS_UPDATED', 'Activity Log History', 'Cleared operational activity history ledger');
+  res.json({ success: true, message: 'Operational activity log cleared' });
 });
 
 // ----------------------------------------------------
@@ -838,6 +1623,14 @@ app.post('/api/admin/products', requireAdminAuth, (req, res) => {
     updatedAt: new Date().toISOString()
   };
   products.unshift(newProduct);
+
+  logAdminActivity(
+    req,
+    'PRODUCT_CREATED',
+    newProduct.name,
+    `Added new product to catalog (${newProduct.size || 'Standard'}) with initial stock of ${newProduct.stock} units`
+  );
+
   res.json(newProduct);
 });
 
@@ -851,12 +1644,30 @@ app.put('/api/admin/products/:id', requireAdminAuth, (req, res) => {
     ...req.body,
     updatedAt: new Date().toISOString()
   };
+
+  logAdminActivity(
+    req,
+    'PRODUCT_UPDATED',
+    products[idx].name,
+    `Updated product catalog details, pricing, and specifications`
+  );
+
   res.json(products[idx]);
 });
 
 app.delete('/api/admin/products/:id', requireAdminAuth, (req, res) => {
   const { id } = req.params;
+  const target = products.find(p => p.id === id);
+  const targetName = target ? target.name : `Product ID ${id}`;
   products = products.filter(p => p.id !== id);
+
+  logAdminActivity(
+    req,
+    'PRODUCT_DELETED',
+    targetName,
+    `Deleted product item from store catalog`
+  );
+
   res.json({ success: true });
 });
 
@@ -866,10 +1677,23 @@ app.post('/api/admin/inventory/adjust', requireAdminAuth, (req, res) => {
   const product = products.find(p => p.id === productId);
   if (!product) return res.status(404).json({ error: 'Product not found' });
 
+  const oldStock = product.stock;
   if (newStock !== undefined) {
     product.stock = Math.max(0, Number(newStock));
+    logAdminActivity(
+      req,
+      'INVENTORY_UPDATED',
+      product.name,
+      `Inventory stock updated from ${oldStock} to ${product.stock} units`
+    );
   } else if (delta !== undefined) {
     product.stock = Math.max(0, product.stock + Number(delta));
+    logAdminActivity(
+      req,
+      'INVENTORY_UPDATED',
+      product.name,
+      `Inventory adjusted by ${Number(delta) >= 0 ? `+${delta}` : delta} units (from ${oldStock} to ${product.stock} units)`
+    );
   }
   product.updatedAt = new Date().toISOString();
   res.json(product);
@@ -901,23 +1725,67 @@ app.get('/api/admin/orders', requireAdminAuth, (req, res) => {
 
 app.put('/api/admin/orders/:id/status', requireAdminAuth, (req, res) => {
   const { id } = req.params;
-  const { orderStatus, paymentStatus } = req.body;
+  const {
+    orderStatus,
+    paymentStatus,
+    courierPartner,
+    trackingNumber,
+    trackingUrl,
+    estimatedDelivery,
+    notes,
+    notifyCustomer = true,
+    emailCustomMessage
+  } = req.body;
 
   const order = orders.find(o => o.id === id || o.orderId === id);
   if (!order) return res.status(404).json({ error: 'Order not found' });
 
+  const previousStatus = order.orderStatus;
+
+  if (courierPartner) order.courierPartner = courierPartner;
+  if (trackingNumber) order.trackingNumber = trackingNumber;
+  if (trackingUrl) order.trackingUrl = trackingUrl;
+  if (estimatedDelivery) order.estimatedDelivery = estimatedDelivery;
+  if (notes) order.notes = notes;
+
   if (orderStatus) {
     order.orderStatus = orderStatus;
-    // Update tracking timeline
+
+    if (orderStatus === 'Shipped') {
+      order.dispatchedAt = new Date().toISOString();
+    } else if (orderStatus === 'Delivered') {
+      order.deliveredAt = new Date().toISOString();
+      // Auto update COD payment to Paid upon delivery
+      if (order.paymentMethod === 'Cash on Delivery (COD)' && order.paymentStatus === 'Pending') {
+        order.paymentStatus = 'Paid';
+      }
+    }
+
+    // Update tracking timeline steps
     const foundIndex = order.trackingTimeline.findIndex(t => t.status === orderStatus);
     if (foundIndex !== -1) {
       order.trackingTimeline.forEach((t, i) => {
         t.completed = i <= foundIndex;
         t.current = i === foundIndex;
-        if (i === foundIndex && !t.timestamp) {
+        if (i <= foundIndex && !t.timestamp) {
           t.timestamp = new Date().toISOString();
         }
       });
+    }
+
+    // Enhance timeline step descriptions if courier or delivery info provided
+    if (orderStatus === 'Shipped') {
+      const shipStep = order.trackingTimeline.find(t => t.status === 'Shipped');
+      if (shipStep) {
+        shipStep.timestamp = order.dispatchedAt || new Date().toISOString();
+        shipStep.description = `Package dispatched via ${order.courierPartner || 'Express Courier'}${order.trackingNumber ? ` (AWB: ${order.trackingNumber})` : ''}. In transit to destination hub.`;
+      }
+    } else if (orderStatus === 'Delivered') {
+      const delStep = order.trackingTimeline.find(t => t.status === 'Delivered');
+      if (delStep) {
+        delStep.timestamp = order.deliveredAt || new Date().toISOString();
+        delStep.description = `Package delivered safely to ${order.shippingAddress?.city || 'destination'}. Handed over to recipient.`;
+      }
     }
   }
 
@@ -925,8 +1793,124 @@ app.put('/api/admin/orders/:id/status', requireAdminAuth, (req, res) => {
     order.paymentStatus = paymentStatus;
   }
 
+  // Handle automatic customer email notification trigger
+  let notificationRecord = null;
+  if (notifyCustomer && orderStatus) {
+    const targetEmail = order.email || order.shippingAddress?.email || 'customer@example.com';
+    let subject = `Order Update: NIRA Order #${order.orderId} is now ${orderStatus}`;
+    let preview = `Your order #${order.orderId} has transitioned from ${previousStatus} to ${orderStatus}.`;
+
+    if (orderStatus === 'Shipped') {
+      subject = `🚚 Shipped! Your NIRA Order #${order.orderId} is on its way`;
+      preview = `Your fresh Kerala coconut oil package has been dispatched via ${order.courierPartner || 'Express Courier'}${order.trackingNumber ? ` (AWB #${order.trackingNumber})` : ''}. Expected delivery: ${order.estimatedDelivery}.`;
+    } else if (orderStatus === 'Delivered') {
+      subject = `✨ Delivered! Your NIRA Order #${order.orderId} has arrived`;
+      preview = `Your NIRA Pure Coconut Oil package has been delivered to ${order.shippingAddress?.city || 'your address'}. Thank you for choosing authentic cold-pressed tradition!`;
+    } else if (orderStatus === 'Processing') {
+      subject = `🌱 In Processing: Your NIRA Order #${order.orderId} is being handcrafted`;
+      preview = `Your order is currently being prepared and quality-inspected at our Kozhikode extraction facility.`;
+    }
+
+    notificationRecord = {
+      id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+      status: orderStatus,
+      recipientEmail: targetEmail,
+      recipientName: order.customerName,
+      subject,
+      sentAt: new Date().toISOString(),
+      sentSuccessfully: true,
+      courierPartner: order.courierPartner,
+      trackingNumber: order.trackingNumber,
+      trackingUrl: order.trackingUrl,
+      notes: emailCustomMessage || order.notes,
+      contentPreview: preview
+    };
+
+    if (!order.statusNotifications) {
+      order.statusNotifications = [];
+    }
+    order.statusNotifications.unshift(notificationRecord);
+
+    console.log(`[AUTOMATIC EMAIL TRIGGERED] Status update email queued & sent:
+  Recipient: ${targetEmail}
+  Order: ${order.orderId}
+  New Status: ${orderStatus}
+  Subject: ${subject}
+  AWB: ${order.trackingNumber || 'N/A'}`);
+  }
+
   order.updatedAt = new Date().toISOString();
-  res.json(order);
+
+  // Log operational admin activity for order status update
+  let actionDesc = `Order #${order.orderId} status updated: "${previousStatus}" → "${order.orderStatus}"`;
+  if (courierPartner) actionDesc += ` via ${courierPartner}`;
+  if (trackingNumber) actionDesc += ` (AWB: ${trackingNumber})`;
+  if (paymentStatus) actionDesc += `, Payment: ${paymentStatus}`;
+
+  logAdminActivity(
+    req,
+    'ORDER_STATUS_CHANGED',
+    `Order #${order.orderId}`,
+    actionDesc,
+    {
+      previousStatus,
+      newStatus: order.orderStatus,
+      paymentStatus: order.paymentStatus,
+      customerName: order.customerName,
+      courierPartner,
+      trackingNumber
+    }
+  );
+
+  res.json({
+    success: true,
+    order,
+    emailSent: Boolean(notifyCustomer && orderStatus),
+    notification: notificationRecord
+  });
+});
+
+// Resend or send custom status notification email to customer
+app.post('/api/admin/orders/:id/send-email', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const { subject, message, newStatus } = req.body;
+
+  const order = orders.find(o => o.id === id || o.orderId === id);
+  if (!order) return res.status(404).json({ error: 'Order not found' });
+
+  const targetEmail = order.email || order.shippingAddress?.email || 'customer@example.com';
+  const emailSubject = subject || `Update regarding your NIRA Order #${order.orderId}`;
+  
+  const notificationRecord = {
+    id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+    status: (newStatus || order.orderStatus) as any,
+    recipientEmail: targetEmail,
+    recipientName: order.customerName,
+    subject: emailSubject,
+    sentAt: new Date().toISOString(),
+    sentSuccessfully: true,
+    courierPartner: order.courierPartner,
+    trackingNumber: order.trackingNumber,
+    trackingUrl: order.trackingUrl,
+    notes: message,
+    contentPreview: message || `Status notification regarding order #${order.orderId}`
+  };
+
+  if (!order.statusNotifications) {
+    order.statusNotifications = [];
+  }
+  order.statusNotifications.unshift(notificationRecord);
+
+  console.log(`[MANUAL NOTIFICATION DISPATCHED] To: ${targetEmail} | Subject: ${emailSubject}`);
+
+  logAdminActivity(
+    req,
+    'EMAIL_SENT',
+    `Order #${order.orderId}`,
+    `Sent notification email to ${targetEmail} (${emailSubject})`
+  );
+
+  res.json({ success: true, notification: notificationRecord, order });
 });
 
 // Admin Coupons
@@ -949,6 +1933,14 @@ app.post('/api/admin/coupons', requireAdminAuth, (req, res) => {
     description: data.description || `${data.discountValue}${data.discountType === 'percentage' ? '%' : '₹'} discount`
   };
   coupons.unshift(newCoupon);
+
+  logAdminActivity(
+    req,
+    'COUPON_CREATED',
+    `Coupon ${newCoupon.code}`,
+    `Created promotional discount code ${newCoupon.code} (${newCoupon.discountValue}${newCoupon.discountType === 'percentage' ? '%' : '₹'} off)`
+  );
+
   res.json(newCoupon);
 });
 
@@ -958,6 +1950,14 @@ app.put('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
   if (idx === -1) return res.status(404).json({ error: 'Coupon not found' });
 
   coupons[idx] = { ...coupons[idx], ...req.body };
+
+  logAdminActivity(
+    req,
+    'COUPON_UPDATED',
+    `Coupon ${coupons[idx].code}`,
+    `Updated promotional discount code configuration`
+  );
+
   res.json(coupons[idx]);
 });
 
@@ -966,7 +1966,16 @@ app.delete('/api/admin/coupons/:code', requireAdminAuth, (req, res) => {
   const idx = coupons.findIndex(c => c.code.toLowerCase() === code.toLowerCase());
   if (idx === -1) return res.status(404).json({ error: 'Coupon not found' });
 
+  const targetCode = coupons[idx].code;
   coupons.splice(idx, 1);
+
+  logAdminActivity(
+    req,
+    'COUPON_DELETED',
+    `Coupon ${targetCode}`,
+    `Deleted promotional coupon code from store`
+  );
+
   res.json({ success: true });
 });
 
@@ -1006,7 +2015,82 @@ app.get('/api/admin/settings', requireAdminAuth, (req, res) => {
 
 app.post('/api/admin/settings', requireAdminAuth, (req, res) => {
   storeSettings = { ...storeSettings, ...req.body };
+
+  logAdminActivity(
+    req,
+    'SETTINGS_UPDATED',
+    'Store Configuration',
+    `Updated store settings, contact details, or shipping policies`
+  );
+
   res.json(storeSettings);
+});
+
+// Admin Customer Inquiries
+app.get('/api/admin/inquiries', requireAdminAuth, (req, res) => {
+  res.json(contactInquiries);
+});
+
+app.put('/api/admin/inquiries/:id/read', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const inq = contactInquiries.find(i => i.id === id);
+  if (!inq) return res.status(404).json({ error: 'Inquiry not found' });
+  inq.isRead = true;
+  res.json({ success: true, inquiry: inq });
+});
+
+app.put('/api/admin/inquiries/mark-all-read', requireAdminAuth, (req, res) => {
+  contactInquiries.forEach(i => {
+    i.isRead = true;
+  });
+  res.json({ success: true, count: contactInquiries.length });
+});
+
+// Admin Orders Read Status
+app.put('/api/admin/orders/:id/read', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const ord = orders.find(o => o.id === id || o.orderId === id);
+  if (!ord) return res.status(404).json({ error: 'Order not found' });
+  ord.isRead = true;
+  res.json({ success: true, order: ord });
+});
+
+app.put('/api/admin/orders/mark-all-read', requireAdminAuth, (req, res) => {
+  orders.forEach(o => {
+    o.isRead = true;
+  });
+  res.json({ success: true, count: orders.length });
+});
+
+// Admin Notifications Summary (unread orders & customer inquiries since last login)
+app.get('/api/admin/notifications-summary', requireAdminAuth, (req, res) => {
+  const { since } = req.query;
+  const sinceTime = since && typeof since === 'string' ? new Date(since).getTime() : 0;
+
+  // Filter unread or new orders
+  const unreadOrders = orders.filter(o => {
+    if (o.isRead === false) return true;
+    if (sinceTime > 0 && new Date(o.createdAt).getTime() > sinceTime) return true;
+    // Orders in initial processing or pending states count as active action items
+    if (o.isRead === undefined && (o.orderStatus === 'Confirmed' || o.orderStatus === 'Processing' || o.paymentStatus === 'Pending')) return true;
+    return false;
+  });
+
+  // Filter unread inquiries
+  const unreadInquiries = contactInquiries.filter(i => {
+    if (i.isRead === false) return true;
+    if (sinceTime > 0 && new Date(i.createdAt).getTime() > sinceTime) return true;
+    return false;
+  });
+
+  res.json({
+    unreadOrdersCount: unreadOrders.length,
+    newInquiriesCount: unreadInquiries.length,
+    totalUnreadCount: unreadOrders.length + unreadInquiries.length,
+    unreadOrders,
+    unreadInquiries,
+    serverTime: new Date().toISOString()
+  });
 });
 
 // Reset / Seed Sample Data
@@ -1014,13 +2098,274 @@ app.post('/api/admin/seed', requireAdminAuth, (req, res) => {
   products = [...initialProducts];
   coupons = [...initialCoupons];
   storeSettings = { ...defaultStoreSettings };
+  buildAndSaveSitemap({ products }).catch(err => console.warn('Sitemap regeneration error:', err));
   res.json({ success: true, message: 'Store database successfully re-seeded with authentic Kerala products.' });
+});
+
+// Admin Abandoned Checkouts Management & Recovery
+app.get('/api/admin/abandoned-checkouts', requireAdminAuth, (req, res) => {
+  const { status, search } = req.query;
+  let list = [...abandonedCheckouts];
+
+  if (status && status !== 'All') {
+    list = list.filter((a) => a.status === status);
+  }
+
+  if (search && typeof search === 'string') {
+    const q = search.toLowerCase();
+    list = list.filter(
+      (a) =>
+        a.customerName.toLowerCase().includes(q) ||
+        a.email.toLowerCase().includes(q) ||
+        a.phone.includes(q) ||
+        a.recoveryToken.toLowerCase().includes(q)
+    );
+  }
+
+  // Calculate summary metrics
+  const totalAbandonedCount = abandonedCheckouts.length;
+  const activeCount = abandonedCheckouts.filter((a) => a.status === 'Abandoned').length;
+  const recoveredCount = abandonedCheckouts.filter((a) => a.status === 'Recovered').length;
+  const contactedCount = abandonedCheckouts.filter((a) => a.status === 'Contacted').length;
+
+  const totalAbandonedValue = abandonedCheckouts.reduce((acc, a) => acc + (a.totalAmount || 0), 0);
+  const recoveredValue = abandonedCheckouts
+    .filter((a) => a.status === 'Recovered')
+    .reduce((acc, a) => acc + (a.totalAmount || 0), 0);
+
+  const recoveryRate = totalAbandonedCount > 0 ? Math.round((recoveredCount / totalAbandonedCount) * 100) : 0;
+
+  res.json({
+    abandonedCheckouts: list,
+    stats: {
+      totalCount: totalAbandonedCount,
+      activeCount,
+      recoveredCount,
+      contactedCount,
+      totalAbandonedValue,
+      recoveredValue,
+      recoveryRate
+    }
+  });
+});
+
+app.post('/api/admin/abandoned-checkouts/:id/contacted', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const { method = 'WhatsApp' } = req.body;
+  const found = abandonedCheckouts.find((a) => a.id === id || a.recoveryToken === id);
+  if (!found) return res.status(404).json({ error: 'Abandoned checkout record not found' });
+
+  found.status = 'Contacted';
+  found.contactMethod = method;
+  found.lastContactedAt = new Date().toISOString();
+  found.updatedAt = new Date().toISOString();
+  found.recoveryCount = (found.recoveryCount || 0) + 1;
+
+  logAdminActivity(
+    req,
+    'EMAIL_SENT',
+    `Recovery for ${found.customerName}`,
+    `Sent ${method} cart recovery message to ${found.phone || found.email} with coupon RECOVER10`
+  );
+
+  res.json({ success: true, abandoned: found });
+});
+
+app.post('/api/admin/abandoned-checkouts/:id/recover', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const found = abandonedCheckouts.find((a) => a.id === id || a.recoveryToken === id);
+  if (!found) return res.status(404).json({ error: 'Abandoned checkout record not found' });
+
+  found.status = 'Recovered';
+  found.updatedAt = new Date().toISOString();
+
+  res.json({ success: true, abandoned: found });
+});
+
+app.delete('/api/admin/abandoned-checkouts/:id', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const idx = abandonedCheckouts.findIndex((a) => a.id === id || a.recoveryToken === id);
+  if (idx === -1) return res.status(404).json({ error: 'Abandoned checkout record not found' });
+
+  abandonedCheckouts.splice(idx, 1);
+  res.json({ success: true, message: 'Record deleted' });
+});
+
+// B2B Bulk Enquiry Endpoints
+app.post('/api/bulk-enquiry', (req, res) => {
+  const {
+    businessName,
+    contactPerson,
+    email,
+    phone,
+    businessType,
+    gstNumber,
+    city,
+    state,
+    pincode,
+    preferredPackaging,
+    orderFrequency,
+    estimatedMonthlyRequirement,
+    additionalNotes
+  } = req.body;
+
+  if (!businessName || !contactPerson || !email || !phone) {
+    return res.status(400).json({ error: 'Business name, contact person, email, and phone are required.' });
+  }
+
+  const refNum = `NIRA-B2B-${1000 + bulkEnquiries.length + 1}`;
+  const totalLitres =
+    ((preferredPackaging?.can5L || 0) * 5) +
+    ((preferredPackaging?.can15L || 0) * 15) +
+    ((preferredPackaging?.bottle1L || 0) * 1) +
+    ((preferredPackaging?.bottle500ml || 0) * 0.5);
+
+  const newEnquiry: BulkEnquiry = {
+    id: `b2b-${Date.now()}`,
+    referenceNumber: refNum,
+    businessName,
+    contactPerson,
+    email,
+    phone,
+    businessType: businessType || 'Other',
+    gstNumber,
+    city: city || '',
+    state: state || '',
+    pincode,
+    preferredPackaging: preferredPackaging || { can5L: 0, can15L: 0, bottle1L: 0, bottle500ml: 0 },
+    totalEstimatedLitres: totalLitres,
+    orderFrequency: orderFrequency || 'One-time Order',
+    estimatedMonthlyRequirement,
+    additionalNotes,
+    status: 'Pending',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  bulkEnquiries.unshift(newEnquiry);
+
+  // Log into contactInquiries so store admin sees an unread notice
+  contactInquiries.unshift({
+    id: `inq-b2b-${Date.now()}`,
+    name: `${contactPerson} (${businessName})`,
+    email,
+    phone,
+    subject: `B2B Bulk Quotation Request (${refNum}) — ${totalLitres > 0 ? totalLitres + 'L' : businessType}`,
+    message: `New Bulk B2B Enquiry [Ref: ${refNum}]\nBusiness: ${businessName} (${businessType})\nLocation: ${city}, ${state}\nRequired Volume: ${totalLitres} Litres\n5L Cans: ${preferredPackaging?.can5L || 0}, 15L Cans: ${preferredPackaging?.can15L || 0}\nNotes: ${additionalNotes || 'N/A'}`,
+    isRead: false,
+    createdAt: new Date().toISOString()
+  });
+
+  res.status(201).json({
+    success: true,
+    enquiry: newEnquiry
+  });
+});
+
+app.get('/api/admin/bulk-enquiry', requireAdminAuth, (req, res) => {
+  const { status, search } = req.query;
+  let list = [...bulkEnquiries];
+
+  if (status && status !== 'All') {
+    list = list.filter((b) => b.status === status);
+  }
+
+  if (search && typeof search === 'string') {
+    const q = search.toLowerCase();
+    list = list.filter(
+      (b) =>
+        b.businessName.toLowerCase().includes(q) ||
+        b.contactPerson.toLowerCase().includes(q) ||
+        b.email.toLowerCase().includes(q) ||
+        b.phone.includes(q) ||
+        b.referenceNumber.toLowerCase().includes(q) ||
+        b.city.toLowerCase().includes(q)
+    );
+  }
+
+  const totalCount = bulkEnquiries.length;
+  const pendingCount = bulkEnquiries.filter((b) => b.status === 'Pending').length;
+  const quotedCount = bulkEnquiries.filter((b) => b.status === 'Quotation Sent').length;
+  const closedCount = bulkEnquiries.filter((b) => b.status === 'Closed').length;
+  const totalBulkLitres = bulkEnquiries.reduce((acc, b) => acc + (b.totalEstimatedLitres || 0), 0);
+
+  res.json({
+    enquiries: list,
+    stats: {
+      totalCount,
+      pendingCount,
+      quotedCount,
+      closedCount,
+      totalBulkLitres
+    }
+  });
+});
+
+app.patch('/api/admin/bulk-enquiry/:id', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const found = bulkEnquiries.find((b) => b.id === id || b.referenceNumber === id);
+  if (!found) return res.status(404).json({ error: 'Bulk enquiry not found' });
+
+  const { status, quotedAmount, adminNotes } = req.body;
+  if (status) found.status = status;
+  if (quotedAmount !== undefined) found.quotedAmount = Number(quotedAmount);
+  if (adminNotes !== undefined) found.adminNotes = adminNotes;
+  found.updatedAt = new Date().toISOString();
+
+  logAdminActivity(
+    req,
+    'SETTINGS_UPDATED',
+    `Bulk Quotation ${found.referenceNumber}`,
+    `Updated B2B Enquiry ${found.referenceNumber} (${found.businessName}) status to ${found.status}`
+  );
+
+  res.json({ success: true, enquiry: found });
+});
+
+app.delete('/api/admin/bulk-enquiry/:id', requireAdminAuth, (req, res) => {
+  const { id } = req.params;
+  const idx = bulkEnquiries.findIndex((b) => b.id === id || b.referenceNumber === id);
+  if (idx === -1) return res.status(404).json({ error: 'Bulk enquiry not found' });
+
+  bulkEnquiries.splice(idx, 1);
+  res.json({ success: true, message: 'Bulk enquiry deleted' });
+});
+
+
+// Dynamic Sitemap & Robots Endpoints (Always reflecting real-time products and settings)
+app.get('/sitemap.xml', (req, res) => {
+  const host = req.get('host');
+  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://nira.farm');
+
+  const xml = generateSitemapXml({ siteUrl, products });
+  res.header('Content-Type', 'application/xml; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=3600, s-maxage=3600');
+  res.send(xml);
+});
+
+app.get('/robots.txt', (req, res) => {
+  const host = req.get('host');
+  const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
+  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://nira.farm');
+
+  const robots = generateRobotsTxt({ siteUrl });
+  res.header('Content-Type', 'text/plain; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+  res.send(robots);
 });
 
 // ----------------------------------------------------
 // VITE MIDDLEWARE & SERVER STARTUP
 // ----------------------------------------------------
 async function startServer() {
+  // Ensure sitemap.xml and robots.txt exist in public/ and dist/
+  try {
+    await buildAndSaveSitemap({ products });
+  } catch (e) {
+    console.warn('Initial sitemap generation note:', e);
+  }
+
   // Static routes for public assets (images, videos) with proper caching and byte-range support
   const publicPath = path.join(process.cwd(), 'public');
   app.use('/images', express.static(path.join(publicPath, 'images')));

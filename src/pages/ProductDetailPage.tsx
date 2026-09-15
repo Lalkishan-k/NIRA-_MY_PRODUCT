@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import {
   Star,
   ShoppingBag,
@@ -13,7 +14,11 @@ import {
   Minus,
   Plus,
   ArrowLeft,
-  Sparkles
+  Sparkles,
+  ArrowLeftRight,
+  Copy,
+  Check,
+  MessageCircle
 } from 'lucide-react';
 import { Product, Review, ProductSize } from '../types';
 import { useCart } from '../context/CartContext';
@@ -21,12 +26,15 @@ import { useStore } from '../context/StoreContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { ProductCard } from '../components/ProductCard';
+import { CustomerReviews } from '../components/CustomerReviews';
+import { PincodeDeliveryEstimator } from '../components/PincodeDeliveryEstimator';
+import { NutritionalChart } from '../components/NutritionalChart';
 
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { products, addToast, settings } = useStore();
+  const { products, addToast, settings, openCompare } = useStore();
   const { customerProfile } = useAuth();
 
   const [product, setProduct] = useState<Product | null>(null);
@@ -35,13 +43,7 @@ export const ProductDetailPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'description' | 'benefits' | 'specs' | 'reviews'>('description');
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
-
-  // Review form state
-  const [newRating, setNewRating] = useState(5);
-  const [newTitle, setNewTitle] = useState('');
-  const [newComment, setNewComment] = useState('');
-  const [reviewerName, setReviewerName] = useState(customerProfile?.name || '');
-  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -90,43 +92,80 @@ export const ProductDetailPage: React.FC = () => {
     navigate('/checkout');
   };
 
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: product.name,
-        text: product.shortDescription,
-        url: window.location.href
-      }).catch(() => {});
+  const handleCopyLink = () => {
+    const currentUrl = window.location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard
+        .writeText(currentUrl)
+        .then(() => {
+          setIsCopied(true);
+          addToast('Product link copied to clipboard!', 'success');
+          setTimeout(() => setIsCopied(false), 2500);
+        })
+        .catch(() => {
+          fallbackCopyText(currentUrl);
+        });
     } else {
-      navigator.clipboard.writeText(window.location.href);
-      addToast('Product link copied to clipboard!');
+      fallbackCopyText(currentUrl);
     }
   };
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newComment.trim()) {
-      addToast('Please write your review feedback', 'error');
-      return;
+  const fallbackCopyText = (text: string) => {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setIsCopied(true);
+      addToast('Product link copied to clipboard!', 'success');
+      setTimeout(() => setIsCopied(false), 2500);
+    } catch {
+      addToast('Could not copy link automatically.', 'error');
     }
-    setIsSubmittingReview(true);
+  };
+
+  const handleWhatsAppShare = () => {
+    const currentUrl = window.location.href;
+    const text = `🥥 *${product.name}* (100% Unfiltered Pure Kerala Coconut Oil)\n\nPrice: ₹${product.price} (${product.size})\n\n${product.shortDescription}\n\n👉 Order directly here: ${currentUrl}`;
+    const whatsappUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title: product.name,
+          text: `Check out ${product.name} (100% Unfiltered Pure Kerala Coconut Oil):`,
+          url: window.location.href
+        })
+        .catch(() => {});
+    } else {
+      handleCopyLink();
+    }
+  };
+
+  const handleReviewSubmit = async (reviewData: { rating: number; title: string; review: string; customerName: string }) => {
     try {
       const created = await api.submitReview({
         productId: product.id,
-        rating: newRating,
-        title: newTitle || 'Excellent quality coconut oil',
-        review: newComment,
-        customerName: reviewerName || 'Kerala Customer',
+        rating: reviewData.rating,
+        title: reviewData.title,
+        review: reviewData.review,
+        customerName: reviewData.customerName,
         customerId: customerProfile?.uid || 'guest'
       });
       setReviews([created, ...reviews]);
-      setNewComment('');
-      setNewTitle('');
       addToast('Thank you! Your verified review has been published.', 'success');
     } catch (err: any) {
       addToast(err.message || 'Failed to submit review', 'error');
-    } finally {
-      setIsSubmittingReview(false);
+      throw err;
     }
   };
 
@@ -136,8 +175,80 @@ export const ProductDetailPage: React.FC = () => {
   const isLowStock = product.stock > 0 && product.stock <= 15;
   const isOutOfStock = product.stock <= 0;
 
+  const pageTitle = `${product.name} (${product.size}) | 100% Pure Unfiltered Kerala Coconut Oil - NIRA`;
+  const pageDescription = product.shortDescription || product.description || `Pure unfiltered cold pressed coconut oil (${product.size}) direct from Kerala farms. Maximum Vitamin E, healthy MCTs, and natural coconut aroma.`;
+  const canonicalUrl = `https://nira.farm/product/${product.slug}`;
+  const primaryImage = product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=1200';
+  const keywordsList = `NIRA Coconut Oil, ${product.name}, ${product.size}, Kerala coconut oil, wood pressed coconut oil, cold pressed, unfiltered, hair oil, cooking oil, pure coconut oil, ${product.ingredients?.join(', ') || '100% pure coconut oil'}`;
+
+  const schemaJson = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": `${product.name} (${product.size})`,
+    "image": product.images,
+    "description": pageDescription,
+    "sku": product.sku || `NIRA-${product.size.replace(/\s+/g, '')}`,
+    "mpn": product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": "NIRA Pure Coconut Oil"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": canonicalUrl,
+      "priceCurrency": "INR",
+      "price": product.price,
+      "priceValidUntil": "2027-12-31",
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "NIRA Pure Coconut Oil"
+      }
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": product.rating || 5,
+      "reviewCount": product.reviewCount || (reviews.length > 0 ? reviews.length : 1),
+      "bestRating": "5",
+      "worstRating": "1"
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+      {/* Dynamic SEO Meta Tags via React Helmet */}
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDescription} />
+        <meta name="keywords" content={keywordsList} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph / Facebook / WhatsApp */}
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.name} (${product.size}) - NIRA Pure Coconut Oil`} />
+        <meta property="og:description" content={pageDescription} />
+        <meta property="og:image" content={primaryImage} />
+        <meta property="og:image:alt" content={`${product.name} - ${product.size}`} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:site_name" content="NIRA Pure Coconut Oil" />
+        <meta property="product:price:amount" content={String(product.price)} />
+        <meta property="product:price:currency" content="INR" />
+        <meta property="product:availability" content={product.stock > 0 ? 'in stock' : 'out of stock'} />
+        <meta property="product:brand" content="NIRA" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={`${product.name} (${product.size}) | NIRA Pure Coconut Oil`} />
+        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:image" content={primaryImage} />
+
+        {/* Structured Data (Schema.org / Product) */}
+        <script type="application/ld+json">
+          {JSON.stringify(schemaJson)}
+        </script>
+      </Helmet>
+
       {/* Back button */}
       <Link
         to="/shop"
@@ -191,13 +302,24 @@ export const ProductDetailPage: React.FC = () => {
               <span className="text-xs uppercase tracking-widest text-emerald-800 font-bold">
                 {product.category}
               </span>
-              <button
-                onClick={handleShare}
-                className="text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition-colors"
-                title="Share product"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleWhatsAppShare}
+                  className="text-stone-400 hover:text-emerald-700 p-1.5 rounded-full hover:bg-emerald-50 transition-colors"
+                  title="Share on WhatsApp"
+                >
+                  <MessageCircle className="w-4 h-4 text-emerald-700" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="text-stone-400 hover:text-stone-700 p-1.5 rounded-full hover:bg-stone-100 transition-colors"
+                  title={isCopied ? 'Link Copied!' : 'Copy Link'}
+                >
+                  {isCopied ? <Check className="w-4 h-4 text-emerald-700" /> : <Copy className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-stone-900 mt-1">
@@ -227,6 +349,26 @@ export const ProductDetailPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Live Stock Urgency Badge */}
+          <div className="flex items-center gap-2">
+            {product.stock <= 0 ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                Currently Out of Stock
+              </span>
+            ) : product.stock <= 10 ? (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-300 animate-bounce">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                🔥 Hurry, only {product.stock} left in freshly pressed batch!
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                In Stock ({product.stock} units available) — Ready to Dispatch
+              </span>
+            )}
+          </div>
+
           {/* Pricing Block */}
           <div className="p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200 flex flex-wrap items-baseline gap-2 sm:gap-3">
             <span className="text-2xl sm:text-3xl font-black text-stone-900 font-serif">₹{product.price}</span>
@@ -250,9 +392,14 @@ export const ProductDetailPage: React.FC = () => {
               <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
                 Choose Packaging Size
               </label>
-              <span className="text-[11px] sm:text-xs text-emerald-800 font-semibold flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> 100% Unfiltered Pure Oil
-              </span>
+              <button
+                type="button"
+                onClick={() => openCompare(product.size)}
+                className="text-[11px] sm:text-xs text-emerald-800 hover:text-emerald-950 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Compare Nutrient Profiles</span>
+              </button>
             </div>
             <div className="grid grid-cols-3 gap-1.5 sm:gap-3">
               {(['200 ml', '500 ml', '1 Litre'] as const).map(sz => {
@@ -363,6 +510,57 @@ export const ProductDetailPage: React.FC = () => {
             </button>
           </div>
 
+          {/* Instant PIN Code Delivery Estimator Widget */}
+          <PincodeDeliveryEstimator />
+
+          {/* Social Sharing Component: WhatsApp & Copy Link */}
+          <div className="p-3.5 sm:p-4 rounded-2xl bg-stone-50 border border-stone-200/90 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-stone-800 uppercase tracking-wider">
+                <Share2 className="w-3.5 h-3.5 text-emerald-800" />
+                <span>Share Product with Friends & Family</span>
+              </div>
+              <span className="text-[11px] text-stone-500">100% Pure Kerala Oil</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* WhatsApp Direct Share Button */}
+              <button
+                type="button"
+                onClick={handleWhatsAppShare}
+                className="w-full py-2.5 px-3.5 bg-emerald-700 hover:bg-emerald-800 active:scale-98 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs cursor-pointer"
+                title="Share product link directly on WhatsApp"
+              >
+                <MessageCircle className="w-4 h-4 text-emerald-200 fill-emerald-200/20" />
+                <span>Share on WhatsApp</span>
+              </button>
+
+              {/* Copy Product Link Button */}
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className={`w-full py-2.5 px-3.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all border cursor-pointer ${
+                  isCopied
+                    ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+                    : 'bg-white hover:bg-stone-100 text-stone-800 border-stone-300 hover:border-stone-400'
+                }`}
+                title="Copy product link to clipboard"
+              >
+                {isCopied ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-700" />
+                    <span className="text-emerald-800 font-bold">Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4 text-stone-600" />
+                    <span>Copy Product Link</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
           {/* Value props & shipping notes */}
           <div className="p-4 rounded-2xl bg-white border border-stone-200 grid grid-cols-2 gap-3 text-xs text-stone-600">
             <div className="flex items-center gap-2">
@@ -383,6 +581,11 @@ export const ProductDetailPage: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Interactive Nutritional Super-Superiority Chart Section */}
+      <div className="pt-2">
+        <NutritionalChart />
       </div>
 
       {/* Detailed Specifications & Reviews Tabs */}
@@ -491,116 +694,13 @@ export const ProductDetailPage: React.FC = () => {
           )}
 
           {activeTab === 'reviews' && (
-            <div className="space-y-8 max-w-3xl">
-              {/* Write Review Form */}
-              <form onSubmit={handleReviewSubmit} className="p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-4">
-                <h4 className="font-serif text-base font-bold text-stone-900">
-                  Share Your Experience with {product.name}
-                </h4>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-stone-600 font-medium">Your Rating:</span>
-                  <div className="flex gap-1">
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button
-                        type="button"
-                        key={star}
-                        onClick={() => setNewRating(star)}
-                        className="p-1 text-amber-500 hover:scale-110 transition-transform"
-                      >
-                        <Star
-                          className={`w-5 h-5 ${
-                            star <= newRating ? 'fill-amber-400 text-amber-400' : 'text-stone-300'
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input
-                    type="text"
-                    placeholder="Your Name (e.g. Ananya N.)"
-                    value={reviewerName}
-                    onChange={e => setReviewerName(e.target.value)}
-                    required
-                    className="text-xs px-3 py-2 rounded-xl border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Review Title (e.g. Pure authentic aroma)"
-                    value={newTitle}
-                    onChange={e => setNewTitle(e.target.value)}
-                    className="text-xs px-3 py-2 rounded-xl border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                  />
-                </div>
-
-                <textarea
-                  rows={3}
-                  placeholder="Tell us about the scent, taste, packaging or cooking results..."
-                  value={newComment}
-                  onChange={e => setNewComment(e.target.value)}
-                  required
-                  className="w-full text-xs p-3 rounded-xl border border-stone-300 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700"
-                />
-
-                <button
-                  type="submit"
-                  disabled={isSubmittingReview}
-                  className="px-6 py-2.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-semibold transition-colors disabled:opacity-50"
-                >
-                  {isSubmittingReview ? 'Publishing Review...' : 'Submit Verified Review'}
-                </button>
-              </form>
-
-              {/* Existing Reviews list */}
-              <div className="space-y-4">
-                {isLoadingReviews ? (
-                  <p className="text-xs text-stone-500">Loading reviews...</p>
-                ) : reviews.length === 0 ? (
-                  <p className="text-xs text-stone-500">
-                    No reviews yet for this product. Be the first to share your experience!
-                  </p>
-                ) : (
-                  reviews.map(rev => (
-                    <div key={rev.id} className="p-4 rounded-2xl border border-stone-200 bg-white space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-xs text-stone-900">{rev.customerName}</span>
-                          {rev.verifiedPurchase && (
-                            <span className="text-[10px] bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded-full flex items-center gap-1">
-                              <CheckCircle2 className="w-2.5 h-2.5" /> Verified Purchase
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-stone-400">
-                          {new Date(rev.createdAt).toLocaleDateString('en-IN', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-1 text-amber-500">
-                        {[1, 2, 3, 4, 5].map(s => (
-                          <Star
-                            key={s}
-                            className={`w-3.5 h-3.5 ${
-                              s <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-stone-200'
-                            }`}
-                          />
-                        ))}
-                        {rev.title && <span className="font-bold text-xs text-stone-800 ml-2">{rev.title}</span>}
-                      </div>
-
-                      <p className="text-xs text-stone-600 leading-relaxed">{rev.review}</p>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+            <CustomerReviews
+              productId={product.id}
+              productName={product.name}
+              reviews={reviews}
+              isLoading={isLoadingReviews}
+              onSubmitReview={handleReviewSubmit}
+            />
           )}
         </div>
       </div>
@@ -613,9 +713,14 @@ export const ProductDetailPage: React.FC = () => {
               <h3 className="font-serif text-2xl font-bold text-stone-900">Other Packaging Sizes</h3>
               <p className="text-xs text-stone-500 mt-0.5">Same 100% Unfiltered Pure Oil, available in other sizes.</p>
             </div>
-            <Link to="/shop" className="text-xs font-semibold text-emerald-800 hover:underline">
-              Compare All Sizes →
-            </Link>
+            <button
+              type="button"
+              onClick={() => openCompare(product.size)}
+              className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 flex items-center gap-1.5 hover:underline"
+            >
+              <ArrowLeftRight className="w-3.5 h-3.5" />
+              <span>Compare All Sizes Side-by-Side</span>
+            </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-3xl">
             {relatedProducts.map(p => (

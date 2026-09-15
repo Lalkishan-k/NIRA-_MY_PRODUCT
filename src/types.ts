@@ -98,6 +98,21 @@ export interface TrackingStep {
   current: boolean;
 }
 
+export interface StatusNotificationLog {
+  id: string;
+  status: OrderStatus;
+  recipientEmail: string;
+  recipientName: string;
+  subject: string;
+  sentAt: string;
+  sentSuccessfully: boolean;
+  courierPartner?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  notes?: string;
+  contentPreview?: string;
+}
+
 export interface Order {
   id: string;
   orderId: string; // e.g. CP-20260910-001
@@ -121,7 +136,14 @@ export interface Order {
   orderStatus: OrderStatus;
   trackingTimeline: TrackingStep[];
   estimatedDelivery: string;
+  courierPartner?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  dispatchedAt?: string;
+  deliveredAt?: string;
+  statusNotifications?: StatusNotificationLog[];
   notes?: string;
+  isRead?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -186,3 +208,149 @@ export interface StoreSettings {
   fssaiNumber: string;
   currencySymbol: string;
 }
+
+export interface SecurityAuditLog {
+  id: string;
+  timestamp: string;
+  ip: string;
+  userAgent: string;
+  event: 'LOGIN_SUCCESS' | 'LOGIN_FAILED' | 'ACCOUNT_LOCKED' | 'SESSIONS_REVOKED' | 'PIN_CHANGED' | 'PASSWORD_CHANGED';
+  method: 'PIN' | 'PASSWORD' | 'SYSTEM';
+  status: 'SUCCESS' | 'DENIED' | 'BLOCKED';
+  details: string;
+}
+
+export interface SecurityAuditResponse {
+  success: boolean;
+  auditLogs: SecurityAuditLog[];
+  activeSessionsCount: number;
+  lockedIpsCount: number;
+  currentSessionTokenPreview: string;
+}
+
+export type AdminActionType =
+  | 'ORDER_STATUS_CHANGED'
+  | 'INVENTORY_UPDATED'
+  | 'PRODUCT_UPDATED'
+  | 'PRODUCT_CREATED'
+  | 'PRODUCT_DELETED'
+  | 'COUPON_CREATED'
+  | 'COUPON_UPDATED'
+  | 'COUPON_DELETED'
+  | 'SETTINGS_UPDATED'
+  | 'EMAIL_SENT'
+  | 'PIN_CHANGED'
+  | 'PASSWORD_CHANGED';
+
+export interface AdminActivityLog {
+  id: string;
+  timestamp: string;
+  adminName: string;
+  adminEmail: string;
+  actionType: AdminActionType;
+  target: string;
+  description: string;
+  details?: Record<string, any>;
+}
+
+export interface CustomerInquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+  isRead?: boolean;
+  createdAt: string;
+}
+
+export interface AdminNotificationSummary {
+  unreadOrdersCount: number;
+  newInquiriesCount: number;
+  totalUnreadCount: number;
+  lastLoginTime?: string;
+  unreadOrders: Order[];
+  unreadInquiries: CustomerInquiry[];
+}
+
+export interface PincodeDeliveryEstimate {
+  pincode: string;
+  valid: boolean;
+  city: string;
+  district?: string;
+  state: string;
+  zone: string;
+  deliveryDaysMin: number;
+  deliveryDaysMax: number;
+  deliveryTimeframe: string;
+  estimatedDeliveryDate: string;
+  isExpress: boolean;
+  codAvailable: boolean;
+  freeShippingEligible: boolean;
+  freeShippingThreshold: number;
+  standardShippingFee: number;
+  courierPartners: string[];
+  message: string;
+}
+
+export interface AbandonedCheckoutItem {
+  productId: string;
+  name: string;
+  image: string;
+  size: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+export interface AbandonedCheckout {
+  id: string;
+  recoveryToken: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  shippingAddress?: Partial<ShippingAddress>;
+  items: AbandonedCheckoutItem[];
+  subtotal: number;
+  discount: number;
+  couponCode?: string;
+  totalAmount: number;
+  status: 'Abandoned' | 'Recovered' | 'Contacted';
+  lastContactedAt?: string;
+  contactMethod?: 'WhatsApp' | 'Email';
+  recoveryCount?: number;
+  recoveredOrderId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BulkEnquiry {
+  id: string;
+  referenceNumber: string;
+  businessName: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
+  businessType: 'Ayurvedic Wellness / Hospital' | 'Organic Retail Store' | 'Restaurant / Hospitality' | 'Wholesale Exporter' | 'Other';
+  gstNumber?: string;
+  city: string;
+  state: string;
+  pincode?: string;
+  preferredPackaging: {
+    can5L: number;
+    can15L: number;
+    bottle1L: number;
+    bottle500ml: number;
+  };
+  totalEstimatedLitres: number;
+  orderFrequency: 'One-time Order' | 'Monthly Subscription' | 'Quarterly Contract' | 'Weekly Restock';
+  estimatedMonthlyRequirement?: string;
+  additionalNotes?: string;
+  status: 'Pending' | 'In Progress' | 'Quotation Sent' | 'Closed' | 'Rejected';
+  quotedAmount?: number;
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+

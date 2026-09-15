@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import {
   ShieldCheck,
   CreditCard,
@@ -11,7 +11,9 @@ import {
   AlertCircle,
   Clock,
   Sparkles,
-  Smartphone
+  Smartphone,
+  Tag,
+  RotateCcw
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -19,6 +21,7 @@ import { useStore } from '../context/StoreContext';
 import { ShippingAddress } from '../types';
 import { api } from '../services/api';
 import { RazorpayModal } from '../components/RazorpayModal';
+import { sendOrderConfirmationEmail } from '../services/emailService';
 
 declare global {
   interface Window {
@@ -27,10 +30,17 @@ declare global {
 }
 
 export const CheckoutPage: React.FC = () => {
-  const { cart, subtotal, shippingCost, discount, grandTotal, appliedCoupon, clearCart } = useCart();
+  const { cart, subtotal, shippingCost, discount, grandTotal, appliedCoupon, clearCart, restoreCartItems, applyCoupon } = useCart();
   const { customerProfile, savedAddresses, updateProfileAddress } = useAuth();
   const { settings, addToast, razorpayKeyId } = useStore();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const recoveryTokenParam = searchParams.get('recover');
+
+  // Recovery State
+  const [isRecovering, setIsRecovering] = useState(Boolean(recoveryTokenParam));
+  const [recoveryMessage, setRecoveryMessage] = useState<string | null>(null);
+  const activeRecoveryTokenRef = useRef<string | undefined>(recoveryTokenParam || undefined);
 
   // Contact info
   const [fullName, setFullName] = useState(customerProfile?.name || '');
@@ -62,12 +72,119 @@ export const CheckoutPage: React.FC = () => {
     amount: number;
   } | null>(null);
 
-  // Auto redirect if cart is empty
+  // Handle 1-Click Recovery Token from URL
   useEffect(() => {
-    if (cart.length === 0) {
+    if (!recoveryTokenParam) return;
+
+    const performRecovery = async () => {
+      try {
+        setIsRecovering(true);
+        const recovered = await api.getRecoveredCheckout(recoveryTokenParam);
+        if (recovered && recovered.items && recovered.items.length > 0) {
+          // Format into CartItem shape
+          const restoredItems = recovered.items.map((it: any) => ({
+            productId: it.productId,
+            name: it.name,
+            image: it.image,
+            size: it.size,
+            unitPrice: it.unitPrice,
+            quantity: it.quantity,
+            stock: 100
+          }));
+
+          restoreCartItems(restoredItems, recovered.couponCode || 'RECOVER10');
+
+          if (recovered.customerName) setFullName(recovered.customerName);
+          if (recovered.email) setEmail(recovered.email);
+          if (recovered.phone) setPhone(recovered.phone);
+
+          if (recovered.shippingAddress) {
+            const sa = recovered.shippingAddress;
+            if (sa.house) setHouse(sa.house);
+            if (sa.street) setStreet(sa.street);
+            if (sa.locality) setLocality(sa.locality);
+            if (sa.city) setCity(sa.city);
+            if (sa.district) setDistrict(sa.district);
+            if (sa.state) setState(sa.state);
+            if (sa.pinCode) setPinCode(sa.pinCode);
+            if (sa.landmark) setLandmark(sa.landmark);
+          }
+
+          // Auto-apply recovery coupon
+          setTimeout(() => {
+            applyCoupon(recovered.couponCode || 'RECOVER10');
+          }, 400);
+
+          setRecoveryMessage(`Welcome back! We've restored your items with the exclusive RECOVER10 voucher.`);
+          addToast('Your saved checkout has been restored!', 'success');
+        }
+      } catch (err: any) {
+        console.warn('Recovery token lookup failed:', err);
+      } finally {
+        setIsRecovering(false);
+      }
+    };
+
+    performRecovery();
+  }, [recoveryTokenParam]);
+
+  // Debounced auto-record abandoned checkout when customer details are entered
+  useEffect(() => {
+    if (cart.length === 0 || (!email.trim() && !phone.trim())) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        const payload = {
+          customerName: fullName.trim() || undefined,
+          email: email.trim() || undefined,
+          phone: phone.trim() || undefined,
+          shippingAddress: {
+            fullName: fullName.trim(),
+            phone: phone.trim(),
+            email: email.trim(),
+            house,
+            street,
+            locality,
+            city,
+            district,
+            state,
+            pinCode,
+            landmark
+          },
+          items: cart.map(c => ({
+            productId: c.productId,
+            name: c.name,
+            image: c.image,
+            size: c.size,
+            quantity: c.quantity,
+            unitPrice: c.unitPrice,
+            totalPrice: c.unitPrice * c.quantity
+          })),
+          subtotal,
+          discount,
+          couponCode: appliedCoupon || undefined,
+          totalAmount: grandTotal,
+          recoveryToken: activeRecoveryTokenRef.current
+        };
+
+        const res = await api.recordAbandonedCheckout(payload);
+        if (res?.recoveryToken) {
+          activeRecoveryTokenRef.current = res.recoveryToken;
+        }
+      } catch (e) {
+        // Silent background tracking
+      }
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [fullName, email, phone, house, street, city, pinCode, cart, subtotal, discount, grandTotal, appliedCoupon]);
+
+  // Auto redirect if cart is empty and not currently recovering
+  useEffect(() => {
+    if (cart.length === 0 && !recoveryTokenParam && !isRecovering) {
       navigate('/cart');
     }
-  }, [cart, navigate]);
+  }, [cart, navigate, recoveryTokenParam, isRecovering]);
 
   const handleSavedAddressSelect = (addr: ShippingAddress) => {
     setFullName(addr.fullName);
@@ -137,7 +254,9 @@ export const CheckoutPage: React.FC = () => {
       // Handle Cash on Delivery (COD)
       if (paymentMethod === 'Cash on Delivery (COD)' || res.cod) {
         clearCart();
-        addToast('Order confirmed with Cash on Delivery!', 'success');
+        // Send automated order confirmation email via EmailJS (graceful catch if not configured)
+        sendOrderConfirmationEmail(res, email, fullName).catch(err => console.log('Email notice skipped:', err));
+        addToast('Order confirmed with Cash on Delivery! Confirmation email sent.', 'success');
         navigate(`/order-confirmation/${res.orderId}`);
         return;
       }
@@ -183,7 +302,10 @@ export const CheckoutPage: React.FC = () => {
 
                 if (verifyRes.success) {
                   clearCart();
-                  addToast('Payment successful! Your order has been placed.', 'success');
+                  if (verifyRes.order) {
+                    sendOrderConfirmationEmail(verifyRes.order, email, fullName).catch(err => console.log('Email notice skipped:', err));
+                  }
+                  addToast('Payment successful! Order confirmation email sent.', 'success');
                   navigate(`/order-confirmation/${orderId}`);
                 }
               } catch (verErr: any) {
@@ -245,7 +367,10 @@ export const CheckoutPage: React.FC = () => {
       if (verifyRes.success) {
         setShowRazorpayModal(false);
         clearCart();
-        addToast('Payment verified successfully! Your order is confirmed.', 'success');
+        if (verifyRes.order) {
+          sendOrderConfirmationEmail(verifyRes.order, email, fullName).catch(err => console.log('Email notice skipped:', err));
+        }
+        addToast('Payment verified successfully! Order confirmation email sent.', 'success');
         navigate(`/order-confirmation/${activePaymentOrderData.orderId}`);
       }
     } catch (verErr: any) {
@@ -271,6 +396,23 @@ export const CheckoutPage: React.FC = () => {
           <span>256-bit Encrypted Transaction. Direct dispatch from Kozhikode, Kerala.</span>
         </p>
       </div>
+
+      {recoveryMessage && (
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-teal-500/15 border border-emerald-600/30 text-emerald-950 text-xs flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+              <RotateCcw className="w-4 h-4" />
+            </div>
+            <div>
+              <span className="font-bold text-emerald-900 block font-serif text-sm">Cart Restored Successfully!</span>
+              <p className="text-stone-700">{recoveryMessage}</p>
+            </div>
+          </div>
+          <span className="hidden sm:inline-flex items-center px-2.5 py-1 bg-emerald-700 text-white font-bold rounded-lg text-[11px] shadow-xs">
+            10% Saved
+          </span>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2">
@@ -378,7 +520,7 @@ export const CheckoutPage: React.FC = () => {
                     type="text"
                     value={street}
                     onChange={e => setStreet(e.target.value)}
-                    placeholder="e.g. Kunnamangalam Main Road"
+                    placeholder="e.g. NH 66 / Mavoor Road / MG Road"
                     required
                     className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-stone-300 bg-stone-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-700"
                   />

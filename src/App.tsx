@@ -1,12 +1,16 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { StoreProvider, useStore } from './context/StoreContext';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { WishlistProvider } from './context/WishlistContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { WhatsAppButton } from './components/WhatsAppButton';
 import { CartDrawer } from './components/CartDrawer';
+import { WishlistDrawer } from './components/WishlistDrawer';
+import { CompareModal } from './components/CompareModal';
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -17,6 +21,7 @@ import { TrackOrderPage } from './pages/TrackOrderPage';
 import { AccountPage } from './pages/AccountPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminDashboard } from './pages/AdminDashboard';
+import { BulkEnquiryPage } from './pages/BulkEnquiryPage';
 import { Policies } from './pages/Policies';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
@@ -103,6 +108,8 @@ const AppContent: React.FC = () => {
           <Route path="/track-order" element={<TrackOrderPage />} />
           <Route path="/account" element={<AccountPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/bulk-enquiry" element={<BulkEnquiryPage />} />
+          <Route path="/wholesale" element={<BulkEnquiryPage />} />
           <Route path="/shipping-policy" element={<Policies />} />
           <Route path="/return-refund-policy" element={<Policies />} />
           <Route path="/privacy-policy" element={<Policies />} />
@@ -113,6 +120,8 @@ const AppContent: React.FC = () => {
 
       {!isAdminRoute && <Footer />}
       <CartDrawer />
+      <WishlistDrawer />
+      <CompareModal />
       <WhatsAppButton />
       <ToastContainer />
     </div>
@@ -121,14 +130,18 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <StoreProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <AppContent />
-          </Router>
-        </CartProvider>
-      </AuthProvider>
-    </StoreProvider>
+    <HelmetProvider>
+      <StoreProvider>
+        <AuthProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <Router>
+                <AppContent />
+              </Router>
+            </WishlistProvider>
+          </CartProvider>
+        </AuthProvider>
+      </StoreProvider>
+    </HelmetProvider>
   );
 }

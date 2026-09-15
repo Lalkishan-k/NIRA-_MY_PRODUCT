@@ -1,11 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Filter, SlidersHorizontal, Search, RefreshCw } from 'lucide-react';
+import { Helmet } from 'react-helmet-async';
+import { Filter, SlidersHorizontal, Search, RefreshCw, ArrowLeftRight, Sparkles } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
+import { CompareSection } from '../components/CompareSection';
 
 export const ShopPage: React.FC = () => {
-  const { products, isLoadingProducts } = useStore();
+  const { products, isLoadingProducts, openCompare } = useStore();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedSize = searchParams.get('size') || 'All';
@@ -72,6 +74,17 @@ export const ShopPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+      <Helmet>
+        <title>Shop Unfiltered Pure Coconut Oil (200ml, 500ml, 1 Litre) | NIRA</title>
+        <meta
+          name="description"
+          content="Buy 100% authentic, raw unfiltered Kerala coconut oil in 200 ml, 500 ml, and 1 Litre bottles. Rich in Vitamin E, polyphenols, and healthy MCTs."
+        />
+        <meta property="og:title" content="Shop Raw Unfiltered Coconut Oil | NIRA Kerala" />
+        <meta property="og:description" content="Discover 100% pure unfiltered coconut oil with natural sediment, roasted aroma, and rich nutrients. Available in 200ml, 500ml & 1L." />
+        <link rel="canonical" href="https://nira.farm/shop" />
+      </Helmet>
+
       {/* Header Banner */}
       <div className="bg-stone-900 rounded-3xl p-8 sm:p-12 text-white relative overflow-hidden">
         <div className="max-w-2xl relative z-10 space-y-3">
@@ -110,14 +123,24 @@ export const ShopPage: React.FC = () => {
           })}
         </div>
 
-        {/* Search & Sort Controls */}
+        {/* Search, Sort & Compare Controls */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+          {/* Compare Modal Opener */}
+          <button
+            type="button"
+            onClick={() => openCompare('200 ml', '500 ml')}
+            className="px-3.5 py-2 sm:py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shadow-2xs"
+          >
+            <ArrowLeftRight className="w-3.5 h-3.5 text-amber-700" />
+            <span>Compare Sizes</span>
+          </button>
+
           {/* Search bar inside shop */}
-          <div className="relative flex-1 sm:w-56">
+          <div className="relative flex-1 sm:w-48">
             <Search className="w-4 h-4 text-stone-400 absolute left-3 top-2.5" />
             <input
               type="text"
-              placeholder="Search packaging or benefits..."
+              placeholder="Search oil or benefits..."
               value={searchQuery}
               onChange={e => handleSearchChange(e.target.value)}
               className="w-full pl-9 pr-3 py-2 sm:py-1.5 text-xs rounded-xl border border-stone-200 focus:outline-none focus:ring-2 focus:ring-emerald-600 bg-stone-50"
@@ -187,6 +210,11 @@ export const ShopPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* In-Page Compare Section */}
+      <div className="pt-6">
+        <CompareSection />
+      </div>
     </div>
   );
 };

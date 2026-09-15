@@ -198,6 +198,18 @@ export const initialCoupons: Coupon[] = [
     usedCount: 45,
     active: true,
     description: '15% OFF for orders above ₹799 (Max ₹250)'
+  },
+  {
+    code: 'RECOVER10',
+    discountType: 'percentage',
+    discountValue: 10,
+    minimumOrderAmount: 0,
+    maximumDiscount: 200,
+    expiryDate: '2028-12-31',
+    usageLimit: 10000,
+    usedCount: 12,
+    active: true,
+    description: 'Exclusive 10% Recovery Discount on your abandoned order'
   }
 ];
 
@@ -210,10 +222,10 @@ export const defaultStoreSettings: StoreSettings = {
   whatsappNumber: '+919562513642',
   address: {
     line1: 'NIRA Agro-Processing Heritage Unit',
-    line2: 'Kozhikode-Wayanad Highway, Kunnamangalam',
+    line2: 'NH 66 Airport Bypass Corridor',
     city: 'Kozhikode',
     state: 'Kerala',
-    pincode: '673571'
+    pincode: '673633'
   },
   freeShippingThreshold: 499,
   shippingCharge: 50,

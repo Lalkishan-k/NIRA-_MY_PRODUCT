@@ -19,6 +19,7 @@ interface CartContextType {
   updateQuantity: (productId: string, size: ProductSize, quantity: number) => void;
   removeFromCart: (productId: string, size: ProductSize) => void;
   clearCart: () => void;
+  restoreCartItems: (items: CartItem[], couponCode?: string) => void;
   totalItems: number;
   subtotal: number;
   shippingCost: number;
@@ -99,6 +100,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const addToCart = (product: Product, quantity = 1, selectedSize?: ProductSize) => {
     const size = selectedSize || product.size;
+    const isExisting = cart.some(item => item.productId === product.id && item.size === size);
+
     setCart(prev => {
       const existingIndex = prev.findIndex(item => item.productId === product.id && item.size === size);
       if (existingIndex > -1) {
@@ -106,7 +109,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const newQty = Math.min(product.stock, item.quantity + quantity);
         const updated = [...prev];
         updated[existingIndex] = { ...item, quantity: newQty };
-        addToast(`Updated quantity of ${product.name} (${size}) in cart`);
         return updated;
       } else {
         const newItem: CartItem = {
@@ -118,10 +120,15 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
           quantity: Math.min(product.stock, quantity),
           stock: product.stock
         };
-        addToast(`Added ${product.name} to cart!`);
         return [...prev, newItem];
       }
     });
+
+    if (isExisting) {
+      addToast(`Updated quantity of ${product.name} (${size}) in cart`);
+    } else {
+      addToast(`Added ${product.name} to cart!`);
+    }
     setIsCartDrawerOpen(true);
   };
 
@@ -185,6 +192,20 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     addToast('Coupon removed', 'info');
   };
 
+  const restoreCartItems = (items: CartItem[], couponCode?: string) => {
+    if (!items || items.length === 0) return;
+    setCart(items);
+    try {
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    } catch (e) {
+      console.warn('Failed saving restored cart', e);
+    }
+    if (couponCode) {
+      setAppliedCoupon(couponCode);
+      localStorage.setItem(COUPON_STORAGE_KEY, couponCode);
+    }
+  };
+
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const subtotal = cart.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const shippingCost = subtotal === 0 || subtotal >= settings.freeShippingThreshold ? 0 : settings.shippingCharge;
@@ -200,6 +221,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateQuantity,
         removeFromCart,
         clearCart,
+        restoreCartItems,
         totalItems,
         subtotal,
         shippingCost,

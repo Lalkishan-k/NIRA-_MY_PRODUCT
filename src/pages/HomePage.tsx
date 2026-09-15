@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/ProductCard';
+import { FaqAccordion } from '../components/FaqAccordion';
 import {
   heroCoconutOil,
   keralaCooking,
@@ -716,6 +717,9 @@ export const HomePage: React.FC = () => {
       </section>
 
 
+
+      {/* FAQ Accordion Section */}
+      <FaqAccordion />
 
       {/* Video Customization Modal */}
       {isVideoModalOpen && (

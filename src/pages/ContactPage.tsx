@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Phone, Mail, MapPin, MessageCircle, Clock, ShieldCheck, Send, CheckCircle2 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { api } from '../services/api';
+import { StoreLocator } from '../components/StoreLocator';
 
 export const ContactPage: React.FC = () => {
   const { settings, addToast } = useStore();
@@ -13,6 +14,17 @@ export const ContactPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    if (window.location.hash) {
+      const element = document.querySelector(window.location.hash);
+      if (element) {
+        setTimeout(() => {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }, 150);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,6 +85,12 @@ export const ContactPage: React.FC = () => {
                   {settings.address.line2}<br />
                   {settings.address.city}, {settings.address.state} — {settings.address.pincode}
                 </p>
+                <a
+                  href="#store-locator"
+                  className="inline-flex items-center gap-1 text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold underline mt-1.5"
+                >
+                  View Facility Map & Store Locator ↓
+                </a>
               </div>
             </div>
 
@@ -217,6 +235,9 @@ export const ContactPage: React.FC = () => {
           </form>
         </div>
       </div>
+
+      {/* Store Locator Section */}
+      <StoreLocator />
 
       {/* Frequently Asked Questions */}
       <div className="bg-stone-50 rounded-3xl p-8 border border-stone-200 space-y-6">

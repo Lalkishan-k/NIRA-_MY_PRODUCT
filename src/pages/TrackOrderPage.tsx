@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Truck, Package, AlertCircle, MessageCircle, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
+import { Search, Truck, Package, AlertCircle, MessageCircle, Calendar, MapPin, CheckCircle2, ExternalLink } from 'lucide-react';
 import { Order } from '../types';
 import { api } from '../services/api';
 import { OrderTimeline } from '../components/OrderTimeline';
@@ -120,6 +120,42 @@ export const TrackOrderPage: React.FC = () => {
                 currentStatus={order.orderStatus}
               />
             </div>
+
+            {/* Courier Dispatch Banner if Shipped / Delivered */}
+            {(order.courierPartner || order.trackingNumber) && (
+              <div className="mt-4 p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-800 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <Truck className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider block">
+                      Dispatched Logistics Partner
+                    </span>
+                    <h4 className="font-bold text-stone-900 text-sm">
+                      {order.courierPartner || 'Express Courier'}
+                    </h4>
+                    {order.trackingNumber && (
+                      <p className="text-xs text-stone-600 font-mono mt-0.5">
+                        Consignment / AWB No: <strong className="text-stone-900">{order.trackingNumber}</strong>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                {order.trackingUrl && (
+                  <a
+                    href={order.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold rounded-xl shadow-xs transition-colors whitespace-nowrap"
+                  >
+                    <span>Track with Courier</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Delivery & Items Summary */}

@@ -1,4 +1,23 @@
-import { Product, Order, Coupon, Review, StoreSettings, ShippingAddress } from '../types';
+import { Product, Order, Coupon, Review, StoreSettings, ShippingAddress, StatusNotificationLog, SecurityAuditResponse, AdminActivityLog, CustomerInquiry, AdminNotificationSummary, AbandonedCheckout, BulkEnquiry } from '../types';
+
+export interface UpdateOrderStatusOptions {
+  orderStatus?: string;
+  paymentStatus?: string;
+  courierPartner?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  estimatedDelivery?: string;
+  notes?: string;
+  notifyCustomer?: boolean;
+  emailCustomMessage?: string;
+}
+
+export interface UpdateOrderStatusResponse {
+  success: boolean;
+  order: Order;
+  emailSent?: boolean;
+  notification?: StatusNotificationLog;
+}
 
 const ADMIN_TOKEN_KEY = 'nira_admin_session_token';
 
@@ -212,6 +231,55 @@ export const api = {
     return data;
   },
 
+  async changeAdminPassword(currentPassword: string, newPassword: string) {
+    const res = await fetch('/api/admin/auth/change-password', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ currentPassword, newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update master password');
+    return data;
+  },
+
+  async getAdminSecurityAudit(): Promise<SecurityAuditResponse> {
+    const res = await fetch('/api/admin/security/audit', {
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch security audit log');
+    return data;
+  },
+
+  async revokeAllOtherAdminSessions(): Promise<{ success: boolean; revokedCount: number; message: string }> {
+    const res = await fetch('/api/admin/security/revoke-all', {
+      method: 'POST',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to revoke other sessions');
+    return data;
+  },
+
+  async getAdminActivityLogs(): Promise<AdminActivityLog[]> {
+    const res = await fetch('/api/admin/activity-logs', {
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch activity logs');
+    return data;
+  },
+
+  async clearAdminActivityLogs(): Promise<{ success: boolean; message: string }> {
+    const res = await fetch('/api/admin/activity-logs/clear', {
+      method: 'POST',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to clear activity logs');
+    return data;
+  },
+
   // ----------------------------------------------------
   // PROTECTED ADMIN ENDPOINTS
   // ----------------------------------------------------
@@ -273,13 +341,48 @@ export const api = {
     return res.json();
   },
 
-  async updateOrderStatus(id: string, orderStatus?: string, paymentStatus?: string): Promise<Order> {
+  async updateOrderStatus(
+    id: string,
+    orderStatusOrOptions?: string | UpdateOrderStatusOptions,
+    paymentStatus?: string
+  ): Promise<UpdateOrderStatusResponse> {
+    let bodyPayload: any = {};
+    if (typeof orderStatusOrOptions === 'object' && orderStatusOrOptions !== null) {
+      bodyPayload = orderStatusOrOptions;
+    } else {
+      bodyPayload = {
+        orderStatus: orderStatusOrOptions,
+        paymentStatus,
+        notifyCustomer: true
+      };
+    }
+
     const res = await fetch(`/api/admin/orders/${id}/status`, {
       method: 'PUT',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ orderStatus, paymentStatus })
+      body: JSON.stringify(bodyPayload)
     });
-    if (!res.ok) throw new Error('Failed to update order status');
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to update order status');
+    }
+    const data = await res.json();
+    if (data.order) {
+      return data;
+    }
+    return { success: true, order: data as Order };
+  },
+
+  async resendOrderNotification(id: string, payload?: { subject?: string; message?: string; newStatus?: string }) {
+    const res = await fetch(`/api/admin/orders/${id}/send-email`, {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(payload || {})
+    });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || 'Failed to send notification email');
+    }
     return res.json();
   },
 
@@ -355,7 +458,177 @@ export const api = {
     return res.json();
   },
 
+  async getAdminInquiries(): Promise<CustomerInquiry[]> {
+    const res = await fetch('/api/admin/inquiries', {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load customer inquiries');
+    return res.json();
+  },
+
+  async markInquiryRead(id: string): Promise<void> {
+    const res = await fetch(`/api/admin/inquiries/${id}/read`, {
+      method: 'PUT',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to mark inquiry as read');
+  },
+
+  async markAllInquiriesRead(): Promise<void> {
+    const res = await fetch('/api/admin/inquiries/mark-all-read', {
+      method: 'PUT',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to mark all inquiries as read');
+  },
+
+  async markOrderRead(id: string): Promise<void> {
+    const res = await fetch(`/api/admin/orders/${id}/read`, {
+      method: 'PUT',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to mark order as read');
+  },
+
+  async markAllOrdersRead(): Promise<void> {
+    const res = await fetch('/api/admin/orders/mark-all-read', {
+      method: 'PUT',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to mark all orders as read');
+  },
+
+  async getAdminNotificationsSummary(since?: string): Promise<AdminNotificationSummary & { serverTime: string }> {
+    const query = since ? `?since=${encodeURIComponent(since)}` : '';
+    const res = await fetch(`/api/admin/notifications-summary${query}`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load notifications summary');
+    return res.json();
+  },
+
+  async recordAbandonedCheckout(payload: {
+    customerName?: string;
+    email?: string;
+    phone?: string;
+    shippingAddress?: ShippingAddress;
+    items: any[];
+    subtotal: number;
+    discount?: number;
+    couponCode?: string;
+    totalAmount: number;
+    recoveryToken?: string;
+  }): Promise<{ success: boolean; abandoned: AbandonedCheckout; recoveryToken: string }> {
+    const res = await fetch('/api/checkout/record-abandoned', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Failed to record checkout session');
+    return res.json();
+  },
+
+  async getRecoveredCheckout(token: string): Promise<AbandonedCheckout> {
+    const res = await fetch(`/api/checkout/recover/${encodeURIComponent(token)}`);
+    if (!res.ok) throw new Error('Recovery session not found or expired');
+    return res.json();
+  },
+
+  async getAdminAbandonedCheckouts(params?: { status?: string; search?: string }): Promise<{
+    abandonedCheckouts: AbandonedCheckout[];
+    stats: {
+      totalCount: number;
+      activeCount: number;
+      recoveredCount: number;
+      contactedCount: number;
+      totalAbandonedValue: number;
+      recoveredValue: number;
+      recoveryRate: number;
+    };
+  }> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.search) query.set('search', params.search);
+    const res = await fetch(`/api/admin/abandoned-checkouts?${query.toString()}`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load abandoned checkouts');
+    return res.json();
+  },
+
+  async markAbandonedContacted(id: string, method: 'WhatsApp' | 'Email' = 'WhatsApp'): Promise<AbandonedCheckout> {
+    const res = await fetch(`/api/admin/abandoned-checkouts/${id}/contacted`, {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ method })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update contact status');
+    return data.abandoned;
+  },
+
+  async markAbandonedRecovered(id: string): Promise<AbandonedCheckout> {
+    const res = await fetch(`/api/admin/abandoned-checkouts/${id}/recover`, {
+      method: 'POST',
+      headers: getAdminHeaders()
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to mark as recovered');
+    return data.abandoned;
+  },
+
+  async deleteAbandonedCheckout(id: string): Promise<void> {
+    const res = await fetch(`/api/admin/abandoned-checkouts/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete abandoned checkout record');
+  },
+
+  // B2B Bulk Enquiry Endpoints
+  async submitBulkEnquiry(data: Partial<BulkEnquiry>): Promise<{ success: boolean; enquiry: BulkEnquiry }> {
+    const res = await fetch('/api/bulk-enquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Failed to submit bulk enquiry');
+    return json;
+  },
+
+  async getAdminBulkEnquiries(params?: { status?: string; search?: string }): Promise<{ enquiries: BulkEnquiry[]; stats: any }> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.search) query.set('search', params.search);
+    const res = await fetch(`/api/admin/bulk-enquiry?${query.toString()}`, {
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to load B2B bulk enquiries');
+    return res.json();
+  },
+
+  async updateAdminBulkEnquiry(id: string, updates: Partial<BulkEnquiry>): Promise<BulkEnquiry> {
+    const res = await fetch(`/api/admin/bulk-enquiry/${id}`, {
+      method: 'PATCH',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify(updates)
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Failed to update bulk enquiry');
+    return json.enquiry;
+  },
+
+  async deleteAdminBulkEnquiry(id: string): Promise<void> {
+    const res = await fetch(`/api/admin/bulk-enquiry/${id}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete bulk enquiry');
+  },
+
   async seedDatabase() {
+
     const res = await fetch('/api/admin/seed', {
       method: 'POST',
       headers: getAdminHeaders()

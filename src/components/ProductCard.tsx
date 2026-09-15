@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Star, ShoppingBag, Zap, Check } from 'lucide-react';
+import { Star, ShoppingBag, Zap, Check, Heart, ArrowLeftRight } from 'lucide-react';
 import { Product } from '../types';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useStore } from '../context/StoreContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,7 +12,11 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const { openCompare } = useStore();
   const navigate = useNavigate();
+
+  const inWishlist = isInWishlist(product.id);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -25,11 +31,17 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     addToCart(product, 1);
   };
 
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleWishlist(product);
+  };
+
   const isLowStock = product.stock > 0 && product.stock <= 15;
   const isOutOfStock = product.stock <= 0;
 
   return (
-    <div className="group bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col">
+    <div className="group bg-white rounded-2xl border border-stone-200 overflow-hidden shadow-xs hover:shadow-md transition-all duration-300 flex flex-col relative">
       {/* Product Image Link */}
       <Link to={`/product/${product.slug}`} className="relative block aspect-square overflow-hidden bg-stone-50">
         <img
@@ -41,23 +53,36 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
         {/* Discount Badge */}
         {product.discount && product.discount > 0 && (
-          <span className="absolute top-3 left-3 bg-amber-500 text-stone-950 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs">
+          <span className="absolute top-3 left-3 bg-amber-500 text-stone-950 font-bold text-[11px] px-2.5 py-1 rounded-full shadow-xs z-10">
             {product.discount}% OFF
           </span>
         )}
 
+        {/* Wishlist Button Overlay */}
+        <button
+          onClick={handleWishlistToggle}
+          className={`absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center transition-all shadow-xs z-20 ${
+            inWishlist
+              ? 'bg-rose-500 text-white scale-105'
+              : 'bg-white/90 backdrop-blur-xs text-stone-600 hover:text-rose-600 hover:bg-white'
+          }`}
+          title={inWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
+        >
+          <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+        </button>
+
         {/* Category Pill */}
-        <span className="absolute bottom-3 left-3 bg-stone-900/70 backdrop-blur-xs text-white text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full">
+        <span className="absolute bottom-3 left-3 bg-stone-900/70 backdrop-blur-xs text-white text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full z-10">
           {product.category}
         </span>
 
         {/* Stock Status Pill */}
         {isOutOfStock ? (
-          <span className="absolute top-3 right-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="absolute top-14 right-3 bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
             Out of Stock
           </span>
         ) : isLowStock ? (
-          <span className="absolute top-3 right-3 bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="absolute top-14 right-3 bg-amber-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full z-10">
             Only {product.stock} left
           </span>
         ) : null}
@@ -73,9 +98,19 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               <span className="font-bold text-stone-800">{product.rating}</span>
               <span className="text-stone-400">({product.reviewCount})</span>
             </div>
-            <span className="font-medium bg-stone-100 text-stone-700 px-2 py-0.5 rounded-md text-[11px]">
-              {product.size}
-            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openCompare(product.size);
+              }}
+              title={`Compare ${product.size} nutrients with other sizes`}
+              className="font-semibold bg-stone-100 hover:bg-amber-100 hover:text-amber-900 text-stone-700 px-2.5 py-0.5 rounded-md text-[11px] flex items-center gap-1 transition-colors cursor-pointer border border-stone-200/80 hover:border-amber-300"
+            >
+              <ArrowLeftRight className="w-3 h-3 text-stone-500 hover:text-amber-700" />
+              <span>{product.size}</span>
+            </button>
           </div>
 
           {/* Title */}

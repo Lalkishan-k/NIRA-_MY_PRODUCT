@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, User, Menu, X, ShieldCheck, Truck } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, ShieldCheck, Truck, Heart, ArrowLeftRight } from 'lucide-react';
 import { CrackedCoconutPiece } from './CrackedCoconutPiece';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export const Navbar: React.FC = () => {
   const { totalItems, setIsCartDrawerOpen } = useCart();
+  const { wishlistCount, setIsWishlistOpen } = useWishlist();
   const { customerProfile, isAdmin, logout } = useAuth();
-  const { settings, searchQuery, setSearchQuery } = useStore();
+  const { settings, searchQuery, setSearchQuery, openCompare } = useStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -42,6 +44,7 @@ export const Navbar: React.FC = () => {
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Shop', path: '/shop' },
+    { label: 'B2B Bulk & Wholesale', path: '/bulk-enquiry' },
     { label: 'How It Is Made', path: '/#how-it-is-made' },
     { label: 'Why Choose Us', path: '/#why-choose-us' },
     { label: 'Track Order', path: '/track-order' },
@@ -78,43 +81,42 @@ export const Navbar: React.FC = () => {
       </div>
 
       {/* Floating Menubar Container */}
-      <header className="sticky top-2 sm:top-4 z-40 px-3 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full transition-all duration-300">
+      <header className="sticky top-2 sm:top-4 z-40 px-2 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full transition-all duration-300">
         <div
           className={`transition-all duration-300 rounded-2xl sm:rounded-full border ${
             isScrolled
               ? 'bg-white/95 backdrop-blur-xl border-stone-200/90 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-stone-900/5'
               : 'bg-white/90 backdrop-blur-lg border-stone-200/80 shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
-          } px-3.5 sm:px-6 py-2 sm:py-2.5`}
+          } px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2`}
         >
-          <div className="flex items-center justify-between h-13 sm:h-15">
+          <div className="flex items-center justify-between h-11 sm:h-13 md:h-14">
             {/* Left: Mobile/Tablet Menu Button & Brand Logo */}
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 min-w-0">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="xl:hidden p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
+                className="lg:hidden p-1.5 sm:p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
                 aria-label="Toggle menu"
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                {isMobileMenuOpen ? <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" /> : <Menu className="w-4.5 h-4.5 sm:w-5 sm:h-5" />}
               </button>
 
               {/* Brand Logo */}
-              <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group shrink-0">
+              <Link to="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
                 <div className="flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <CrackedCoconutPiece className="w-7 h-7 sm:w-8 sm:h-8" />
+                  <CrackedCoconutPiece className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
                 </div>
-                <span className="font-brand text-2xl sm:text-3xl font-black text-[#144D29] tracking-wider block leading-none group-hover:text-emerald-950 transition-colors">
+                <span className="font-brand text-xl sm:text-2xl md:text-3xl font-black text-[#144D29] tracking-wide block leading-none group-hover:text-emerald-950 transition-colors">
                   {settings.brandName}
                 </span>
               </Link>
             </div>
 
-            {/* Middle: Navigation Links with strict responsive priority to prevent overlapping */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5 xl:gap-2 flex-nowrap shrink min-w-0">
-              {/* Priority 1 (Always visible on md+): Home & Shop */}
+            {/* Middle: Desktop Navigation Links (Visible on lg+ screens, clean layout) */}
+            <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-nowrap shrink min-w-0">
               <Link
                 to="/"
                 onClick={() => handleNavClick('/')}
-                className={`text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -125,7 +127,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/shop"
                 onClick={() => handleNavClick('/shop')}
-                className={`text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/shop')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -133,12 +135,18 @@ export const Navbar: React.FC = () => {
               >
                 Shop
               </Link>
-
-              {/* Priority 2 (Visible on lg+ screens): Track Order & Contact */}
+              <button
+                type="button"
+                onClick={() => openCompare()}
+                className="text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap text-stone-700 hover:text-emerald-900 hover:bg-stone-100 flex items-center gap-1 cursor-pointer"
+              >
+                <ArrowLeftRight className="w-3.5 h-3.5 text-amber-700" />
+                <span>Compare</span>
+              </button>
               <Link
                 to="/track-order"
                 onClick={() => handleNavClick('/track-order')}
-                className={`hidden lg:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/track-order')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -149,7 +157,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/contact"
                 onClick={() => handleNavClick('/contact')}
-                className={`hidden lg:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/contact')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -157,12 +165,10 @@ export const Navbar: React.FC = () => {
               >
                 Contact
               </Link>
-
-              {/* Priority 3 (Secondary links - cut on smaller screens, visible on xl+ only): How It Is Made & Why Choose Us */}
               <Link
                 to="/#how-it-is-made"
                 onClick={() => handleNavClick('/#how-it-is-made')}
-                className={`hidden xl:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`hidden xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/#how-it-is-made')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -173,7 +179,7 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/#why-choose-us"
                 onClick={() => handleNavClick('/#why-choose-us')}
-                className={`hidden xl:inline-flex text-xs lg:text-sm font-medium px-2.5 lg:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`hidden xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/#why-choose-us')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
                     : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
@@ -183,8 +189,8 @@ export const Navbar: React.FC = () => {
               </Link>
             </nav>
 
-            {/* Right: Action Icons */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+            {/* Right: Action Icons with compact, adaptive spacing */}
+            <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 shrink-0">
               {/* Search Trigger */}
               <div className="relative">
                 {isSearchOpen ? (
@@ -195,23 +201,23 @@ export const Navbar: React.FC = () => {
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       autoFocus
-                      className="w-36 sm:w-56 text-xs sm:text-sm px-3 py-1.5 rounded-full border border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-stone-50"
+                      className="w-24 sm:w-40 md:w-52 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-stone-50"
                     />
                     <button
                       type="button"
                       onClick={() => setIsSearchOpen(false)}
                       className="ml-1 text-stone-500 hover:text-stone-800 p-1"
                     >
-                      <X className="w-4 h-4" />
+                      <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
                   </form>
                 ) : (
                   <button
                     onClick={() => setIsSearchOpen(true)}
-                    className="p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
+                    className="p-1.5 sm:p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
                     aria-label="Search"
                   >
-                    <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+                    <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                   </button>
                 )}
               </div>
@@ -220,10 +226,10 @@ export const Navbar: React.FC = () => {
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-semibold hover:bg-amber-200 transition-colors"
+                  className="hidden md:flex items-center gap-1 px-2.5 py-1 bg-amber-100 text-amber-900 border border-amber-300 rounded-full text-xs font-semibold hover:bg-amber-200 transition-colors shrink-0"
                 >
                   <ShieldCheck className="w-3.5 h-3.5 text-amber-800" />
-                  Admin
+                  <span>Admin</span>
                 </Link>
               )}
 
@@ -231,19 +237,19 @@ export const Navbar: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors flex items-center gap-1"
+                  className="p-1.5 sm:p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors flex items-center gap-1 shrink-0"
                   aria-label="Account"
                 >
-                  <User className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <User className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                   {customerProfile && (
-                    <span className="hidden xl:inline text-xs font-medium text-stone-700 max-w-[75px] truncate">
+                    <span className="hidden xl:inline text-xs font-medium text-stone-700 max-w-[70px] truncate">
                       {customerProfile.name.split(' ')[0]}
                     </span>
                   )}
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     {customerProfile ? (
                       <>
                         <div className="px-4 py-2 border-b border-stone-100">
@@ -316,16 +322,31 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
 
-              {/* Shopping Cart Floating Pill Button */}
+              {/* Wishlist Button */}
+              <button
+                onClick={() => setIsWishlistOpen(true)}
+                className="relative p-1.5 sm:p-2 text-stone-700 hover:text-rose-600 rounded-full hover:bg-stone-100 transition-colors flex items-center justify-center shrink-0"
+                aria-label="View Wishlist"
+                title="Wishlist"
+              >
+                <Heart className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[9px] font-bold h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full flex items-center justify-center shadow-xs">
+                    {wishlistCount}
+                  </span>
+                )}
+              </button>
+
+              {/* Shopping Cart Pill Button - always contained inside the navbar */}
               <button
                 onClick={() => setIsCartDrawerOpen(true)}
-                className="relative flex items-center gap-1.5 px-3 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-full transition-transform active:scale-95 shadow-sm"
+                className="relative flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-full transition-transform active:scale-95 shadow-xs shrink-0"
                 aria-label="View Cart"
               >
-                <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-                <span className="text-xs font-bold hidden sm:inline">Cart</span>
+                <ShoppingBag className="w-4 h-4 sm:w-4.5 sm:h-4.5 shrink-0" />
+                <span className="text-xs font-bold hidden md:inline">Cart</span>
                 {totalItems > 0 && (
-                  <span className="bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-extrabold h-4.5 w-4.5 sm:h-5 sm:w-5 rounded-full flex items-center justify-center ml-0.5 shadow-xs">
+                  <span className="bg-amber-400 text-stone-950 text-[10px] sm:text-[11px] font-extrabold h-4 w-4 sm:h-4.5 sm:w-4.5 rounded-full flex items-center justify-center shadow-xs shrink-0">
                     {totalItems}
                   </span>
                 )}
@@ -336,7 +357,7 @@ export const Navbar: React.FC = () => {
 
         {/* Floating Mobile/Tablet Dropdown Menu Island */}
         {isMobileMenuOpen && (
-          <div className="xl:hidden mt-2 bg-white/98 backdrop-blur-xl rounded-2xl border border-stone-200/90 shadow-2xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="lg:hidden mt-2 bg-white/98 backdrop-blur-xl rounded-2xl border border-stone-200/90 shadow-2xl p-4 space-y-2 animate-in fade-in slide-in-from-top-2 duration-200">
             {navLinks.map(link => {
               const active = isLinkActive(link.path);
               return (
@@ -354,6 +375,17 @@ export const Navbar: React.FC = () => {
                 </Link>
               );
             })}
+            <button
+              type="button"
+              onClick={() => {
+                setIsMobileMenuOpen(false);
+                openCompare();
+              }}
+              className="w-full text-left px-3.5 py-2.5 rounded-xl text-sm font-medium text-stone-800 hover:bg-stone-100 hover:text-emerald-800 flex items-center justify-between"
+            >
+              <span>Compare Packaging Sizes</span>
+              <ArrowLeftRight className="w-4 h-4 text-amber-700" />
+            </button>
             {isAdmin && (
               <Link
                 to="/admin"

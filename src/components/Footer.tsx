@@ -72,6 +72,11 @@ export const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/bulk-enquiry" className="hover:text-amber-300 transition-colors text-amber-400 font-bold flex items-center gap-1">
+                  B2B & Bulk Wholesale <ArrowUpRight className="w-3.5 h-3.5 text-amber-400" />
+                </Link>
+              </li>
+              <li>
                 <Link to="/shop" className="hover:text-amber-300 transition-colors flex items-center gap-1">
                   Compare Sizes <ArrowUpRight className="w-3 h-3 text-stone-500" />
                 </Link>
@@ -151,10 +156,11 @@ export const Footer: React.FC = () => {
               </li>
               <li className="pt-2">
                 <Link
-                  to="/contact"
-                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-4"
+                  to="/contact#store-locator"
+                  className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 underline underline-offset-4 flex items-center gap-1"
                 >
-                  Contact Form & Map Location →
+                  <MapPin className="w-3.5 h-3.5" />
+                  Store Locator & Mill Directions →
                 </Link>
               </li>
             </ul>
@@ -164,18 +170,19 @@ export const Footer: React.FC = () => {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between text-xs text-stone-500 gap-4">
           <p>© {new Date().getFullYear()} {settings.brandName} Inc. All rights reserved. Sourced & Packed with pride in Kerala, India.</p>
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-1">
-              Secured with <span className="font-semibold text-stone-300">Razorpay</span>
+          <div className="flex items-center gap-4 text-[11px]">
+            <span className="flex items-center gap-1.5 text-stone-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+              <span>Secured with <span className="font-semibold text-stone-300">Razorpay</span> (256-bit SSL)</span>
             </span>
-            <span>•</span>
+            <span className="text-stone-700">•</span>
             <Link
               to="/admin"
-              className="text-stone-700 hover:text-stone-400 text-[11px] flex items-center gap-1 transition-colors"
-              title="Authorized Staff Portal"
+              className="text-stone-700 hover:text-stone-500 transition-colors p-1 rounded"
+              title="Authorized Operations Gateway"
+              aria-label="Operations Gateway"
             >
-              <Lock className="w-2.5 h-2.5" />
-              <span>Staff Login</span>
+              <Lock className="w-3 h-3 opacity-30 hover:opacity-80 transition-opacity" />
             </Link>
           </div>
         </div>

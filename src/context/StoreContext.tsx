@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, StoreSettings } from '../types';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Product, StoreSettings, ProductSize } from '../types';
 import { defaultStoreSettings } from '../data/sampleProducts';
 import { api } from '../services/api';
 
@@ -21,6 +21,11 @@ interface StoreContextType {
   refreshProducts: () => Promise<void>;
   razorpayKeyId: string;
   isTestMode: boolean;
+  isCompareOpen: boolean;
+  compareSizes: [ProductSize, ProductSize];
+  openCompare: (sizeA?: ProductSize, sizeB?: ProductSize) => void;
+  closeCompare: () => void;
+  setCompareSizes: (sizes: [ProductSize, ProductSize]) => void;
 }
 
 const StoreContext = createContext<StoreContextType | undefined>(undefined);
@@ -34,21 +39,42 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_NIRADemo');
   const [isTestMode, setIsTestMode] = useState(true);
 
-  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+  // Compare Feature State
+  const [isCompareOpen, setIsCompareOpen] = useState(false);
+  const [compareSizes, setCompareSizes] = useState<[ProductSize, ProductSize]>(['200 ml', '500 ml']);
+
+  const openCompare = useCallback((sizeA?: ProductSize, sizeB?: ProductSize) => {
+    if (sizeA && sizeB && sizeA !== sizeB) {
+      setCompareSizes([sizeA, sizeB]);
+    } else if (sizeA) {
+      // Pick a smart complementary default size for comparison
+      const fallbackB: ProductSize = sizeA === '200 ml' ? '500 ml' : sizeA === '500 ml' ? '1 Litre' : '500 ml';
+      setCompareSizes([sizeA, fallbackB]);
+    }
+    setIsCompareOpen(true);
+  }, []);
+
+  const closeCompare = useCallback(() => {
+    setIsCompareOpen(false);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
+
+  const addToast = useCallback((message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
     setToasts(prev => {
       // Prevent duplicate identical toast from showing simultaneously
       if (prev.some(t => t.message === message)) {
         return prev;
       }
-      const id = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
-      setTimeout(() => removeToast(id), 3500);
       return [...prev, { id, message, type }];
     });
-  };
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
+    setTimeout(() => {
+      removeToast(id);
+    }, 3500);
+  }, [removeToast]);
 
   const refreshProducts = async () => {
     try {
@@ -90,7 +116,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         removeToast,
         refreshProducts,
         razorpayKeyId,
-        isTestMode
+        isTestMode,
+        isCompareOpen,
+        compareSizes,
+        openCompare,
+        closeCompare,
+        setCompareSizes
       }}
     >
       {children}
