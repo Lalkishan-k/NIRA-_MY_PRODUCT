@@ -46,7 +46,7 @@ export const RazorpayModal: React.FC<RazorpayModalProps> = ({
   customer,
   onSuccess,
   onFailure,
-  brandName = 'NIRA Pure Coconut Oil',
+  brandName = 'ELA naturals Pure Coconut Oil',
   isTestMode = true
 }) => {
   const [activeTab, setActiveTab] = useState<'upi' | 'card' | 'netbanking' | 'wallet'>('upi');
@@ -262,7 +262,7 @@ export const RazorpayModal: React.FC<RazorpayModalProps> = ({
                   <div className="w-32 h-32 bg-white p-2 rounded-xl border border-stone-200 shadow-xs shrink-0 flex items-center justify-center relative">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        `upi://pay?pa=nira.coconutoil@razorpay&pn=NIRA%20Pure%20Coconut%20Oil&am=${amount}&cu=INR&tr=${orderId}`
+                        `upi://pay?pa=elanaturals@razorpay&pn=ELA%20naturals%20Pure%20Coconut%20Oil&am=${amount}&cu=INR&tr=${orderId}`
                       )}`}
                       alt="UPI QR Code"
                       className="w-full h-full object-contain"

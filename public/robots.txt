@@ -1,0 +1,12 @@
+# Robots.txt for ELA naturals Pure Coconut Oil
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /api/*
+Disallow: /checkout
+Disallow: /order-confirmation/*
+
+# Host & Sitemap location
+Sitemap: https://elanaturals.in/sitemap.xml

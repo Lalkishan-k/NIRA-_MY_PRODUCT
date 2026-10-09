@@ -19,7 +19,7 @@ export interface UpdateOrderStatusResponse {
   notification?: StatusNotificationLog;
 }
 
-const ADMIN_TOKEN_KEY = 'nira_admin_session_token';
+const ADMIN_TOKEN_KEY = 'ela_naturals_admin_session_token';
 
 // Admin Token Store Helper
 export const getAdminToken = (): string | null => {

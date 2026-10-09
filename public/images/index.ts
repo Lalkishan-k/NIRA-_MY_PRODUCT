@@ -1,7 +1,12 @@
-export const niraPure1LBottle = '/images/nira_pure_1l_bottle_1789099774161.jpg';
-export const niraOilBottle = '/images/nira_oil_bottle_1789061486587.jpg';
-export const niraChildOil = '/images/nira_child_oil_1789061505125.jpg';
-export const niraKeralaCooking = '/images/kerala_kitchen_bg_1789063003173.jpg';
+export const elaPure1LBottle = '/images/nira_pure_1l_bottle_1789099774161.jpg';
+export const elaOilBottle = '/images/nira_oil_bottle_1789061486587.jpg';
+export const elaChildOil = '/images/nira_child_oil_1789061505125.jpg';
+export const elaKeralaCooking = '/images/kerala_kitchen_bg_1789063003173.jpg';
+
+export const niraPure1LBottle = elaPure1LBottle;
+export const niraOilBottle = elaOilBottle;
+export const niraChildOil = elaChildOil;
+export const niraKeralaCooking = elaKeralaCooking;
 
 export const keralaCoconutGrove = '/images/kerala_coconut_grove_1789071583835.jpg';
 export const heroCoconutOil = '/images/nira_pure_1l_bottle_1789099774161.jpg';

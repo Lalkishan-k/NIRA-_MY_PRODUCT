@@ -14,10 +14,10 @@ interface PincodeRule {
 
 const PINCODE_MAP: PincodeRule[] = [
   // Kerala - Home Mill & Regional Hubs
-  { prefix: '673', city: 'Kozhikode (Calicut)', district: 'Kozhikode', state: 'Kerala', zone: 'Direct Mill Hub', daysMin: 1, daysMax: 1, express: true, couriers: ['NIRA Local Express', 'Kerala Speed Post', 'Delhivery Local'] },
+  { prefix: '673', city: 'Kozhikode (Calicut)', district: 'Kozhikode', state: 'Kerala', zone: 'Direct Mill Hub', daysMin: 1, daysMax: 1, express: true, couriers: ['ELA Local Express', 'Kerala Speed Post', 'Delhivery Local'] },
   { prefix: '670', city: 'Kannur', district: 'Kannur', state: 'Kerala', zone: 'North Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['Kerala Speed Post', 'Delhivery Direct'] },
   { prefix: '671', city: 'Kasaragod', district: 'Kasaragod', state: 'Kerala', zone: 'North Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['Kerala Speed Post', 'Delhivery Direct'] },
-  { prefix: '676', city: 'Malappuram', district: 'Malappuram', state: 'Kerala', zone: 'North Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['NIRA Local Express', 'Speed Post'] },
+  { prefix: '676', city: 'Malappuram', district: 'Malappuram', state: 'Kerala', zone: 'North Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['ELA Local Express', 'Speed Post'] },
   { prefix: '679', city: 'Shoranur / Palakkad', district: 'Palakkad', state: 'Kerala', zone: 'North-Central Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['Kerala Speed Post', 'Bluedart'] },
   { prefix: '678', city: 'Palakkad', district: 'Palakkad', state: 'Kerala', zone: 'North-Central Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['Kerala Speed Post', 'Delhivery'] },
   { prefix: '680', city: 'Thrissur', district: 'Thrissur', state: 'Kerala', zone: 'Central Kerala', daysMin: 1, daysMax: 2, express: true, couriers: ['Kerala Speed Post', 'Bluedart Air'] },

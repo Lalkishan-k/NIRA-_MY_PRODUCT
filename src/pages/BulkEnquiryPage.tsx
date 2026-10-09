@@ -121,7 +121,7 @@ export const BulkEnquiryPage: React.FC = () => {
 
   const handleLaunchWhatsAppQuote = () => {
     if (!submittedEnquiry) return;
-    const msg = `*NIRA B2B Wholesale Quote Request*\n\n` +
+    const msg = `*ELA naturals B2B Wholesale Quote Request*\n\n` +
       `*Ref ID:* ${submittedEnquiry.referenceNumber}\n` +
       `*Business Name:* ${submittedEnquiry.businessName}\n` +
       `*Contact Person:* ${submittedEnquiry.contactPerson}\n` +
@@ -137,14 +137,14 @@ export const BulkEnquiryPage: React.FC = () => {
       `*Estimated Subtotal:* ₹${estimatedOrderSubtotal.toLocaleString('en-IN')} (approx ${bulkDiscountPercent}% tier discount)\n\n` +
       `*Notes:* ${additionalNotes || 'Please send official tax invoice quotation & CoA certificate.'}`;
 
-    // Direct WhatsApp to NIRA B2B Desk
+    // Direct WhatsApp to ELA naturals B2B Desk
     openWhatsAppDirect('919847123456', msg);
   };
 
   return (
     <div className="bg-stone-50 min-h-screen py-8 sm:py-12" id="bulk-enquiry-page">
       <Helmet>
-        <title>B2B & Bulk Coconut Oil Quotation | NIRA Pure Kerala Coconut Oil</title>
+        <title>B2B & Bulk Coconut Oil Quotation | ELA naturals Pure Kerala Coconut Oil</title>
         <meta
           name="description"
           content="Wholesale bulk coconut oil quotation for Ayurvedic wellness centers, organic grocery stores, restaurants, and exporters. 5L & 15L cans direct from Kozhikode mill with GST invoices."
@@ -198,7 +198,7 @@ export const BulkEnquiryPage: React.FC = () => {
               Trusted Across Healthcare, Hospitality & Retail
             </h2>
             <p className="text-xs sm:text-sm text-stone-600">
-              NIRA pure oil is specially formulated for rigorous commercial demands.
+              ELA naturals pure oil is specially formulated for rigorous commercial demands.
             </p>
           </div>
 

@@ -36,7 +36,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [toasts, setToasts] = useState<Toast[]>([]);
-  const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_NIRADemo');
+  const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_ELADemo');
   const [isTestMode, setIsTestMode] = useState(true);
 
   // Compare Feature State

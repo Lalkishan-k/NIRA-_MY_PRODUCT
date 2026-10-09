@@ -32,7 +32,7 @@ const NUTRIENT_METRICS: Record<string, NutrientData> = {
     unit: 'mg / 100g',
     multiplier: '12x Higher',
     description: 'Natural Vitamin E (alpha-tocopherol) protects skin cells from oxidative stress and feeds scalp follicles.',
-    healthBenefit: 'Preserved entirely because NIRA uses natural gravity settling instead of high-heat chemical bleaching.'
+    healthBenefit: 'Preserved entirely because ELA naturals uses natural gravity settling instead of high-heat chemical bleaching.'
   },
   lauricAcid: {
     category: 'Lauric Acid (C12 MCT)',
@@ -75,7 +75,7 @@ export const NutritionalChart: React.FC = () => {
   // Data formatted for Recharts Bar Chart
   const chartData = [
     {
-      name: 'NIRA Pure Unfiltered',
+      name: 'ELA naturals Pure Unfiltered',
       value: activeMetric.niraValue,
       fill: '#065f46' // Deep Emerald
     },
@@ -120,7 +120,7 @@ export const NutritionalChart: React.FC = () => {
           <Award className="w-6 h-6 text-amber-400 shrink-0" />
           <div className="text-left text-xs">
             <span className="font-bold text-stone-200 block">FSSAI Certified Lab Tested</span>
-            <span className="text-[10px] text-stone-400">Batch Analysis #NIRA-LAB-2026</span>
+            <span className="text-[10px] text-stone-400">Batch Analysis #ELA-LAB-2026</span>
           </div>
         </div>
       </div>
@@ -198,7 +198,7 @@ export const NutritionalChart: React.FC = () => {
                           <p className="font-mono text-emerald-400 text-sm font-black">
                             {data.value} {activeMetric.unit}
                           </p>
-                          {data.name.includes('NIRA') && (
+                          {data.name.includes('ELA naturals') && (
                             <p className="text-[10px] text-amber-300 font-semibold">
                               ✓ 100% Living Bio-availability
                             </p>
@@ -221,7 +221,7 @@ export const NutritionalChart: React.FC = () => {
           <div className="flex items-center justify-between text-[11px] text-stone-400 pt-2 border-t border-stone-800">
             <span className="flex items-center text-emerald-400 font-semibold">
               <span className="w-2.5 h-2.5 bg-emerald-700 rounded-xs mr-1.5 inline-block" />
-              NIRA Cold Expeller Unfiltered
+              ELA naturals Cold Expeller Unfiltered
             </span>
             <span className="flex items-center text-stone-400">
               <span className="w-2.5 h-2.5 bg-stone-400 rounded-xs mr-1.5 inline-block" />
@@ -287,7 +287,7 @@ export const NutritionalChart: React.FC = () => {
             <div className="bg-stone-900 p-3 rounded-xl border border-stone-700/80 flex items-center justify-between text-xs">
               <div>
                 <span className="text-stone-400 block text-[10px] uppercase tracking-wider">
-                  NIRA Yield per {servingTbsp * 15}ml:
+                  ELA naturals Yield per {servingTbsp * 15}ml:
                 </span>
                 <span className="font-mono font-bold text-emerald-400 text-sm">
                   {niraServingAmount} {activeMetric.unit.split(' ')[0]}
@@ -319,7 +319,7 @@ export const NutritionalChart: React.FC = () => {
               <tr>
                 <th className="p-3 rounded-l-xl">Nutrient Parameter</th>
                 <th className="p-3 text-emerald-400 bg-emerald-950/40 font-black">
-                  NIRA Raw Unfiltered
+                  ELA naturals Raw Unfiltered
                 </th>
                 <th className="p-3">Commercial Refined (RBD)</th>
                 <th className="p-3">Refined Vegetable Oil</th>

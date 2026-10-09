@@ -2,13 +2,14 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, ShieldCheck, Heart, ArrowUpRight, MessageCircle, Lock } from 'lucide-react';
 import { CrackedCoconutPiece } from './CrackedCoconutPiece';
+import { ElaOfficialLogo } from './ElaOfficialLogo';
 import { useStore } from '../context/StoreContext';
 
 export const Footer: React.FC = () => {
   const { settings } = useStore();
 
   const openWhatsApp = () => {
-    const text = encodeURIComponent(`Hello NIRA, I would like to inquire about your pure coconut oil products.`);
+    const text = encodeURIComponent(`Hello ELA naturals, I would like to inquire about your pure coconut oil products.`);
     window.open(`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${text}`, '_blank');
   };
 
@@ -18,16 +19,14 @@ export const Footer: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           {/* Col 1: Brand & Heritage */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex items-center justify-center shrink-0">
-                <CrackedCoconutPiece className="w-7 h-7" />
-              </div>
+            <div className="flex items-center gap-3">
+              <ElaOfficialLogo variant="mark" className="w-10 h-10 object-contain shrink-0" />
               <span className="font-brand text-2xl sm:text-3xl font-bold text-white tracking-wider">
                 {settings.brandName}
               </span>
             </div>
             <p className="text-sm text-stone-400 leading-relaxed max-w-sm">
-              Rooted in the lush coconut palm groves of Malabar, Kerala. We craft 100% pure, raw, unfiltered coconut oil using traditional copra selection and natural gravity settling — keeping all natural nutrients, Vitamin E, and polyphenols intact.
+              Rooted in the lush coconut palm groves of Malabar, Kerala. We craft 100% <b>ശുദ്ധമായ വെളിച്ചെണ്ണ</b> (Pure Raw Unfiltered Coconut Oil) using traditional copra selection and natural gravity settling — keeping all natural nutrients, Vitamin E, and polyphenols intact.
             </p>
             <div className="pt-2 flex flex-wrap gap-4 text-xs text-stone-400">
               <span className="flex items-center gap-1.5 bg-stone-800/80 px-3 py-1.5 rounded-full border border-stone-700 text-stone-200">

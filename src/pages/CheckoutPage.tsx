@@ -794,7 +794,7 @@ export const CheckoutPage: React.FC = () => {
           }}
           onSuccess={handleModalPaymentSuccess}
           onFailure={handleModalPaymentFailure}
-          brandName={settings.brandName || 'NIRA Pure Coconut Oil'}
+          brandName={settings.brandName || 'ELA naturals Pure Coconut Oil'}
           isTestMode={!razorpayKeyId || razorpayKeyId.includes('SANDBOX') || razorpayKeyId.includes('YourTestKeyId')}
         />
       )}

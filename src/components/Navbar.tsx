@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { ShoppingBag, Search, User, Menu, X, ShieldCheck, Truck, Heart, ArrowLeftRight } from 'lucide-react';
+import { ShoppingBag, Search, User, Menu, X, ShieldCheck, Truck, Heart, ArrowLeftRight, Sun, Moon } from 'lucide-react';
 import { CrackedCoconutPiece } from './CrackedCoconutPiece';
+import { ElaOfficialLogo } from './ElaOfficialLogo';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useStore } from '../context/StoreContext';
 import { useWishlist } from '../context/WishlistContext';
+import { useTheme } from '../context/ThemeContext';
 
 export const Navbar: React.FC = () => {
   const { totalItems, setIsCartDrawerOpen } = useCart();
   const { wishlistCount, setIsWishlistOpen } = useWishlist();
   const { customerProfile, isAdmin, logout } = useAuth();
   const { settings, searchQuery, setSearchQuery, openCompare } = useStore();
+  const { isDark, toggleTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -75,18 +78,18 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Announcement Bar */}
-      <div className="bg-emerald-950 text-emerald-100 text-xs py-2 px-4 text-center font-medium flex items-center justify-center gap-2 border-b border-emerald-900/40 relative z-30">
+      <div className="bg-emerald-950 text-emerald-100 text-[11px] sm:text-xs py-1 px-4 text-center font-medium flex items-center justify-center gap-2 border-b border-emerald-900/40 relative z-30">
         <Truck className="w-3.5 h-3.5 text-emerald-300 inline shrink-0" />
         <span className="truncate">{settings.announcementText}</span>
       </div>
 
       {/* Floating Menubar Container */}
-      <header className="sticky top-2 sm:top-4 z-40 px-2 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full transition-all duration-300">
+      <header className="sticky top-1 sm:top-2 z-40 px-2 sm:px-4 md:px-6 lg:px-8 max-w-7xl mx-auto w-full transition-all duration-300">
         <div
           className={`transition-all duration-300 rounded-2xl sm:rounded-full border ${
             isScrolled
-              ? 'bg-white/95 backdrop-blur-xl border-stone-200/90 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-stone-900/5'
-              : 'bg-white/90 backdrop-blur-lg border-stone-200/80 shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
+              ? 'bg-white/95 dark:bg-stone-900/95 backdrop-blur-xl border-stone-200/90 dark:border-stone-800 shadow-[0_12px_32px_rgba(0,0,0,0.12)] ring-1 ring-stone-900/5 dark:ring-stone-100/10'
+              : 'bg-white/90 dark:bg-stone-900/90 backdrop-blur-lg border-stone-200/80 dark:border-stone-800 shadow-[0_8px_24px_rgba(0,0,0,0.06)]'
           } px-2.5 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2`}
         >
           <div className="flex items-center justify-between h-11 sm:h-13 md:h-14">
@@ -94,32 +97,27 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0 min-w-0">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden p-1.5 sm:p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
+                className="lg:hidden p-1.5 sm:p-2 text-stone-700 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-amber-300 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? <X className="w-4.5 h-4.5 sm:w-5 sm:h-5" /> : <Menu className="w-4.5 h-4.5 sm:w-5 sm:h-5" />}
               </button>
 
-              {/* Brand Logo */}
-              <Link to="/" className="flex items-center gap-1.5 sm:gap-2 group shrink-0">
-                <div className="flex items-center justify-center group-hover:scale-105 transition-transform shrink-0">
-                  <CrackedCoconutPiece className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8" />
-                </div>
-                <span className="font-brand text-xl sm:text-2xl md:text-3xl font-black text-[#144D29] tracking-wide block leading-none group-hover:text-emerald-950 transition-colors">
-                  {settings.brandName}
-                </span>
+              {/* Brand Logo - Standalone Official Logo Image */}
+              <Link to="/" className="flex items-center group shrink-0 py-0.5">
+                <ElaOfficialLogo variant="badge" className="h-10 sm:h-12 md:h-13 lg:h-15 w-auto max-w-[180px] sm:max-w-[220px] md:max-w-[260px] object-contain group-hover:scale-105 transition-transform shrink-0" />
               </Link>
             </div>
 
-            {/* Middle: Desktop Navigation Links (Visible on lg+ screens, clean layout) */}
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 flex-nowrap shrink min-w-0">
+            {/* Middle: Desktop Navigation Links (Visible on lg+ screens, clean spacing) */}
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-2 flex-nowrap shrink min-w-0">
               <Link
                 to="/"
                 onClick={() => handleNavClick('/')}
-                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 Home
@@ -127,10 +125,10 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/shop"
                 onClick={() => handleNavClick('/shop')}
-                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/shop')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 Shop
@@ -138,18 +136,18 @@ export const Navbar: React.FC = () => {
               <button
                 type="button"
                 onClick={() => openCompare()}
-                className="text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap text-stone-700 hover:text-emerald-900 hover:bg-stone-100 flex items-center gap-1 cursor-pointer"
+                className="text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800 flex items-center gap-1 cursor-pointer"
               >
-                <ArrowLeftRight className="w-3.5 h-3.5 text-amber-700" />
+                <ArrowLeftRight className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Compare</span>
               </button>
               <Link
                 to="/track-order"
                 onClick={() => handleNavClick('/track-order')}
-                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/track-order')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 Track Order
@@ -157,10 +155,10 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/contact"
                 onClick={() => handleNavClick('/contact')}
-                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/contact')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 Contact
@@ -168,10 +166,10 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/#how-it-is-made"
                 onClick={() => handleNavClick('/#how-it-is-made')}
-                className={`hidden xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`hidden 2xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/#how-it-is-made')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 How It Is Made
@@ -179,10 +177,10 @@ export const Navbar: React.FC = () => {
               <Link
                 to="/#why-choose-us"
                 onClick={() => handleNavClick('/#why-choose-us')}
-                className={`hidden xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3 py-1.5 rounded-full transition-all whitespace-nowrap ${
+                className={`hidden 2xl:inline-flex text-xs xl:text-sm font-medium px-2.5 xl:px-3.5 py-1.5 rounded-full transition-all whitespace-nowrap ${
                   isLinkActive('/#why-choose-us')
                     ? 'bg-emerald-800 text-white font-semibold shadow-xs'
-                    : 'text-stone-700 hover:text-emerald-900 hover:bg-stone-100'
+                    : 'text-stone-700 dark:text-stone-200 hover:text-emerald-900 dark:hover:text-emerald-300 hover:bg-stone-100 dark:hover:bg-stone-800'
                 }`}
               >
                 Why Choose Us
@@ -201,12 +199,12 @@ export const Navbar: React.FC = () => {
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                       autoFocus
-                      className="w-24 sm:w-40 md:w-52 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-stone-50"
+                      className="w-24 sm:w-40 md:w-52 text-xs sm:text-sm px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-stone-50 dark:bg-stone-800 dark:text-stone-100"
                     />
                     <button
                       type="button"
                       onClick={() => setIsSearchOpen(false)}
-                      className="ml-1 text-stone-500 hover:text-stone-800 p-1"
+                      className="ml-1 text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 p-1"
                     >
                       <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </button>
@@ -214,13 +212,14 @@ export const Navbar: React.FC = () => {
                 ) : (
                   <button
                     onClick={() => setIsSearchOpen(true)}
-                    className="p-1.5 sm:p-2 text-stone-700 hover:text-emerald-800 rounded-full hover:bg-stone-100 transition-colors"
+                    className="p-1.5 sm:p-2 text-stone-700 dark:text-stone-300 hover:text-emerald-800 dark:hover:text-emerald-400 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors"
                     aria-label="Search"
                   >
                     <Search className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                   </button>
                 )}
               </div>
+
 
               {/* Admin Badge/Link */}
               {isAdmin && (
@@ -249,24 +248,24 @@ export const Navbar: React.FC = () => {
                 </button>
 
                 {isUserMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white rounded-2xl shadow-xl border border-stone-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 mt-2 w-52 sm:w-56 bg-white dark:bg-stone-900 rounded-2xl shadow-xl border border-stone-100 dark:border-stone-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
                     {customerProfile ? (
                       <>
-                        <div className="px-4 py-2 border-b border-stone-100">
-                          <p className="text-sm font-semibold text-stone-900 truncate">{customerProfile.name}</p>
-                          <p className="text-xs text-stone-500 truncate">{customerProfile.email}</p>
+                        <div className="px-4 py-2 border-b border-stone-100 dark:border-stone-800">
+                          <p className="text-sm font-semibold text-stone-900 dark:text-stone-100 truncate">{customerProfile.name}</p>
+                          <p className="text-xs text-stone-500 dark:text-stone-400 truncate">{customerProfile.email}</p>
                         </div>
                         <Link
                           to="/account"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                          className="block px-4 py-2 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800"
                         >
                           My Account & Orders
                         </Link>
                         <Link
                           to="/track-order"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                          className="block px-4 py-2 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800"
                         >
                           Track Order
                         </Link>
@@ -274,7 +273,7 @@ export const Navbar: React.FC = () => {
                           <Link
                             to="/admin"
                             onClick={() => setIsUserMenuOpen(false)}
-                            className="block px-4 py-2 text-sm text-amber-900 font-semibold bg-amber-50 hover:bg-amber-100"
+                            className="block px-4 py-2 text-sm text-amber-900 dark:text-amber-300 font-semibold bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60"
                           >
                             Admin Dashboard
                           </Link>
@@ -284,35 +283,35 @@ export const Navbar: React.FC = () => {
                             logout();
                             setIsUserMenuOpen(false);
                           }}
-                          className="w-full text-left px-4 py-2 text-sm text-rose-700 hover:bg-rose-50 border-t border-stone-100"
+                          className="w-full text-left px-4 py-2 text-sm text-rose-700 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 border-t border-stone-100 dark:border-stone-800"
                         >
                           Sign Out
                         </button>
                       </>
                     ) : (
                       <>
-                        <div className="px-4 py-2 border-b border-stone-100">
-                          <p className="text-xs font-semibold text-stone-500">Welcome to NIRA</p>
-                          <p className="text-xs text-stone-400">Sign in for fast order tracking</p>
+                        <div className="px-4 py-2 border-b border-stone-100 dark:border-stone-800">
+                          <p className="text-xs font-semibold text-stone-500 dark:text-stone-400">Welcome to ELA naturals</p>
+                          <p className="text-xs text-stone-400 dark:text-stone-500">Sign in for fast order tracking</p>
                         </div>
                         <Link
                           to="/account?tab=login"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm font-medium text-emerald-800 hover:bg-emerald-50"
+                          className="block px-4 py-2 text-sm font-medium text-emerald-800 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
                         >
                           Customer Login
                         </Link>
                         <Link
                           to="/account?tab=register"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                          className="block px-4 py-2 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800"
                         >
                           Create Account
                         </Link>
                         <Link
                           to="/track-order"
                           onClick={() => setIsUserMenuOpen(false)}
-                          className="block px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+                          className="block px-4 py-2 text-sm text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800"
                         >
                           Track Guest Order
                         </Link>
@@ -325,7 +324,7 @@ export const Navbar: React.FC = () => {
               {/* Wishlist Button */}
               <button
                 onClick={() => setIsWishlistOpen(true)}
-                className="relative p-1.5 sm:p-2 text-stone-700 hover:text-rose-600 rounded-full hover:bg-stone-100 transition-colors flex items-center justify-center shrink-0"
+                className="relative p-1.5 sm:p-2 text-stone-700 dark:text-stone-300 hover:text-rose-600 dark:hover:text-rose-400 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors flex items-center justify-center shrink-0"
                 aria-label="View Wishlist"
                 title="Wishlist"
               >
@@ -334,6 +333,21 @@ export const Navbar: React.FC = () => {
                   <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[9px] font-bold h-3.5 w-3.5 sm:h-4 sm:w-4 rounded-full flex items-center justify-center shadow-xs">
                     {wishlistCount}
                   </span>
+                )}
+              </button>
+
+              {/* Dark Mode Toggle Button */}
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="p-1.5 sm:p-2 text-stone-700 dark:text-stone-200 hover:text-emerald-800 dark:hover:text-amber-300 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                aria-label="Toggle Dark Mode"
+                title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {isDark ? (
+                  <Sun className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-amber-400 transition-transform hover:rotate-45" />
+                ) : (
+                  <Moon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-stone-700 transition-transform hover:-rotate-12" />
                 )}
               </button>
 

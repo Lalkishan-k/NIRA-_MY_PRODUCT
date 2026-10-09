@@ -20,10 +20,10 @@ export interface SitemapOptions {
   products?: Product[];
 }
 
-export const CANONICAL_SITE_URL = process.env.SITE_URL || 'https://nira.farm';
+export const CANONICAL_SITE_URL = process.env.SITE_URL || 'https://elanaturals.in';
 
 /**
- * Builds the complete list of URLs for NIRA e-commerce store
+ * Builds the complete list of URLs for ELA naturals e-commerce store
  */
 export function getSitemapEntries(options?: SitemapOptions): SitemapUrlEntry[] {
   const siteUrl = (options?.siteUrl || CANONICAL_SITE_URL).replace(/\/+$/, '');
@@ -40,7 +40,7 @@ export function getSitemapEntries(options?: SitemapOptions): SitemapUrlEntry[] {
       images: [
         {
           loc: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=1200&q=80',
-          title: 'NIRA 100% Pure Raw Kerala Coconut Oil',
+          title: 'ELA naturals 100% Pure Raw Kerala Coconut Oil',
           caption: 'Authentic unfiltered cold expeller pressed Kerala coconut oil'
         }
       ]
@@ -187,7 +187,7 @@ ${xmlItems}
 export function generateRobotsTxt(options?: SitemapOptions): string {
   const siteUrl = (options?.siteUrl || CANONICAL_SITE_URL).replace(/\/+$/, '');
 
-  return `# Robots.txt for NIRA Pure Coconut Oil
+  return `# Robots.txt for ELA naturals Pure Coconut Oil
 User-agent: *
 Allow: /
 Disallow: /admin

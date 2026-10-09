@@ -216,7 +216,7 @@ export function downloadSuccessfulOrdersCsv(
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const filename = `NIRA-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`;
+  const filename = `ELA-naturals-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().slice(0, 10)}.csv`;
   
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -300,7 +300,7 @@ export function downloadItemizedSuccessfulOrdersCsv(
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const filename = `NIRA-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-itemized-${new Date().toISOString().slice(0, 10)}.csv`;
+  const filename = `ELA-naturals-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-itemized-${new Date().toISOString().slice(0, 10)}.csv`;
   
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -381,7 +381,7 @@ export function downloadSuccessfulOrdersExcel(
       </style>
     </head>
     <body>
-      <div class="header-title">🌴 NIRA UNFILTERED PURE COCONUT OIL — SALES & ORDER LEDGER</div>
+      <div class="header-title">🌴 ELA naturals UNFILTERED PURE COCONUT OIL — SALES & ORDER LEDGER</div>
       <div class="header-sub">
         <b>Report:</b> ${timeframeLabel} | <b>Export Date:</b> ${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })} | <b>Filter:</b> Successful & Paid Orders
       </div>
@@ -488,7 +488,7 @@ export function downloadSuccessfulOrdersExcel(
   `;
 
   const blob = new Blob([excelHtml], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-  const filename = `NIRA-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().slice(0, 10)}.xls`;
+  const filename = `ELA-naturals-${reportTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${new Date().toISOString().slice(0, 10)}.xls`;
   
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');

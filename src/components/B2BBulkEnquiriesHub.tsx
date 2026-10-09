@@ -107,7 +107,7 @@ export const B2BBulkEnquiriesHub: React.FC = () => {
       ? `*Quoted Amount:* ₹${enquiry.quotedAmount.toLocaleString('en-IN')}`
       : `*Status:* Under Processing for Special Bulk Tier Discount`;
 
-    const msg = `*NIRA Pure Kerala Coconut Oil — Official Wholesale Quotation*\n\n` +
+    const msg = `*ELA naturals Pure Kerala Coconut Oil — Official Wholesale Quotation*\n\n` +
       `Dear ${enquiry.contactPerson},\n` +
       `Thank you for your bulk enquiry [Ref: *${enquiry.referenceNumber}*] for *${enquiry.businessName}*.\n\n` +
       `*Order Details:*\n` +

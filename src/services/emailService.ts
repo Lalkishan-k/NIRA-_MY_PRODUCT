@@ -21,45 +21,45 @@ export const getStatusEmailDetails = (
   switch (newStatus) {
     case 'Shipped':
       return {
-        subject: `🚚 Shipped! Your NIRA Order #${orderId} is on its way`,
+        subject: `🚚 Shipped! Your ELA naturals Order #${orderId} is on its way`,
         headline: 'Your pure coconut oil package has been dispatched!',
         message: courierPartner
-          ? `Your fresh batch of NIRA Pure Coconut Oil has been hand-inspected, packed with UV-protection, and handed over to ${courierPartner}${trackingNumber ? ` (AWB #${trackingNumber})` : ''}.`
+          ? `Your fresh batch of ELA naturals Pure Coconut Oil has been hand-inspected, packed with UV-protection, and handed over to ${courierPartner}${trackingNumber ? ` (AWB #${trackingNumber})` : ''}.`
           : 'Your order has been packed and handed over to our express courier partner for speedy delivery to your doorstep.'
       };
     case 'Delivered':
       return {
-        subject: `✨ Delivered! Your NIRA Order #${orderId} has arrived`,
-        headline: 'Your NIRA Pure Coconut Oil package has been delivered!',
+        subject: `✨ Delivered! Your ELA naturals Order #${orderId} has arrived`,
+        headline: 'Your ELA naturals Pure Coconut Oil package has been delivered!',
         message: 'Your order has been delivered successfully. We hope you cherish the natural aroma, unbleached purity, and therapeutic richness of our traditional Kerala cold-pressed coconut oil.'
       };
     case 'Processing':
       return {
-        subject: `🌱 In Processing: Your NIRA Order #${orderId} is being prepared`,
+        subject: `🌱 In Processing: Your ELA naturals Order #${orderId} is being prepared`,
         headline: 'Your order is currently being prepared at our Kozhikode facility.',
         message: 'Our artisans are verifying your cold-pressed coconut oil bottles for airtight sealing and quality control before dispatch.'
       };
     case 'Packed':
       return {
-        subject: `📦 Packed & Ready: Your NIRA Order #${orderId}`,
+        subject: `📦 Packed & Ready: Your ELA naturals Order #${orderId}`,
         headline: 'Your package is packed and awaiting courier pickup.',
         message: 'Your bottles are securely cushioned in recyclable, tamper-evident packaging.'
       };
     case 'Out for Delivery':
       return {
-        subject: `🛵 Out for Delivery: NIRA Order #${orderId}`,
+        subject: `🛵 Out for Delivery: ELA naturals Order #${orderId}`,
         headline: 'Your package is out for delivery today!',
         message: 'The delivery executive is nearby. Please ensure someone is available at the delivery location.'
       };
     case 'Cancelled':
       return {
-        subject: `Notice: NIRA Order #${orderId} Cancelled`,
+        subject: `Notice: ELA naturals Order #${orderId} Cancelled`,
         headline: 'Your order has been cancelled.',
         message: 'Your order has been cancelled. Any pre-authorized online payments will be refunded to your original source within 3-5 business days.'
       };
     default:
       return {
-        subject: `Status Update: NIRA Order #${orderId} is now ${newStatus}`,
+        subject: `Status Update: ELA naturals Order #${orderId} is now ${newStatus}`,
         headline: `Your order status has been updated to ${newStatus}.`,
         message: `Your order #${orderId} is now marked as ${newStatus}.`
       };
@@ -92,7 +92,7 @@ export const sendOrderConfirmationEmail = async (order: Order, customerEmail: st
       payment_status: order.paymentStatus,
       shipping_address: deliveryAddress,
       support_phone: '+91 98460 12345',
-      company_name: 'NIRA Pure Coconut Oil'
+      company_name: 'ELA naturals Pure Coconut Oil'
     };
 
     const response = await emailjs.send(serviceId, templateId, templateParams, publicKey);
@@ -148,8 +148,8 @@ export const sendStatusUpdateEmail = async ({
       shipping_address: deliveryAddress,
       order_items: itemsSummary,
       support_phone: '+91 98460 12345',
-      support_email: 'care@niraoils.com',
-      company_name: 'NIRA Pure Coconut Oil (Kerala)'
+      support_email: 'care@elanaturals.in',
+      company_name: 'ELA naturals Pure Coconut Oil (Kerala)'
     };
 
     if (!publicKey) {

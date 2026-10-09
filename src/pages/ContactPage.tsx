@@ -46,7 +46,7 @@ export const ContactPage: React.FC = () => {
   };
 
   const openWhatsApp = () => {
-    const text = encodeURIComponent('Hello NIRA team, I would like to make an inquiry.');
+    const text = encodeURIComponent('Hello ELA naturals team, I would like to make an inquiry.');
     window.open(`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${text}`, '_blank');
   };
 
@@ -58,7 +58,7 @@ export const ContactPage: React.FC = () => {
           Malabar Heritage Hub
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900">
-          Get in Touch with NIRA
+          Get in Touch with ELA naturals
         </h1>
         <p className="text-stone-500 text-sm">
           Have questions about our copra drying process, bulk culinary wholesale, or retail deliveries? We are always here to assist.
@@ -265,9 +265,9 @@ export const ContactPage: React.FC = () => {
           </div>
 
           <div className="p-4 bg-white rounded-2xl border border-stone-200 space-y-1.5">
-            <h4 className="font-bold text-stone-900 text-sm">Is NIRA sulphur-free?</h4>
+            <h4 className="font-bold text-stone-900 text-sm">Is ELA naturals sulphur-free?</h4>
             <p className="leading-relaxed">
-              Yes, 100%. Commercial processors often burn toxic sulphur to whiten and preserve copra artificially. NIRA relies entirely on hygienic sun drying and clean hot-air dehydration to guarantee 0% sulphur.
+              Yes, 100%. Commercial processors often burn toxic sulphur to whiten and preserve copra artificially. ELA naturals relies entirely on hygienic sun drying and clean hot-air dehydration to guarantee 0% sulphur.
             </p>
           </div>
         </div>

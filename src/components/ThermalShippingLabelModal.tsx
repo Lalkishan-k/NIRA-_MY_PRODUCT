@@ -237,8 +237,8 @@ export const ThermalShippingLabelModal: React.FC<ThermalShippingLabelModalProps>
                     <div className="border-b-2 border-black pb-2 space-y-1">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-1">
-                          <span className="font-serif font-extrabold text-base tracking-tight uppercase">
-                            NIRA PURE COCONUT OIL
+                          <span className="font-serif font-extrabold text-base tracking-tight">
+                            ELA naturals Pure Coconut Oil
                           </span>
                         </div>
                         <span className="border-2 border-black px-2 py-0.5 text-xs font-black uppercase tracking-wider bg-black text-white">
@@ -317,7 +317,7 @@ export const ThermalShippingLabelModal: React.FC<ThermalShippingLabelModalProps>
                       </div>
 
                       <div className="text-[9px] text-black font-semibold pt-1 leading-tight border-t border-black/20">
-                        <strong>RETURN SENDER:</strong> NIRA Pure Coconut Oil Works, Calicut Mill Road, Kozhikode, Kerala - 673001. Support: +91 95625 13642
+                        <strong>RETURN SENDER:</strong> ELA naturals Pure Coconut Oil Works, Calicut Mill Road, Kozhikode, Kerala - 673001. Support: +91 95625 13642
                       </div>
                     </div>
                   </div>
@@ -332,7 +332,7 @@ export const ThermalShippingLabelModal: React.FC<ThermalShippingLabelModalProps>
                     {/* Header */}
                     <div className="flex justify-between items-start border-b-2 border-black pb-4">
                       <div>
-                        <h2 className="font-serif text-2xl font-black text-black">NIRA PURE COCONUT OIL</h2>
+                        <h2 className="font-serif text-2xl font-black text-black">ELA naturals Pure Coconut Oil</h2>
                         <p className="text-xs font-bold text-stone-600">Kozhikode Extraction Mill • Kerala, India</p>
                         <p className="text-xs text-stone-500">FSSAI Licence No: 11322007000123</p>
                       </div>
@@ -368,7 +368,7 @@ export const ThermalShippingLabelModal: React.FC<ThermalShippingLabelModalProps>
                         <span className="font-bold uppercase tracking-wider text-black block border-b border-stone-300 pb-1 mb-1">
                           FULFILLMENT ORIGIN:
                         </span>
-                        <div className="font-bold text-sm text-black">NIRA Extraction Mill Warehouse</div>
+                        <div className="font-bold text-sm text-black">ELA naturals Extraction Mill Warehouse</div>
                         <div>Main Mill Road, Beach Area</div>
                         <div>Kozhikode, Kerala - 673001</div>
                         <div className="pt-1 font-bold">Courier: BlueDart / Express Air</div>

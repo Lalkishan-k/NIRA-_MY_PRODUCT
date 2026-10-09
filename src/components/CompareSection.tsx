@@ -217,7 +217,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({
                 )}
                 <div>
                   <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 leading-snug">
-                    {productA?.name || `NIRA Coconut Oil (${sizeA})`}
+                    {productA?.name || `ELA naturals Coconut Oil (${sizeA})`}
                   </h3>
                   <p className="text-[11px] text-stone-500">{dataA.containerType}</p>
                 </div>
@@ -275,7 +275,7 @@ export const CompareSection: React.FC<CompareSectionProps> = ({
                 )}
                 <div>
                   <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 leading-snug">
-                    {productB?.name || `NIRA Coconut Oil (${sizeB})`}
+                    {productB?.name || `ELA naturals Coconut Oil (${sizeB})`}
                   </h3>
                   <p className="text-[11px] text-stone-500">{dataB.containerType}</p>
                 </div>

@@ -22,6 +22,7 @@ import { AccountPage } from './pages/AccountPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { BulkEnquiryPage } from './pages/BulkEnquiryPage';
+import { ThemeProvider } from './context/ThemeContext';
 import { Policies } from './pages/Policies';
 import { CheckCircle2, AlertCircle, Info, X } from 'lucide-react';
 
@@ -93,7 +94,7 @@ const AppContent: React.FC = () => {
   const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900">
+    <div className="min-h-screen flex flex-col bg-[#FAF7F0] dark:bg-[#0c140e] text-stone-900 dark:text-stone-100 transition-colors duration-300">
       <ScrollToTop />
       {!isAdminRoute && <Navbar />}
 
@@ -131,17 +132,19 @@ const AppContent: React.FC = () => {
 export default function App() {
   return (
     <HelmetProvider>
-      <StoreProvider>
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <Router>
-                <AppContent />
-              </Router>
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
-      </StoreProvider>
+      <ThemeProvider>
+        <StoreProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                <Router>
+                  <AppContent />
+                </Router>
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </StoreProvider>
+      </ThemeProvider>
     </HelmetProvider>
   );
 }

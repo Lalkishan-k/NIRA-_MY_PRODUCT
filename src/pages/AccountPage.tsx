@@ -145,7 +145,7 @@ export const AccountPage: React.FC = () => {
       description: '100% Pure Cold-Pressed Virgin Coconut Oil crafted from fresh Malabar coconuts.',
       price: item.unitPrice,
       stock: 100,
-      sku: `NIRA-${item.size.replace(/\s+/g, '')}`,
+      sku: `ELA-${item.size.replace(/\s+/g, '')}`,
       size: item.size,
       unit: 'bottle',
       images: [item.image || 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600'],
@@ -209,7 +209,7 @@ export const AccountPage: React.FC = () => {
     setAuthError(null);
     try {
       await login(loginEmail, loginPassword);
-      addToast('Welcome back to NIRA!', 'success');
+      addToast('Welcome back to ELA naturals!', 'success');
     } catch (err: any) {
       setAuthError(err.message || 'Login failed. Please check your credentials.');
     }
@@ -220,7 +220,7 @@ export const AccountPage: React.FC = () => {
     setAuthError(null);
     try {
       await register(regName, regEmail, regPassword, regPhone);
-      addToast('Account created successfully! Welcome to NIRA.', 'success');
+      addToast('Account created successfully! Welcome to ELA naturals.', 'success');
     } catch (err: any) {
       setAuthError(err.message || 'Registration failed. Please try again.');
     }
@@ -359,7 +359,7 @@ export const AccountPage: React.FC = () => {
       <div className="max-w-md mx-auto px-4 py-16">
         <div className="bg-white rounded-3xl p-8 border border-stone-200 shadow-sm space-y-6">
           <div className="text-center space-y-1">
-            <span className="font-serif text-2xl font-bold text-stone-900">NIRA Account</span>
+            <span className="font-serif text-2xl font-bold text-stone-900">ELA naturals Account</span>
             <p className="text-xs text-stone-500">Sign in to view past orders, track shipments, and reorder items in 1 click.</p>
           </div>
 
@@ -680,7 +680,7 @@ export const AccountPage: React.FC = () => {
             <div className="bg-white rounded-3xl border border-stone-200 p-12 text-center space-y-3">
               <RefreshCw className="w-8 h-8 text-emerald-800 animate-spin mx-auto" />
               <p className="text-xs font-bold text-stone-800">Fetching your order history & tracking details...</p>
-              <p className="text-[11px] text-stone-400">Connecting to NIRA database...</p>
+              <p className="text-[11px] text-stone-400">Connecting to ELA naturals database...</p>
             </div>
           ) : filteredOrders.length === 0 ? (
             <div className="bg-white rounded-3xl border border-stone-200 p-12 text-center space-y-4 max-w-lg mx-auto shadow-xs">
@@ -1060,7 +1060,7 @@ export const AccountPage: React.FC = () => {
                       <div className="flex items-center gap-2.5 flex-wrap">
                         {/* WhatsApp Help */}
                         <a
-                          href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi NIRA Team, I have a query regarding my order #${order.orderId}`)}`}
+                          href={`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ELA naturals Team, I have a query regarding my order #${order.orderId}`)}`}
                           target="_blank"
                           rel="noreferrer"
                           className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 flex items-center gap-1.5 transition-colors font-medium"

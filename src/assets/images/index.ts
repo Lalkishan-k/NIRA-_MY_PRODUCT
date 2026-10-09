@@ -1,9 +1,16 @@
-export const niraPure1LBottle = '/images/nira_pure_1l_hero_master.jpeg';
-export const niraBottle500ml = '/images/nira_500ml_bottle_showcase.jpg';
-export const niraPouch200ml = '/images/nira_200ml_pouch.jpeg';
-export const niraOilBottle = '/images/nira_500ml_bottle_showcase.jpg';
-export const niraChildOil = '/images/nira_child_oil_master.png';
-export const niraKeralaCooking = '/images/nira_traditional_kitchen_cooking.png';
+export const elaPure1LBottle = '/images/nira_pure_1l_hero_master.jpeg';
+export const elaBottle500ml = '/images/nira_500ml_bottle_showcase.jpg';
+export const elaPouch200ml = '/images/nira_200ml_pouch.jpeg';
+export const elaOilBottle = '/images/nira_500ml_bottle_showcase.jpg';
+export const elaChildOil = '/images/nira_child_oil_master.png';
+export const elaKeralaCooking = '/images/nira_traditional_kitchen_cooking.png';
+
+export const niraPure1LBottle = elaPure1LBottle;
+export const niraBottle500ml = elaBottle500ml;
+export const niraPouch200ml = elaPouch200ml;
+export const niraOilBottle = elaOilBottle;
+export const niraChildOil = elaChildOil;
+export const niraKeralaCooking = elaKeralaCooking;
 
 export const keralaCoconutGrove = '/images/kerala_sunrise_coconut_farmland.png';
 export const heroCoconutOil = '/images/nira_pure_1l_hero_master.jpeg';

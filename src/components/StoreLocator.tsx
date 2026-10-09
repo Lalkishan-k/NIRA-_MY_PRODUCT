@@ -23,8 +23,8 @@ import { useStore } from '../context/StoreContext';
 const FACILITY_COORDS = {
   lat: 11.1599,
   lng: 75.8993,
-  name: 'NIRA Agro-Processing Heritage Unit & Direct Mill Store',
-  addressLine1: 'NIRA Agro-Processing Heritage Unit',
+  name: 'ELA naturals Agro-Processing Heritage Unit & Direct Mill Store',
+  addressLine1: 'ELA naturals Agro-Processing Heritage Unit',
   addressLine2: 'NH 66 Airport Bypass Corridor',
   city: 'Kozhikode (Calicut)',
   district: 'Kozhikode District',
@@ -67,7 +67,7 @@ export const StoreLocator: React.FC = () => {
 
   const handlePlanVisitWhatsApp = () => {
     const text = encodeURIComponent(
-      `Hello NIRA Team, I am planning to visit your Kerala production facility & direct farm store in Kozhikode, Kerala (11.1599° N, 75.8993° E). Could you please confirm visiting hours?`
+      `Hello ELA naturals Team, I am planning to visit your Kerala production facility & direct farm store in Kozhikode, Kerala (11.1599° N, 75.8993° E). Could you please confirm visiting hours?`
     );
     window.open(`https://wa.me/${settings.whatsappNumber.replace(/[^0-9]/g, '')}?text=${text}`, '_blank');
   };
@@ -204,14 +204,14 @@ export const StoreLocator: React.FC = () => {
             {apiKey && !imgError ? (
               <img
                 src={staticMapUrl}
-                alt="NIRA Kerala Production Facility Static Map with Marker"
+                alt="ELA naturals Kerala Production Facility Static Map with Marker"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
                 onError={() => setImgError(true)}
               />
             ) : (
               <iframe
-                title="NIRA Kerala Production Facility Map"
+                title="ELA naturals Kerala Production Facility Map"
                 className="w-full h-full border-0"
                 src={openStreetMapEmbedUrl}
                 loading="lazy"
@@ -221,7 +221,7 @@ export const StoreLocator: React.FC = () => {
             {/* Static marker badge indicator */}
             <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-stone-200 shadow-sm text-[11px] font-medium text-stone-800 flex items-center gap-2 z-10 pointer-events-none">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-700 animate-pulse" />
-              <span><b>NIRA Mill & Farm Store</b> (Kozhikode, Kerala)</span>
+              <span><b>ELA Mill & Farm Store</b> (Kozhikode, Kerala)</span>
             </div>
 
             {/* Quick Action Overlay */}

@@ -51,10 +51,10 @@ export const TrackOrderPage: React.FC = () => {
           Real-Time Shipment Tracking
         </span>
         <h1 className="font-serif text-3xl font-bold text-stone-900">
-          Track Your NIRA Shipment
+          Track Your ELA naturals Shipment
         </h1>
         <p className="text-stone-500 text-xs">
-          Enter your unique NIRA Order ID (e.g., NIRA-20260910-001) to view live progress from our Kerala facility to your doorstep.
+          Enter your unique Order ID (e.g., ELA-20260910-001) to view live progress from our Kerala facility to your doorstep.
         </p>
       </div>
 

@@ -480,7 +480,7 @@ export const OrderStatusTrackingModal: React.FC<OrderStatusTrackingModalProps> =
                   {/* Email Header */}
                   <div className="bg-emerald-950 text-white p-4 flex items-center justify-between">
                     <div>
-                      <h5 className="font-serif text-base font-bold tracking-tight">NIRA</h5>
+                      <h5 className="font-serif text-base font-bold tracking-tight">ELA naturals</h5>
                       <p className="text-[10px] text-emerald-200 uppercase tracking-widest">
                         Pure Cold-Pressed Coconut Oil • Kerala
                       </p>
@@ -535,7 +535,7 @@ export const OrderStatusTrackingModal: React.FC<OrderStatusTrackingModalProps> =
                     </div>
 
                     <div className="pt-2 text-[10px] text-stone-400 text-center border-t border-stone-200">
-                      NIRA Kerala Artisanal Oils • Kozhikode, Kerala • Customer Desk: +91 98460 12345
+                      ELA naturals Kerala Artisanal Oils • Kozhikode, Kerala • Customer Desk: +91 98460 12345
                     </div>
                   </div>
                 </div>

@@ -10,17 +10,17 @@ interface FaqItem {
 const FAQ_DATA: FaqItem[] = [
   {
     category: 'Production Methods',
-    question: 'How is NIRA Pure Coconut Oil extracted?',
-    answer: 'NIRA coconut oil is crafted using traditional wooden cold-pressed (Mara Chekku) extraction methods. We use sun-dried mature copra from organic Kerala coconut groves and extract the oil at low temperatures without any external heat, chemical solvents, or bleaching agents, preserving all natural antioxidants, nutrients, and the signature aroma.'
+    question: 'How is ELA naturals Pure Coconut Oil extracted?',
+    answer: 'ELA naturals coconut oil is crafted using traditional wooden cold-pressed (Mara Chekku) extraction methods. We use sun-dried mature copra from organic Kerala coconut groves and extract the oil at low temperatures without any external heat, chemical solvents, or bleaching agents, preserving all natural antioxidants, nutrients, and the signature aroma.'
   },
   {
     category: 'Production Methods',
     question: 'Why is your oil unfiltered?',
-    answer: 'Unlike commercial refined oils that undergo high-heat refining, deodorization, and chemical filtration stripping away natural goodness, NIRA is 100% unfiltered and unrefined. This retains the rich natural bioactive compounds, vitamin E, and medium-chain fatty acids (MCTs) exactly as nature intended.'
+    answer: 'Unlike commercial refined oils that undergo high-heat refining, deodorization, and chemical filtration stripping away natural goodness, ELA naturals is 100% unfiltered and unrefined. This retains the rich natural bioactive compounds, vitamin E, and medium-chain fatty acids (MCTs) exactly as nature intended.'
   },
   {
     category: 'Shelf Life',
-    question: 'What is the shelf life of NIRA Coconut Oil, and how should it be stored?',
+    question: 'What is the shelf life of ELA naturals Coconut Oil, and how should it be stored?',
     answer: 'Our pure coconut oil has a natural shelf life of 24 months from the date of extraction. Store it in a cool, dry place away from direct sunlight. No refrigeration is required. Coconut oil naturally solidifies below 24°C (75°F); you can gently warm the bottle in warm water to liquefy it if desired.'
   },
   {
@@ -40,8 +40,8 @@ const FAQ_DATA: FaqItem[] = [
   },
   {
     category: 'Quality & Purity',
-    question: 'Is NIRA certified by FSSAI and organic authorities?',
-    answer: 'Yes! NIRA operates under strict FSSAI central licensing standards. Every batch undergoes rigorous quality testing for moisture content, free fatty acids (FFA), and 100% purity without any mineral oil or adulterant blending.'
+    question: 'Is ELA naturals certified by FSSAI and organic authorities?',
+    answer: 'Yes! ELA naturals operates under strict FSSAI central licensing standards. Every batch undergoes rigorous quality testing for moisture content, free fatty acids (FFA), and 100% purity without any mineral oil or adulterant blending.'
   }
 ];
 
@@ -56,18 +56,18 @@ export const FaqAccordion: React.FC = () => {
     : FAQ_DATA.filter(faq => faq.category === activeCategory);
 
   return (
-    <section className="py-16 bg-stone-50/80 border-t border-stone-200">
+    <section className="py-16 bg-stone-50/80 dark:bg-stone-900/80 border-t border-stone-200 dark:border-stone-800">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-900 font-semibold px-3 py-1 rounded-full text-xs">
+          <div className="inline-flex items-center gap-1.5 bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 font-semibold px-3 py-1 rounded-full text-xs">
             <HelpCircle className="w-3.5 h-3.5" />
             <span>Frequently Asked Questions</span>
           </div>
-          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900">
-            Everything You Want to Know About NIRA
+          <h2 className="font-serif text-3xl sm:text-4xl font-bold text-stone-900 dark:text-stone-100">
+            Everything You Want to Know About ELA naturals
           </h2>
-          <p className="text-sm text-stone-600 max-w-xl mx-auto">
+          <p className="text-sm text-stone-600 dark:text-stone-400 max-w-xl mx-auto">
             Got questions about our traditional Kerala extraction methods, shelf life, or delivery? We have answers.
           </p>
 
@@ -82,8 +82,8 @@ export const FaqAccordion: React.FC = () => {
                 }}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeCategory === cat
-                    ? 'bg-emerald-800 text-white shadow-sm'
-                    : 'bg-white text-stone-600 hover:bg-stone-100 border border-stone-200'
+                    ? 'bg-emerald-800 dark:bg-emerald-600 text-white shadow-sm'
+                    : 'bg-white dark:bg-stone-800 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700 border border-stone-200 dark:border-stone-700'
                 }`}
               >
                 {cat}
@@ -101,8 +101,8 @@ export const FaqAccordion: React.FC = () => {
                 key={index}
                 className={`rounded-2xl border transition-all overflow-hidden ${
                   isOpen
-                    ? 'bg-white border-emerald-800/30 shadow-md ring-1 ring-emerald-800/10'
-                    : 'bg-white/80 border-stone-200 hover:border-stone-300'
+                    ? 'bg-white dark:bg-stone-800 border-emerald-800/30 dark:border-emerald-500/30 shadow-md ring-1 ring-emerald-800/10 dark:ring-emerald-500/10'
+                    : 'bg-white/80 dark:bg-stone-800/80 border-stone-200 dark:border-stone-700 hover:border-stone-300 dark:hover:border-stone-600'
                 }`}
               >
                 <button
@@ -110,23 +110,23 @@ export const FaqAccordion: React.FC = () => {
                   className="w-full text-left p-5 flex items-center justify-between gap-4 focus:outline-none"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-xs flex items-center justify-center shrink-0">
+                    <span className="w-7 h-7 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-xs flex items-center justify-center shrink-0">
                       Q
                     </span>
-                    <span className="font-serif font-bold text-sm sm:text-base text-stone-900">
+                    <span className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-stone-100">
                       {faq.question}
                     </span>
                   </div>
-                  <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-stone-100 text-stone-600 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180 bg-emerald-800 text-white' : ''}`}>
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 transition-transform duration-300 shrink-0 ${isOpen ? 'rotate-180 bg-emerald-800 dark:bg-emerald-600 text-white' : ''}`}>
                     <ChevronDown className="w-4 h-4" />
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-5 pb-5 pt-0 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100 pt-4 animate-fade-in">
+                  <div className="px-5 pb-5 pt-0 text-xs sm:text-sm text-stone-600 dark:text-stone-300 leading-relaxed border-t border-stone-100 dark:border-stone-700 pt-4 animate-fade-in">
                     <div className="pl-10 space-y-2">
                       <p>{faq.answer}</p>
-                      <span className="inline-block text-[10px] uppercase font-bold tracking-wider bg-stone-100 text-stone-500 px-2 py-0.5 rounded">
+                      <span className="inline-block text-[10px] uppercase font-bold tracking-wider bg-stone-100 dark:bg-stone-700 text-stone-500 dark:text-stone-400 px-2 py-0.5 rounded">
                         Category: {faq.category}
                       </span>
                     </div>

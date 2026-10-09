@@ -318,7 +318,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                   )}
                   <div>
                     <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 leading-tight">
-                      {productA?.name || `NIRA Unfiltered Coconut Oil (${sizeA})`}
+                      {productA?.name || `ELA naturals Unfiltered Coconut Oil (${sizeA})`}
                     </h3>
                     <p className="text-[11px] text-stone-500 mt-0.5">{dataA.containerType}</p>
                   </div>
@@ -377,7 +377,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                   )}
                   <div>
                     <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 leading-tight">
-                      {productB?.name || `NIRA Unfiltered Coconut Oil (${sizeB})`}
+                      {productB?.name || `ELA naturals Unfiltered Coconut Oil (${sizeB})`}
                     </h3>
                     <p className="text-[11px] text-stone-500 mt-0.5">{dataB.containerType}</p>
                   </div>
@@ -657,7 +657,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-800 shrink-0" />
             <span>
-              All NIRA coconut oil sizes contain identical 100% Raw Unfiltered Kerala expeller-pressed oil.
+              All ELA naturals coconut oil sizes contain identical 100% Raw Unfiltered Kerala expeller-pressed oil.
             </span>
           </div>
           <button

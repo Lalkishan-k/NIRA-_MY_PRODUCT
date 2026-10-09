@@ -53,7 +53,7 @@ export function generateOrderWhatsAppMessage(order: Order, type: 'CONFIRMED' | '
 
   switch (type) {
     case 'CONFIRMED':
-      return `🥥 *NIRA PURE COCONUT OIL — ORDER CONFIRMED*
+      return `🥥 *ELA naturals PURE COCONUT OIL — ORDER CONFIRMED*
 
 Hello *${customerName}*,
 
@@ -71,11 +71,11 @@ ${trackingUrl}
 
 We are preparing your fresh cold-press batch from our Kozhikode extraction facility!
 
-— *NIRA Pure Coconut Oil, Kerala*
+— *ELA naturals Pure Coconut Oil, Kerala*
 📞 Helpline: +91 94471 23456`;
 
     case 'PACKED':
-      return `🥥 *NIRA PURE COCONUT OIL — ORDER PACKED*
+      return `🥥 *ELA naturals PURE COCONUT OIL — ORDER PACKED*
 
 Hello *${customerName}*,
 
@@ -88,10 +88,10 @@ Our logistics team is handing it over to the express courier partner.
 
 🔍 *Live Tracking:* ${trackingUrl}
 
-— *NIRA Pure Coconut Oil Team*`;
+— *ELA naturals Pure Coconut Oil Team*`;
 
     case 'DISPATCHED':
-      return `🚚 *NIRA PURE COCONUT OIL — ORDER DISPATCHED*
+      return `🚚 *ELA naturals PURE COCONUT OIL — ORDER DISPATCHED*
 
 Hello *${customerName}*,
 
@@ -99,7 +99,7 @@ Your order *#${orderNumber}* is on its way!
 
 📦 *Shipment Details:*
 • *Courier Partner:* ${order.courierPartner || 'Kerala Express / Delhivery Air'}
-• *AWB Tracking No:* ${order.trackingNumber || 'NIRA-EXP-' + orderNumber.replace(/\D/g, '')}
+• *AWB Tracking No:* ${order.trackingNumber || 'ELA-EXP-' + orderNumber.replace(/\D/g, '')}
 • *Live Tracking Link:* ${order.trackingUrl || trackingUrl}
 
 📍 *Destination:* ${order.shippingAddress.city}, ${order.shippingAddress.state} (${order.shippingAddress.pinCode})
@@ -107,11 +107,11 @@ Your order *#${orderNumber}* is on its way!
 
 Please ensure someone is available at the delivery address.
 
-— *NIRA Pure Coconut Oil*
+— *ELA naturals Pure Coconut Oil*
 📞 Questions? Reply directly to this WhatsApp message.`;
 
     case 'OUT_FOR_DELIVERY':
-      return `🛵 *NIRA ORDER OUT FOR DELIVERY TODAY!*
+      return `🛵 *ELA naturals ORDER OUT FOR DELIVERY TODAY!*
 
 Hello *${customerName}*,
 
@@ -125,10 +125,10 @@ ${order.paymentMethod.includes('COD') ? '⚠️ *Reminder:* Please keep exact ca
 
 Enjoy the authentic taste & aroma of unfiltered pure coconut oil!
 
-— *NIRA Team*`;
+— *ELA naturals Team*`;
 
     case 'DELIVERED':
-      return `✨ *NIRA ORDER DELIVERED — THANK YOU!*
+      return `✨ *ELA naturals ORDER DELIVERED — THANK YOU!*
 
 Hello *${customerName}*,
 
@@ -140,9 +140,9 @@ Your order *#${orderNumber}* has been successfully delivered. We hope you love t
 
 ⭐ *We Value Your Feedback:*
 How was your experience? Leave a review and earn 50 Coconut Coins for your next order:
-${appBaseUrl}/product/nira-pure-coconut-oil-500ml#reviews
+${appBaseUrl}/product/ela-naturals-pure-coconut-oil-500ml#reviews
 
-— *With gratitude, Team NIRA*
+— *With gratitude, Team ELA naturals*
 📞 Helpline: +91 94471 23456`;
   }
 }
@@ -160,7 +160,7 @@ export function generateAbandonedRecoveryMessage(abandoned: AbandonedCheckout): 
 
   return `🥥 *Hello ${customerName}, you left something pure in your cart!*
 
-We noticed you started ordering 100% Pure Unfiltered Kerala Coconut Oil from *NIRA*, but didn't get a chance to complete your checkout.
+We noticed you started ordering 100% Pure Unfiltered Kerala Coconut Oil from *ELA naturals*, but didn't get a chance to complete your checkout.
 
 🛒 *Your Saved Basket:*
 ${itemsText}
@@ -176,7 +176,7 @@ Our current batch is fresh from the Kozhikode mill. We have reserved your bottle
 
 If you have any questions or need help with payment, simply reply to this WhatsApp message!
 
-— *Lal Kishan & Team NIRA*
+— *Lal Kishan & Team ELA naturals*
 📍 Kozhikode, Kerala`;
 }
 
@@ -184,5 +184,5 @@ If you have any questions or need help with payment, simply reply to this WhatsA
  * Generates a customer-initiated tracking inquiry WhatsApp message.
  */
 export function generateCustomerTrackingInquiryMessage(orderId: string): string {
-  return `Hello NIRA Team, I would like to know the live dispatch status for my order *#${orderId}*. Please assist!`;
+  return `Hello ELA naturals Team, I would like to know the live dispatch status for my order *#${orderId}*. Please assist!`;
 }

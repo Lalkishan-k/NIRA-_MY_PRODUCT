@@ -21,8 +21,8 @@ export interface MicroNutrientProfile {
   vitaminEMg: number; // Natural Tocopherols & Tocotrienols
   polyphenolsMgGae: number; // Phenolic antioxidants preserved by gravity settling
   phytosterolsMg: number; // Plant sterols (Beta-sitosterol, campesterol)
-  freeFattyAcidsPercent: string; // FSSAI max 0.5%, NIRA < 0.25%
-  moisturePercent: string; // Max 0.25%, NIRA < 0.12%
+  freeFattyAcidsPercent: string; // FSSAI max 0.5%, ELA naturals < 0.25%
+  moisturePercent: string; // Max 0.25%, ELA naturals < 0.12%
   peroxideValue: string; // Freshness measure
 }
 

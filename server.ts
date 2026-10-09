@@ -17,8 +17,8 @@ let coupons: Coupon[] = [...initialCoupons];
 let storeSettings: StoreSettings = { ...defaultStoreSettings };
 let orders: Order[] = [
   {
-    id: 'ord-nira-1001',
-    orderId: 'NIRA-89210',
+    id: 'ord-ela-1001',
+    orderId: 'ELA-89210',
     customerId: 'cust-101',
     customerName: 'Ananya Nair',
     email: 'ananya.nair@example.com',
@@ -38,7 +38,7 @@ let orders: Order[] = [
     items: [
       {
         productId: 'prod-pco-500ml',
-        name: 'NIRA Pure Coconut Oil — 500 ml',
+        name: 'ELA naturals Pure Coconut Oil — 500 ml',
         image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
         size: '500 ml',
         quantity: 2,
@@ -47,7 +47,7 @@ let orders: Order[] = [
       },
       {
         productId: 'prod-pco-200ml',
-        name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
+        name: 'ELA naturals Unfiltered Pure Coconut Oil — 200 ml',
         image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
         size: '200 ml',
         quantity: 1,
@@ -77,8 +77,8 @@ let orders: Order[] = [
     updatedAt: '2026-09-13T10:30:00.000Z'
   },
   {
-    id: 'ord-nira-1002',
-    orderId: 'NIRA-89211',
+    id: 'ord-ela-1002',
+    orderId: 'ELA-89211',
     customerId: 'cust-102',
     customerName: 'Rajesh Varma',
     email: 'rajesh.varma@example.com',
@@ -98,7 +98,7 @@ let orders: Order[] = [
     items: [
       {
         productId: 'prod-pco-1000ml',
-        name: 'NIRA Pure Coconut Oil — 1 Litre Kitchen Can',
+        name: 'ELA naturals Pure Coconut Oil — 1 Litre Kitchen Can',
         image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
         size: '1 Litre',
         quantity: 1,
@@ -126,8 +126,8 @@ let orders: Order[] = [
     updatedAt: '2026-09-14T03:00:00.000Z'
   },
   {
-    id: 'ord-nira-1003',
-    orderId: 'NIRA-89212',
+    id: 'ord-ela-1003',
+    orderId: 'ELA-89212',
     customerId: 'cust-103',
     customerName: 'Meera Krishnan',
     email: 'meera.krishnan@example.com',
@@ -147,7 +147,7 @@ let orders: Order[] = [
     items: [
       {
         productId: 'prod-pco-500ml',
-        name: 'NIRA Pure Coconut Oil — 500 ml',
+        name: 'ELA naturals Pure Coconut Oil — 500 ml',
         image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
         size: '500 ml',
         quantity: 3,
@@ -158,7 +158,7 @@ let orders: Order[] = [
     subtotal: 720,
     shippingCost: 0,
     discount: 72,
-    couponCode: 'NIRAPURE10',
+    couponCode: 'ELAPURE10',
     totalAmount: 648,
     currency: 'INR',
     paymentMethod: 'Razorpay',
@@ -177,7 +177,7 @@ let orders: Order[] = [
         status: 'Shipped',
         recipientEmail: 'meera.krishnan@example.com',
         recipientName: 'Meera Krishnan',
-        subject: '🚚 Shipped! Your NIRA Order #NIRA-89212 is on its way',
+        subject: '🚚 Shipped! Your ELA naturals Order #ELA-89212 is on its way',
         sentAt: '2026-09-13T09:05:00.000Z',
         sentSuccessfully: true,
         courierPartner: 'Blue Dart Express',
@@ -256,7 +256,7 @@ let contactInquiries: ContactInquiry[] = [
     email: 'dr.radhika.menon@ayurhealth.in',
     phone: '+91 94471 23890',
     subject: 'Bulk Ayurvedic Supply for Wellness Clinic',
-    message: 'Hello NIRA team, We operate an authentic Ayurvedic wellness resort in Wayanad and would like to order 50 litres of wood cold-pressed virgin coconut oil monthly for Shirodhara and Abhyanga treatments. Please share wholesale pricing and packaging details.',
+    message: 'Hello ELA naturals team, We operate an authentic Ayurvedic wellness resort in Wayanad and would like to order 50 litres of wood cold-pressed virgin coconut oil monthly for Shirodhara and Abhyanga treatments. Please share wholesale pricing and packaging details.',
     isRead: false,
     createdAt: new Date(Date.now() - 45 * 60 * 1000).toISOString()
   },
@@ -302,7 +302,7 @@ let abandonedCheckouts: AbandonedCheckout[] = [
     items: [
       {
         productId: 'prod-pco-500ml',
-        name: 'NIRA Pure Coconut Oil — 500 ml',
+        name: 'ELA naturals Pure Coconut Oil — 500 ml',
         image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80',
         size: '500 ml',
         quantity: 2,
@@ -336,7 +336,7 @@ let abandonedCheckouts: AbandonedCheckout[] = [
     items: [
       {
         productId: 'prod-pco-1000ml',
-        name: 'NIRA Unfiltered Pure Coconut Oil — 1 Litre',
+        name: 'ELA naturals Unfiltered Pure Coconut Oil — 1 Litre',
         image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
         size: '1 Litre',
         quantity: 1,
@@ -345,7 +345,7 @@ let abandonedCheckouts: AbandonedCheckout[] = [
       },
       {
         productId: 'prod-pco-200ml',
-        name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
+        name: 'ELA naturals Unfiltered Pure Coconut Oil — 200 ml',
         image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
         size: '200 ml',
         quantity: 1,
@@ -379,7 +379,7 @@ let abandonedCheckouts: AbandonedCheckout[] = [
     items: [
       {
         productId: 'prod-pco-1000ml',
-        name: 'NIRA Unfiltered Pure Coconut Oil — 1 Litre',
+        name: 'ELA naturals Unfiltered Pure Coconut Oil — 1 Litre',
         image: 'https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=600&q=80',
         size: '1 Litre',
         quantity: 2,
@@ -402,7 +402,7 @@ let abandonedCheckouts: AbandonedCheckout[] = [
 let bulkEnquiries: BulkEnquiry[] = [
   {
     id: 'b2b-101',
-    referenceNumber: 'NIRA-B2B-1001',
+    referenceNumber: 'ELA-B2B-1001',
     businessName: 'Dhanvantari Ayurveda Hospital & Rejuvenation Center',
     contactPerson: 'Dr. Anand Menon',
     email: 'dr.anand@dhanvantariayurveda.in',
@@ -428,7 +428,7 @@ let bulkEnquiries: BulkEnquiry[] = [
   },
   {
     id: 'b2b-102',
-    referenceNumber: 'NIRA-B2B-1002',
+    referenceNumber: 'ELA-B2B-1002',
     businessName: 'Kairali Organic Whole Foods & Organics',
     contactPerson: 'Suresh Nambiar',
     email: 'suresh@kairaliorganics.com',
@@ -456,7 +456,7 @@ let bulkEnquiries: BulkEnquiry[] = [
   },
   {
     id: 'b2b-103',
-    referenceNumber: 'NIRA-B2B-1003',
+    referenceNumber: 'ELA-B2B-1003',
     businessName: 'Malabar Coastal Bistro & Heritage Kitchens',
     contactPerson: 'Chef Rafeeq Kozhikode',
     email: 'chef.rafeeq@malabarbistro.com',
@@ -561,12 +561,12 @@ app.get('/api/config', (req, res) => {
   const isKeyConfigured = Boolean(
     razorpayKeyId &&
     !razorpayKeyId.includes('YourTestKeyId') &&
-    !razorpayKeyId.includes('NIRADemo')
+    !razorpayKeyId.includes('ELADemo')
   );
 
   res.json({
     settings: storeSettings,
-    razorpayKeyId: isKeyConfigured ? razorpayKeyId : 'rzp_test_NIRA_SANDBOX',
+    razorpayKeyId: isKeyConfigured ? razorpayKeyId : 'rzp_test_ELA_SANDBOX',
     isRazorpayConfigured: isKeyConfigured && hasSecret,
     testMode: !(isKeyConfigured && hasSecret)
   });
@@ -764,7 +764,7 @@ app.post('/api/payment/create-order', async (req, res) => {
     razorpayKeySecret &&
     !razorpayKeyId.includes('YourTestKeyId') &&
     !razorpayKeySecret.includes('YourRazorpaySecretKeyHere') &&
-    !razorpayKeyId.includes('NIRADemo')
+    !razorpayKeyId.includes('ELADemo')
   );
 
   let razorpayOrderId = `order_${crypto.randomBytes(8).toString('hex')}`;
@@ -784,7 +784,7 @@ app.post('/api/payment/create-order', async (req, res) => {
           currency: 'INR',
           receipt: orderId,
           notes: {
-            brand: 'NIRA Pure Coconut Oil',
+            brand: 'ELA naturals Pure Coconut Oil',
             orderId: orderId,
             customerEmail: customerInfo?.email || ''
           }
@@ -885,7 +885,7 @@ app.post('/api/payment/create-order', async (req, res) => {
     isRealRazorpayOrder,
     amount: amountInPaise,
     currency: 'INR',
-    keyId: isRealKeyConfigured ? razorpayKeyId : 'rzp_test_NIRA_SANDBOX',
+    keyId: isRealKeyConfigured ? razorpayKeyId : 'rzp_test_ELA_SANDBOX',
     customer: {
       name: newOrder.customerName,
       email: newOrder.email,
@@ -1118,7 +1118,7 @@ app.post('/api/contact', (req, res) => {
 // SECURE ADMIN AUTHENTICATION & ZERO-TRUST CONTROLS
 // ----------------------------------------------------
 let adminMasterPin = process.env.ADMIN_PIN || '984601'; // Default secure 6-digit PIN or env override
-let adminMasterPassword = process.env.ADMIN_PASSWORD || 'NiraKerala#2026';
+let adminMasterPassword = process.env.ADMIN_PASSWORD || 'ElaNaturalsKerala#2026';
 const storeOwnerEmail = 'lalkishankkichu@gmail.com';
 const activeAdminSessions = new Map<string, { email: string; name: string; createdAt: number; expiresAt: number }>();
 const loginAttempts = new Map<string, { count: number; lockedUntil: number }>();
@@ -1179,7 +1179,7 @@ const adminActivityLogs: AdminActivityLog[] = [
     adminName: 'Kishan Lal (Store Admin)',
     adminEmail: 'lalkishankkichu@gmail.com',
     actionType: 'ORDER_STATUS_CHANGED',
-    target: 'Order #NIRA-2026-8402',
+    target: 'Order #ELA-2026-8402',
     description: 'Updated status to "Shipped" via BlueDart Express (AWB: BD-849204)'
   },
   {
@@ -1388,7 +1388,7 @@ app.post('/api/admin/auth/login', async (req, res) => {
 
   // Authentication succeeded
   resetAttempts(clientId);
-  const token = `nira_adm_${crypto.randomBytes(32).toString('hex')}`;
+  const token = `ela_adm_${crypto.randomBytes(32).toString('hex')}`;
   const duration = rememberDevice ? 7 * 24 * 60 * 60 * 1000 : 8 * 60 * 60 * 1000; // 8h standard or 7d if remembered
   const expiresAt = Date.now() + duration;
 
@@ -1797,17 +1797,17 @@ app.put('/api/admin/orders/:id/status', requireAdminAuth, (req, res) => {
   let notificationRecord = null;
   if (notifyCustomer && orderStatus) {
     const targetEmail = order.email || order.shippingAddress?.email || 'customer@example.com';
-    let subject = `Order Update: NIRA Order #${order.orderId} is now ${orderStatus}`;
+    let subject = `Order Update: ELA naturals Order #${order.orderId} is now ${orderStatus}`;
     let preview = `Your order #${order.orderId} has transitioned from ${previousStatus} to ${orderStatus}.`;
 
     if (orderStatus === 'Shipped') {
-      subject = `🚚 Shipped! Your NIRA Order #${order.orderId} is on its way`;
+      subject = `🚚 Shipped! Your ELA naturals Order #${order.orderId} is on its way`;
       preview = `Your fresh Kerala coconut oil package has been dispatched via ${order.courierPartner || 'Express Courier'}${order.trackingNumber ? ` (AWB #${order.trackingNumber})` : ''}. Expected delivery: ${order.estimatedDelivery}.`;
     } else if (orderStatus === 'Delivered') {
-      subject = `✨ Delivered! Your NIRA Order #${order.orderId} has arrived`;
-      preview = `Your NIRA Pure Coconut Oil package has been delivered to ${order.shippingAddress?.city || 'your address'}. Thank you for choosing authentic cold-pressed tradition!`;
+      subject = `✨ Delivered! Your ELA naturals Order #${order.orderId} has arrived`;
+      preview = `Your ELA naturals Pure Coconut Oil package has been delivered to ${order.shippingAddress?.city || 'your address'}. Thank you for choosing authentic cold-pressed tradition!`;
     } else if (orderStatus === 'Processing') {
-      subject = `🌱 In Processing: Your NIRA Order #${order.orderId} is being handcrafted`;
+      subject = `🌱 In Processing: Your ELA naturals Order #${order.orderId} is being handcrafted`;
       preview = `Your order is currently being prepared and quality-inspected at our Kozhikode extraction facility.`;
     }
 
@@ -1879,7 +1879,7 @@ app.post('/api/admin/orders/:id/send-email', requireAdminAuth, (req, res) => {
   if (!order) return res.status(404).json({ error: 'Order not found' });
 
   const targetEmail = order.email || order.shippingAddress?.email || 'customer@example.com';
-  const emailSubject = subject || `Update regarding your NIRA Order #${order.orderId}`;
+  const emailSubject = subject || `Update regarding your ELA naturals Order #${order.orderId}`;
   
   const notificationRecord = {
     id: `notif-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -2213,7 +2213,7 @@ app.post('/api/bulk-enquiry', (req, res) => {
     return res.status(400).json({ error: 'Business name, contact person, email, and phone are required.' });
   }
 
-  const refNum = `NIRA-B2B-${1000 + bulkEnquiries.length + 1}`;
+  const refNum = `ELA-B2B-${1000 + bulkEnquiries.length + 1}`;
   const totalLitres =
     ((preferredPackaging?.can5L || 0) * 5) +
     ((preferredPackaging?.can15L || 0) * 15) +
@@ -2336,7 +2336,7 @@ app.delete('/api/admin/bulk-enquiry/:id', requireAdminAuth, (req, res) => {
 app.get('/sitemap.xml', (req, res) => {
   const host = req.get('host');
   const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://nira.farm');
+  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://elanaturals.in');
 
   const xml = generateSitemapXml({ siteUrl, products });
   res.header('Content-Type', 'application/xml; charset=utf-8');
@@ -2347,7 +2347,7 @@ app.get('/sitemap.xml', (req, res) => {
 app.get('/robots.txt', (req, res) => {
   const host = req.get('host');
   const protocol = req.protocol === 'https' || req.get('x-forwarded-proto') === 'https' ? 'https' : 'http';
-  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://nira.farm');
+  const siteUrl = process.env.SITE_URL || (host ? `${protocol}://${host}` : 'https://elanaturals.in');
 
   const robots = generateRobotsTxt({ siteUrl });
   res.header('Content-Type', 'text/plain; charset=utf-8');
@@ -2387,7 +2387,7 @@ async function startServer() {
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`NIRA Server is live on http://0.0.0.0:${PORT}`);
+    console.log(`ELA naturals Server is live on http://0.0.0.0:${PORT}`);
   });
 }
 

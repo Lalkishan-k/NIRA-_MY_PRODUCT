@@ -175,11 +175,11 @@ export const ProductDetailPage: React.FC = () => {
   const isLowStock = product.stock > 0 && product.stock <= 15;
   const isOutOfStock = product.stock <= 0;
 
-  const pageTitle = `${product.name} (${product.size}) | 100% Pure Unfiltered Kerala Coconut Oil - NIRA`;
+  const pageTitle = `${product.name} (${product.size}) | 100% Pure Unfiltered Kerala Coconut Oil - ELA naturals`;
   const pageDescription = product.shortDescription || product.description || `Pure unfiltered cold pressed coconut oil (${product.size}) direct from Kerala farms. Maximum Vitamin E, healthy MCTs, and natural coconut aroma.`;
-  const canonicalUrl = `https://nira.farm/product/${product.slug}`;
+  const canonicalUrl = `https://elanaturals.in/product/${product.slug}`;
   const primaryImage = product.images && product.images.length > 0 ? product.images[0] : 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=1200';
-  const keywordsList = `NIRA Coconut Oil, ${product.name}, ${product.size}, Kerala coconut oil, wood pressed coconut oil, cold pressed, unfiltered, hair oil, cooking oil, pure coconut oil, ${product.ingredients?.join(', ') || '100% pure coconut oil'}`;
+  const keywordsList = `ELA naturals Coconut Oil, ${product.name}, ${product.size}, Kerala coconut oil, wood pressed coconut oil, cold pressed, unfiltered, hair oil, cooking oil, pure coconut oil, ${product.ingredients?.join(', ') || '100% pure coconut oil'}`;
 
   const schemaJson = {
     "@context": "https://schema.org",
@@ -187,11 +187,11 @@ export const ProductDetailPage: React.FC = () => {
     "name": `${product.name} (${product.size})`,
     "image": product.images,
     "description": pageDescription,
-    "sku": product.sku || `NIRA-${product.size.replace(/\s+/g, '')}`,
+    "sku": product.sku || `ELA-${product.size.replace(/\s+/g, '')}`,
     "mpn": product.id,
     "brand": {
       "@type": "Brand",
-      "name": "NIRA Pure Coconut Oil"
+      "name": "ELA naturals Pure Coconut Oil"
     },
     "offers": {
       "@type": "Offer",
@@ -203,7 +203,7 @@ export const ProductDetailPage: React.FC = () => {
       "availability": product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       "seller": {
         "@type": "Organization",
-        "name": "NIRA Pure Coconut Oil"
+        "name": "ELA naturals Pure Coconut Oil"
       }
     },
     "aggregateRating": {
@@ -226,20 +226,20 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* Open Graph / Facebook / WhatsApp */}
         <meta property="og:type" content="product" />
-        <meta property="og:title" content={`${product.name} (${product.size}) - NIRA Pure Coconut Oil`} />
+        <meta property="og:title" content={`${product.name} (${product.size}) - ELA naturals Pure Coconut Oil`} />
         <meta property="og:description" content={pageDescription} />
         <meta property="og:image" content={primaryImage} />
         <meta property="og:image:alt" content={`${product.name} - ${product.size}`} />
         <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:site_name" content="NIRA Pure Coconut Oil" />
+        <meta property="og:site_name" content="ELA naturals Pure Coconut Oil" />
         <meta property="product:price:amount" content={String(product.price)} />
         <meta property="product:price:currency" content="INR" />
         <meta property="product:availability" content={product.stock > 0 ? 'in stock' : 'out of stock'} />
-        <meta property="product:brand" content="NIRA" />
+        <meta property="product:brand" content="ELA naturals" />
 
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={`${product.name} (${product.size}) | NIRA Pure Coconut Oil`} />
+        <meta name="twitter:title" content={`${product.name} (${product.size}) | ELA naturals Pure Coconut Oil`} />
         <meta name="twitter:description" content={pageDescription} />
         <meta name="twitter:image" content={primaryImage} />
 
@@ -589,9 +589,9 @@ export const ProductDetailPage: React.FC = () => {
       </div>
 
       {/* Detailed Specifications & Reviews Tabs */}
-      <div className="bg-white rounded-3xl border border-stone-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-stone-900 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-xs overflow-hidden">
         {/* Tab Headers */}
-        <div className="flex border-b border-stone-200 overflow-x-auto no-scrollbar scroll-smooth">
+        <div className="flex border-b border-stone-200 dark:border-stone-800 overflow-x-auto no-scrollbar scroll-smooth">
           {[
             { id: 'description', label: 'Full Description' },
             { id: 'benefits', label: 'Health Benefits & Usage' },
@@ -601,10 +601,10 @@ export const ProductDetailPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 ${
+              className={`px-4 sm:px-6 py-3 sm:py-4 text-[11px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-colors border-b-2 -mb-px shrink-0 cursor-pointer ${
                 activeTab === tab.id
-                  ? 'border-emerald-800 text-emerald-900 bg-stone-50/50'
-                  : 'border-transparent text-stone-500 hover:text-stone-800'
+                  ? 'border-emerald-800 dark:border-emerald-400 text-emerald-900 dark:text-emerald-400 bg-stone-50/50 dark:bg-stone-800/50'
+                  : 'border-transparent text-stone-500 dark:text-stone-400 hover:text-stone-800 dark:hover:text-stone-200'
               }`}
             >
               {tab.label}
@@ -615,11 +615,11 @@ export const ProductDetailPage: React.FC = () => {
         {/* Tab Content */}
         <div className="p-4 sm:p-6 md:p-8">
           {activeTab === 'description' && (
-            <div className="space-y-4 max-w-3xl text-sm text-stone-700 leading-relaxed">
+            <div className="space-y-4 max-w-3xl text-sm text-stone-700 dark:text-stone-300 leading-relaxed">
               <p>{product.description}</p>
               <div className="pt-4">
-                <h4 className="font-bold text-stone-900 mb-2">Storage Instructions:</h4>
-                <p className="text-stone-600 bg-stone-50 p-4 rounded-xl border border-stone-200 text-xs">
+                <h4 className="font-bold text-stone-900 dark:text-stone-100 mb-2">Storage Instructions:</h4>
+                <p className="text-stone-600 dark:text-stone-300 bg-stone-50 dark:bg-stone-800 p-4 rounded-xl border border-stone-200 dark:border-stone-700 text-xs">
                   {product.storage}
                 </p>
               </div>
@@ -629,14 +629,14 @@ export const ProductDetailPage: React.FC = () => {
           {activeTab === 'benefits' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl">
               <div>
-                <h4 className="font-serif text-base font-bold text-stone-900 mb-3 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-800" />
+                <h4 className="font-serif text-base font-bold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-800 dark:text-emerald-400" />
                   Key Health & Nutrient Benefits
                 </h4>
-                <ul className="space-y-2.5 text-xs text-stone-600">
+                <ul className="space-y-2.5 text-xs text-stone-600 dark:text-stone-300">
                   {product.benefits.map((b, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-emerald-700 font-bold">✓</span>
+                      <span className="text-emerald-700 dark:text-emerald-400 font-bold">✓</span>
                       <span>{b}</span>
                     </li>
                   ))}
@@ -644,14 +644,14 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               <div>
-                <h4 className="font-serif text-base font-bold text-stone-900 mb-3 flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-emerald-800" />
+                <h4 className="font-serif text-base font-bold text-stone-900 dark:text-stone-100 mb-3 flex items-center gap-2">
+                  <Droplets className="w-4 h-4 text-emerald-800 dark:text-emerald-400" />
                   Recommended Daily Applications
                 </h4>
-                <ul className="space-y-2.5 text-xs text-stone-600">
+                <ul className="space-y-2.5 text-xs text-stone-600 dark:text-stone-300">
                   {product.usage.map((u, i) => (
                     <li key={i} className="flex items-start gap-2">
-                      <span className="text-amber-700 font-bold">•</span>
+                      <span className="text-amber-700 dark:text-amber-400 font-bold">•</span>
                       <span>{u}</span>
                     </li>
                   ))}
@@ -662,30 +662,30 @@ export const ProductDetailPage: React.FC = () => {
 
           {activeTab === 'specs' && (
             <div className="max-w-2xl">
-              <div className="divide-y divide-stone-200 border border-stone-200 rounded-2xl overflow-hidden text-xs">
-                <div className="grid grid-cols-2 p-3 bg-stone-50 font-semibold text-stone-800">
+              <div className="divide-y divide-stone-200 dark:divide-stone-800 border border-stone-200 dark:border-stone-800 rounded-2xl overflow-hidden text-xs">
+                <div className="grid grid-cols-2 p-3 bg-stone-50 dark:bg-stone-800/80 font-semibold text-stone-800 dark:text-stone-200">
                   <span>Extraction Method</span>
-                  <span className="text-stone-600">{product.specifications?.extractionMethod}</span>
+                  <span className="text-stone-600 dark:text-stone-300">{product.specifications?.extractionMethod}</span>
                 </div>
-                <div className="grid grid-cols-2 p-3">
+                <div className="grid grid-cols-2 p-3 dark:bg-stone-900 text-stone-800 dark:text-stone-200">
                   <span>Shelf Life</span>
-                  <span className="text-stone-600">{product.specifications?.shelfLife}</span>
+                  <span className="text-stone-600 dark:text-stone-300">{product.specifications?.shelfLife}</span>
                 </div>
-                <div className="grid grid-cols-2 p-3 bg-stone-50">
+                <div className="grid grid-cols-2 p-3 bg-stone-50 dark:bg-stone-800/80 text-stone-800 dark:text-stone-200">
                   <span>Aroma & Flavor Profile</span>
-                  <span className="text-stone-600">{product.specifications?.aroma}</span>
+                  <span className="text-stone-600 dark:text-stone-300">{product.specifications?.aroma}</span>
                 </div>
-                <div className="grid grid-cols-2 p-3">
+                <div className="grid grid-cols-2 p-3 dark:bg-stone-900 text-stone-800 dark:text-stone-200">
                   <span>Smoke Point</span>
-                  <span className="text-stone-600">{product.specifications?.smokePoint}</span>
+                  <span className="text-stone-600 dark:text-stone-300">{product.specifications?.smokePoint}</span>
                 </div>
-                <div className="grid grid-cols-2 p-3 bg-stone-50">
+                <div className="grid grid-cols-2 p-3 bg-stone-50 dark:bg-stone-800/80 text-stone-800 dark:text-stone-200">
                   <span>Copra Origin</span>
-                  <span className="text-stone-600">{product.specifications?.source}</span>
+                  <span className="text-stone-600 dark:text-stone-300">{product.specifications?.source}</span>
                 </div>
-                <div className="grid grid-cols-2 p-3">
+                <div className="grid grid-cols-2 p-3 dark:bg-stone-900 text-stone-800 dark:text-stone-200">
                   <span>FSSAI Central License</span>
-                  <span className="text-stone-600 font-mono font-semibold text-emerald-800">
+                  <span className="text-stone-600 dark:text-stone-300 font-mono font-semibold text-emerald-800 dark:text-emerald-400">
                     {product.specifications?.fssaiLicense}
                   </span>
                 </div>

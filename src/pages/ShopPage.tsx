@@ -75,14 +75,14 @@ export const ShopPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       <Helmet>
-        <title>Shop Unfiltered Pure Coconut Oil (200ml, 500ml, 1 Litre) | NIRA</title>
+        <title>Shop Unfiltered Pure Coconut Oil (200ml, 500ml, 1 Litre) | ELA naturals</title>
         <meta
           name="description"
           content="Buy 100% authentic, raw unfiltered Kerala coconut oil in 200 ml, 500 ml, and 1 Litre bottles. Rich in Vitamin E, polyphenols, and healthy MCTs."
         />
-        <meta property="og:title" content="Shop Raw Unfiltered Coconut Oil | NIRA Kerala" />
+        <meta property="og:title" content="Shop Raw Unfiltered Coconut Oil | ELA naturals Kerala" />
         <meta property="og:description" content="Discover 100% pure unfiltered coconut oil with natural sediment, roasted aroma, and rich nutrients. Available in 200ml, 500ml & 1L." />
-        <link rel="canonical" href="https://nira.farm/shop" />
+        <link rel="canonical" href="https://elanaturals.in/shop" />
       </Helmet>
 
       {/* Header Banner */}

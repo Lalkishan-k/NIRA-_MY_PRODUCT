@@ -13,16 +13,16 @@ import {
 export const initialProducts: Product[] = [
   {
     id: 'prod-pco-200ml',
-    name: 'NIRA Unfiltered Pure Coconut Oil — 200 ml',
+    name: 'ELA naturals Unfiltered Pure Coconut Oil — 200 ml',
     slug: 'unfiltered-pure-coconut-oil-200ml',
     category: 'Unfiltered Pure Coconut Oil',
     shortDescription: '100% Raw, Unfiltered Kerala Coconut Oil in an authentic 200 ml pouch pack. Unfiltered means maximum natural nutrients, Vitamin E & polyphenols intact.',
-    description: 'Extracted from prime Kerala coconuts sun-dried without sulphur and expeller pressed at gentle room temperatures. Unlike industrially filtered commercial oils, NIRA is completely unfiltered — naturally settled by gravity. Leaving the oil unfiltered preserves the full spectrum of micronutrients, natural tocopherols (Vitamin E), plant sterols, and healthy medium-chain triglycerides (MCTs / Lauric acid) that industrial micro-filtering and chemical bleaching routinely strip away. Perfect compact size for daily hair root nourishment, infant massage, face hydration, and trial.',
+    description: 'Extracted from prime Kerala coconuts sun-dried without sulphur and expeller pressed at gentle room temperatures. Unlike industrially filtered commercial oils, ELA naturals is completely unfiltered — naturally settled by gravity. Leaving the oil unfiltered preserves the full spectrum of micronutrients, natural tocopherols (Vitamin E), plant sterols, and healthy medium-chain triglycerides (MCTs / Lauric acid) that industrial micro-filtering and chemical bleaching routinely strip away. Perfect compact size for daily hair root nourishment, infant massage, face hydration, and trial.',
     price: 95,
     compareAtPrice: 120,
     discount: 21,
     stock: 110,
-    sku: 'NIRA-UF-200',
+    sku: 'ELA-UF-200',
     size: '200 ml',
     unit: 'Pouch',
     images: [
@@ -63,16 +63,16 @@ export const initialProducts: Product[] = [
   },
   {
     id: 'prod-pco-500ml',
-    name: 'NIRA Unfiltered Pure Coconut Oil — 500 ml',
+    name: 'ELA naturals Unfiltered Pure Coconut Oil — 500 ml',
     slug: 'unfiltered-pure-coconut-oil-500ml',
     category: 'Unfiltered Pure Coconut Oil',
     shortDescription: 'Our signature kitchen & personal care staple. 100% Raw & Unfiltered for higher nutritional value, rich aroma, and natural golden clarity.',
-    description: 'The golden standard of authentic Kerala coconut oil. Our 500 ml bottle delivers raw, unfiltered NIRA purity directly from Malabar family groves to your household. Because we deliberately bypass high-pressure micro-mesh filtration, the delicate heat-sensitive bio-actives, natural antioxidants, and essential fatty acids remain fully intact. The result is an oil with an intensely aromatic toasted coconut fragrance, a silky mouthfeel, and unmatched health benefits for wholesome cooking, sautéing, hair conditioning, and daily wellness.',
+    description: 'The golden standard of authentic Kerala coconut oil. Our 500 ml bottle delivers raw, unfiltered ELA naturals purity directly from Malabar family groves to your household. Because we deliberately bypass high-pressure micro-mesh filtration, the delicate heat-sensitive bio-actives, natural antioxidants, and essential fatty acids remain fully intact. The result is an oil with an intensely aromatic toasted coconut fragrance, a silky mouthfeel, and unmatched health benefits for wholesome cooking, sautéing, hair conditioning, and daily wellness.',
     price: 195,
     compareAtPrice: 240,
     discount: 19,
     stock: 85,
-    sku: 'NIRA-UF-500',
+    sku: 'ELA-UF-500',
     size: '500 ml',
     unit: 'Bottle',
     images: [
@@ -113,16 +113,16 @@ export const initialProducts: Product[] = [
   },
   {
     id: 'prod-pco-1000ml',
-    name: 'NIRA Unfiltered Pure Coconut Oil — 1 Litre',
+    name: 'ELA naturals Unfiltered Pure Coconut Oil — 1 Litre',
     slug: 'unfiltered-pure-coconut-oil-1-litre',
     category: 'Unfiltered Pure Coconut Oil',
     shortDescription: '1 Litre family value pack. 100% Raw Unfiltered Pure Coconut Oil — the unrefined nutrient-rich kitchen essential for healthy households.',
-    description: 'The definitive 1 Litre pantry pack of authentic, unrefined, unfiltered NIRA Kerala coconut oil. Crafted exclusively from ripe coconuts sun-dried on hygienic open courtyards without sulphur burning. By maintaining a strict zero-filtration policy and relying solely on natural gravity settling, every millilitre retains the complete biological nutrient profile of fresh coconuts — polyphenols, tocopherols, and medium-chain fatty acids. Offers exceptional value for complete family cooking, traditional feast preparation, and weekly hair care.',
+    description: 'The definitive 1 Litre pantry pack of authentic, unrefined, unfiltered ELA naturals Kerala coconut oil. Crafted exclusively from ripe coconuts sun-dried on hygienic open courtyards without sulphur burning. By maintaining a strict zero-filtration policy and relying solely on natural gravity settling, every millilitre retains the complete biological nutrient profile of fresh coconuts — polyphenols, tocopherols, and medium-chain fatty acids. Offers exceptional value for complete family cooking, traditional feast preparation, and weekly hair care.',
     price: 375,
     compareAtPrice: 450,
     discount: 17,
     stock: 140,
-    sku: 'NIRA-UF-1000',
+    sku: 'ELA-UF-1000',
     size: '1 Litre',
     unit: 'Bottle',
     images: [
@@ -214,14 +214,14 @@ export const initialCoupons: Coupon[] = [
 ];
 
 export const defaultStoreSettings: StoreSettings = {
-  brandName: 'NIRA',
-  tagline: 'Pure Coconut Oil. Naturally Better.',
+  brandName: 'ELA naturals',
+  tagline: '100% ശുദ്ധമായ വെളിച്ചെണ്ണ • Pure Coconut Oil. Naturally Better.',
   supportPhone: '+91 96563 19693',
   secondaryPhone: '+91 95625 13642',
-  supportEmail: 'hello@niraoil.in',
+  supportEmail: 'hello@elanaturals.in',
   whatsappNumber: '+919562513642',
   address: {
-    line1: 'NIRA Agro-Processing Heritage Unit',
+    line1: 'ELA naturals Agro-Processing Heritage Unit',
     line2: 'NH 66 Airport Bypass Corridor',
     city: 'Kozhikode',
     state: 'Kerala',
@@ -229,7 +229,7 @@ export const defaultStoreSettings: StoreSettings = {
   },
   freeShippingThreshold: 499,
   shippingCharge: 50,
-  announcementText: '🌴 Free Shipping on all orders above ₹499 across India | Freshly Pressed Malabar Batches',
+  announcementText: '🌴 Free Shipping above ₹499 across India | 100% ശുദ്ധമായ വെളിച്ചെണ്ണ (Pure Kerala Coconut Oil)',
   fssaiNumber: '11322007000341',
   currencySymbol: '₹'
 };

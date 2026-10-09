@@ -251,7 +251,7 @@ export const AdminDashboard: React.FC = () => {
     addToast(`Successfully downloaded ${ordersToExport.length} orders as CSV!`, 'success');
   };
 
-  const exportOrdersToExcel = (ordersToExport: Order[], filename = 'nira-orders-report.xls') => {
+  const exportOrdersToExcel = (ordersToExport: Order[], filename = 'ela-orders-report.xls') => {
     if (!ordersToExport || ordersToExport.length === 0) {
       addToast('No orders found to export', 'info');
       return;
@@ -260,7 +260,7 @@ export const AdminDashboard: React.FC = () => {
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
       <head>
         <meta charset="utf-8" />
-        <title>NIRA Orders Excel Report</title>
+        <title>ELA naturals Orders Excel Report</title>
         <style>
           table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; font-size: 11pt; }
           th { background-color: #064e3b; color: #ffffff; border: 1px solid #047857; padding: 10px; text-align: left; font-weight: bold; }
@@ -270,7 +270,7 @@ export const AdminDashboard: React.FC = () => {
         </style>
       </head>
       <body>
-        <div class="title">NIRA Pure Coconut Oil - Master Orders Management Ledger</div>
+        <div class="title">ELA naturals Pure Coconut Oil - Master Orders Management Ledger</div>
         <p>Exported On: ${new Date().toLocaleString('en-IN')} | Total Orders: ${ordersToExport.length}</p>
         <table>
           <thead>
@@ -324,7 +324,7 @@ export const AdminDashboard: React.FC = () => {
     addToast(`Successfully downloaded ${ordersToExport.length} orders as Excel (.xls)!`, 'success');
   };
 
-  const exportOrdersToPdf = (ordersToExport: Order[], title = 'NIRA Order Management Report') => {
+  const exportOrdersToPdf = (ordersToExport: Order[], title = 'ELA naturals Order Management Report') => {
     if (!ordersToExport || ordersToExport.length === 0) {
       addToast('No orders found to generate PDF report', 'info');
       return;
@@ -363,7 +363,7 @@ export const AdminDashboard: React.FC = () => {
       <body>
         <div class="header">
           <div>
-            <div class="brand">🌴 NIRA PURE COCONUT OIL</div>
+            <div class="brand">🌴 ELA naturals PURE COCONUT OIL</div>
             <div style="font-size: 11px; color: #57534e; margin-top: 2px;">Official Business Orders Ledger & Sales Report</div>
           </div>
           <div class="meta">
@@ -383,7 +383,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
           <div class="summary-item">
             <h4>Export Source</h4>
-            <p>NIRA Admin Control Hub</p>
+            <p>ELA naturals Admin Control Hub</p>
           </div>
         </div>
 
@@ -428,7 +428,7 @@ export const AdminDashboard: React.FC = () => {
         </table>
 
         <div class="footer">
-          NIRA Pure Coconut Oil &bull; Kozhikode, Kerala &bull; Business Management PDF Report
+          ELA naturals Pure Coconut Oil &bull; Kozhikode, Kerala &bull; Business Management PDF Report
         </div>
 
         <div class="no-print" style="margin-top: 25px; text-align: center;">
@@ -827,9 +827,9 @@ export const AdminDashboard: React.FC = () => {
             <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
               <Lock className="w-6 h-6" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-white tracking-tight">NIRA Staff & Admin Portal</h2>
+            <h2 className="font-serif text-2xl font-bold text-white tracking-tight">ELA naturals Staff & Admin Portal</h2>
             <p className="text-xs text-stone-400 leading-relaxed max-w-xs mx-auto">
-              Restricted management portal for NIRA Pure Coconut Oil operations. Authenticate to manage inventory, orders, and pricing.
+              Restricted management portal for ELA naturals Pure Coconut Oil operations. Authenticate to manage inventory, orders, and pricing.
             </p>
           </div>
 
@@ -1145,7 +1145,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="font-serif text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              🥥 NIRA <span className="text-amber-400 font-mono text-xs font-semibold px-2 py-0.5 rounded-full bg-stone-800 border border-stone-700">STORE ADMIN</span>
+              🌴 ELA naturals <span className="text-amber-400 font-mono text-xs font-semibold px-2 py-0.5 rounded-full bg-stone-800 border border-stone-700">STORE ADMIN</span>
             </span>
           </div>
 
@@ -3499,7 +3499,7 @@ export const AdminDashboard: React.FC = () => {
                           <div className="text-stone-600 text-xs flex items-center gap-1">
                             <Mail className="w-3 h-3 text-stone-400" />
                             <a
-                              href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject || 'Inquiry regarding NIRA Coconut Oil')}`}
+                              href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject || 'Inquiry regarding ELA naturals Coconut Oil')}`}
                               className="hover:text-emerald-800 hover:underline"
                             >
                               {inq.email}
@@ -3547,7 +3547,7 @@ export const AdminDashboard: React.FC = () => {
                           </button>
 
                           <a
-                            href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject || 'Inquiry regarding NIRA Coconut Oil')}&body=${encodeURIComponent(`\n\n--- On ${new Date(inq.createdAt).toLocaleString('en-IN')}, ${inq.name} wrote:\n> ${inq.message}`)}`}
+                            href={`mailto:${inq.email}?subject=Re: ${encodeURIComponent(inq.subject || 'Inquiry regarding ELA naturals Coconut Oil')}&body=${encodeURIComponent(`\n\n--- On ${new Date(inq.createdAt).toLocaleString('en-IN')}, ${inq.name} wrote:\n> ${inq.message}`)}`}
                             className="p-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors"
                             title="Reply by Email"
                           >
@@ -3556,7 +3556,7 @@ export const AdminDashboard: React.FC = () => {
 
                           {inq.phone && (
                             <a
-                              href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${inq.name}, regarding your inquiry with NIRA Pure Coconut Oil...`)}`}
+                              href={`https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${inq.name}, regarding your inquiry with ELA naturals Pure Coconut Oil...`)}`}
                               target="_blank"
                               rel="noreferrer"
                               className="p-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition-colors"
@@ -4143,7 +4143,7 @@ export const AdminDashboard: React.FC = () => {
                     <span>Excel ({orders.length})</span>
                   </button>
                   <button
-                    onClick={() => exportOrdersToPdf(orders, `NIRA-Master-Orders-Report-${Date.now()}`)}
+                    onClick={() => exportOrdersToPdf(orders, `ELA-Master-Orders-Report-${Date.now()}`)}
                     className="py-2 bg-rose-700 hover:bg-rose-800 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all"
                     title="Generate and download printable PDF order report"
                   >
@@ -4163,7 +4163,7 @@ export const AdminDashboard: React.FC = () => {
                         addToast('Please select orders using checkboxes first', 'error');
                         return;
                       }
-                      exportOrdersToExcel(selected, `nira-selected-orders-${Date.now()}.xls`);
+                      exportOrdersToExcel(selected, `ela-selected-orders-${Date.now()}.xls`);
                     }}
                     disabled={masterSelectedOrderIds.length === 0}
                     className="flex-1 py-2 bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50"
@@ -4177,7 +4177,7 @@ export const AdminDashboard: React.FC = () => {
                         addToast('Please select orders using checkboxes first', 'error');
                         return;
                       }
-                      exportOrdersToPdf(selected, `NIRA-Selected-Orders-Report-${Date.now()}`);
+                      exportOrdersToPdf(selected, `ELA-Selected-Orders-Report-${Date.now()}`);
                     }}
                     disabled={masterSelectedOrderIds.length === 0}
                     className="flex-1 py-2 bg-stone-900 hover:bg-stone-800 text-amber-300 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-sm transition-all disabled:opacity-50 border border-amber-400/30"
@@ -4480,7 +4480,7 @@ export const AdminDashboard: React.FC = () => {
               </span>
               <div className="flex flex-wrap gap-2.5">
                 <a
-                  href={`mailto:${selectedInquiry.email}?subject=Re: ${encodeURIComponent(selectedInquiry.subject || 'Your inquiry at NIRA Pure Coconut Oil')}&body=${encodeURIComponent(`Dear ${selectedInquiry.name},\n\nThank you for reaching out to NIRA Pure Coconut Oil.\n\n\n\nKind regards,\nNIRA Store Team\nhttps://niracoconutoil.com`)}`}
+                  href={`mailto:${selectedInquiry.email}?subject=Re: ${encodeURIComponent(selectedInquiry.subject || 'Your inquiry at ELA naturals Pure Coconut Oil')}&body=${encodeURIComponent(`Dear ${selectedInquiry.name},\n\nThank you for reaching out to ELA naturals Pure Coconut Oil.\n\n\n\nKind regards,\nELA Store Team\nhttps://elanaturals.in`)}`}
                   className="px-4 py-2.5 bg-blue-800 hover:bg-blue-900 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-colors shadow-xs"
                 >
                   <Mail className="w-4 h-4" />
@@ -4489,7 +4489,7 @@ export const AdminDashboard: React.FC = () => {
 
                 {selectedInquiry.phone && (
                   <a
-                    href={`https://wa.me/${selectedInquiry.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${selectedInquiry.name}, thank you for contacting NIRA Pure Coconut Oil regarding "${selectedInquiry.subject || 'your inquiry'}". How can we assist you today?`)}`}
+                    href={`https://wa.me/${selectedInquiry.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${selectedInquiry.name}, thank you for contacting ELA naturals Pure Coconut Oil regarding "${selectedInquiry.subject || 'your inquiry'}". How can we assist you today?`)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold rounded-xl flex items-center gap-2 transition-colors shadow-xs"
@@ -4524,7 +4524,7 @@ export const AdminDashboard: React.FC = () => {
         amount={100}
         customer={{
           name: customerProfile?.name || 'Store Administrator',
-          email: customerProfile?.email || 'admin@niracoconutoil.com',
+          email: customerProfile?.email || 'admin@elanaturals.in',
           phone: '+91 98470 12345'
         }}
         onSuccess={(data) => {
@@ -4535,7 +4535,7 @@ export const AdminDashboard: React.FC = () => {
           setShowDemoRazorpayModal(false);
           addToast(`Test payment simulation error: ${msg}`, 'error');
         }}
-        brandName="NIRA Pure Coconut Oil"
+        brandName="ELA naturals Pure Coconut Oil"
         isTestMode={isTestMode}
       />
 
